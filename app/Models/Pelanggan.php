@@ -2,31 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class Pelanggan extends Model
 {
-    use HasFactory, Notifiable;
-
-    protected $table = 'users';
-    protected $primaryKey = 'id_user';
-    
+    protected $table = 'pelanggan';
+    protected $primaryKey = 'id_pelanggan';
     protected $fillable = [
-        'name',
-        'role',
-        'email',
+        'kode_pelanggan',
+        'nama',
+        'alamat',
         'no_hp',
+        'email',
         'password',
         'status'
     ];
-
     protected $hidden = [
         'password'
     ];
-
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
