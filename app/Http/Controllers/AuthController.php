@@ -5,47 +5,49 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Pelanggan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    public function showWelcome() { return view('welcome'); }
+    public function showLogin() { return view('auth.login'); }
+    public function login(Request $request)
     {
-        return view('auth.login');
-    }
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-public function login(Request $request)
-{
-    $email = $request->email;
-    $password = $request->password;
-    $user = User::where('email', $email)->first();
-    if ($user && $user->status == 'aktif' && Hash::check($password, $user->password)) {
-        Session::put('login', true);
-        Session::put('role', $user->role);
-        Session::put('nama', $user->nama);
-        Session::put('id_user', $user->id_user);
-        if ($user->role == 'admin') return redirect('/admin/dashboard');
-        if ($user->role == 'owner') return redirect('/owner/dashboard');
-        if ($user->role == 'teknisi') return redirect('/teknisi/dashboard');
-    }
+        // 1. COBA LOGIN SEBAGAI USER (Admin, Owner, Teknisi) - Guard default 'web'
+        $user = User::where('email', $request->email)->first();
+        if ($user && $user->status == 'aktif') {
+            if (Auth::guard('web')->attempt($credentials)) {
+                $request->session()->regenerate(); // Mengamankan session ID
 
-$pelanggan = Pelanggan::where('email', $email)->first();
-    if ($pelanggan && Hash::check($password, $pelanggan->password)) {
-        if ($pelanggan->status == 'aktif') {
-            Session::put('login', true);
-            Session::put('role', 'pelanggan'); // Kita isi manual 'pelanggan' karena di tabel tidak ada kolom role
-            Session::put('nama', $pelanggan->nama);
-            Session::put('id_pelanggan', $pelanggan->id_pelanggan);
-            return redirect('/pelanggan/dashboard');
-        } else {
-            return back()->with('error', 'Akun Anda nonaktif.');
+                // Redirect sesuai role
+                if ($user->role == 'admin') return redirect()->intended('/admin/dashboard');
+                if ($user->role == 'owner') return redirect()->intended('/owner/dashboard');
+                if ($user->role == 'teknisi') return redirect()->intended('/teknisi/dashboard');
+            }
         }
-    }
 
-    return back()->with('error', 'Email atau password salah');
-}
+        // 2. COBA LOGIN SEBAGAI PELANGGAN - Guard 'pelanggan'
+        $pelanggan = Pelanggan::where('email', $request->email)->first();
+        if ($pelanggan) {
+            if ($pelanggan->status != 'aktif') {
+                return back()->with('error', 'Akun Anda nonaktif.');
+            }
+
+            if (Auth::guard('pelanggan')->attempt($credentials)) {
+                $request->session()->regenerate();
+                return redirect()->intended('/pelanggan/dashboard');
+            }
+        }
+
+        return back()->with('error', 'Email atau password salah');
+    }
 
     public function showRegister()
     {
@@ -55,29 +57,30 @@ $pelanggan = Pelanggan::where('email', $email)->first();
         return view('auth.register', compact('kode'));
     }
 
-public function registerPelanggan(Request $request)
-{
-    // ... kode generate kode_pelanggan tetap sama ...
-    $tanggal = Carbon::now()->format('Ymd');
-    $last = Pelanggan::whereDate('created_at', Carbon::today())->count();
-    $kode = 'PLG' . $tanggal . '' . str_pad($last + 1, 3, '0', STR_PAD_LEFT);
-
-    Pelanggan::create([
-        'kode_pelanggan' => $kode,
-        'nama' => $request->nama,
-        'alamat' => $request->alamat,
-        'no_hp' => $request->no_hp,
-        'email' => $request->email,
-        'password' => $request->password, // JANGAN di-Hash::make di sini karena di Model sudah ada Mutator!
-        'status' => 'aktif'
-    ]);
-    
-    return redirect('/login')->with('success', 'Registrasi berhasil, silakan login');
-}
-
-    public function logout()
+    public function registerPelanggan(Request $request)
     {
-        Session::flush();
+        $tanggal = Carbon::now()->format('Ymd');
+        $last = Pelanggan::whereDate('created_at', Carbon::today())->count();
+        $kode = 'PLG' . $tanggal . '' . str_pad($last + 1, 3, '0', STR_PAD_LEFT);
+
+        Pelanggan::create([
+            'kode_pelanggan' => $kode,
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'password' =>$request->password,
+            'status' => 'aktif'
+        ]);
+        
+        return redirect('/login')->with('success', 'Registrasi berhasil, silakan login');
+    }
+
+    public function logout(Request $request)
+    {
+        // Logout dari guard web maupun pelanggan
+        Auth::guard('web')->logout();
+        Auth::guard('pelanggan')->logout();
         return redirect('/login');
     }
 }

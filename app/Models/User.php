@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -15,7 +16,7 @@ class User extends Model
     protected $primaryKey = 'id_user';
     
     protected $fillable = [
-        'name',
+        'nama',
         'role',
         'email',
         'no_hp',
@@ -30,5 +31,33 @@ class User extends Model
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    public function tools()
+    {
+        return $this->hasMany(
+            Tools::class,
+            'id_user',
+            'id_user'
+        );
+    }
+
+    public function histori()
+    {
+        return $this->hasMany(HistoriAktivitas::class, 'id_user', 'id_user');
+    }
+
+    public function penugasan()
+    {
+        return $this->hasMany(
+            PenugasanTeknisi::class,
+            'id_user',
+            'id_user'
+        );
+    }
+
+        public function getAuthIdentifierName()
+    {
+        return 'id_user';
     }
 }

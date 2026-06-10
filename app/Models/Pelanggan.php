@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
 
-class Pelanggan extends Model
+class Pelanggan extends Authenticatable
 {
     protected $table = 'pelanggan';
     protected $primaryKey = 'id_pelanggan';
