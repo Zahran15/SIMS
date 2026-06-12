@@ -24,7 +24,6 @@ class PembayaranController extends Controller
     public function index()
     {
         $idPelanggan = Auth::guard('pelanggan')->id();
-
         $pembayaran = Pembayaran::with([
                 'booking',
                 'servis'
@@ -44,7 +43,6 @@ class PembayaranController extends Controller
     public function detail($id)
     {
         $idPelanggan = Auth::guard('pelanggan')->id();
-
         $pembayaran = Pembayaran::with([
                 'booking.pelanggan',
                 'servis'
@@ -102,7 +100,9 @@ class PembayaranController extends Controller
                 'items' => [
                     [
                         'id' => $pembayaran->id_pembayaran,
-                        'name' => ucfirst($pembayaran->jenis_pembayaran),
+                        'name' => $pembayaran->jenis_pembayaran == 'deposit'
+                            ? 'Deposit Booking Servis'
+                            : 'Pelunasan Servis Laptop',
                         'price' => $pembayaran->nominal,
                         'quantity' => 1
                     ]
@@ -176,10 +176,7 @@ class PembayaranController extends Controller
     public function indexAdmin()
     {
         // Mengambil semua pembayaran milik seluruh pelanggan
-        $pembayaran = Pembayaran::with(['booking.pelanggan', 'servis'])
-            ->latest()
-            ->paginate(10);
-
+        $pembayaran = Pembayaran::with(['booking.pelanggan', 'servis'])->latest()->paginate(10);
         return view('admin.proses.pembayaran.index', compact('pembayaran'));
     }
 
@@ -202,37 +199,24 @@ class PembayaranController extends Controller
         DB::beginTransaction();
         try {
             if ($request->metode_pembayaran == 'cash') {
-                // Trik pemutus hubungan midtrans: 
-                // hapus token, ganti metode ke cash, langsung ubah status jadi sukses lunas
                 $pembayaran->update([
                     'metode_pembayaran' => 'cash',
                     'status_pembayaran' => 'sukses',
-                    'snap_token'        => null, // Menghapus token midtrans agar tidak bisa dipakai lagi
-                    'midtrans_order_id' => null, // Menghapus sangkutan ID transaksi midtrans
+                    'snap_token'        => null,
+                    'midtrans_order_id' => null,
                     'tanggal_bayar'     => now(),
                 ]);
-
                 // Sinkronisasi status deposit booking jika jenisnya deposit
                 if ($pembayaran->jenis_pembayaran == 'deposit') {
-                    $pembayaran->booking->update([
-                        'status_deposit' => 'sudah lunas'
-                    ]);
+                    $pembayaran->booking->update(['status_deposit' => 'sudah lunas']);
                 }
-
                 // Sinkronisasi status servis jika jenisnya pelunasan
                 if ($pembayaran->jenis_pembayaran == 'pelunasan' && $pembayaran->servis) {
-                    $pembayaran->servis->update([
-                        'status_pelunasan' => 'sudah lunas',
-                        'status_servis'    => 'bisa diambil'
-                    ]);
+                    $pembayaran->servis->update(['status_pelunasan' => 'sudah lunas', 'status_servis' => 'bisa diambil']);
                 }
-            } else {
+                } else {
                 // Jika admin mengembalikan ke mode midtrans (opsional)
-                $pembayaran->update([
-                    'metode_pembayaran' => 'midtrans',
-                    'status_pembayaran' => 'pending',
-                    'tanggal_bayar'     => null
-                ]);
+                $pembayaran->update(['metode_pembayaran' => 'midtrans','status_pembayaran' => 'pending','tanggal_bayar' => null]);
             }
 
             DB::commit();
@@ -240,103 +224,6 @@ class PembayaranController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * CALLBACK MIDTRANS
-     */
-    public function callback(Request $request)
-    {
-        $notification = $request->all();
-
-        Log::info('MIDTRANS CALLBACK', $notification);
-
-        if (!$this->midtrans->verifyNotification($notification)) {
-
-            Log::warning('Invalid Signature');
-
-            return response()->json([
-                'message' => 'Invalid Signature'
-            ], 403);
-        }
-
-        $status = $this->midtrans->resolveTransactionStatus($notification);
-
-        DB::beginTransaction();
-
-        try {
-
-            $pembayaran = Pembayaran::where(
-                'midtrans_order_id',
-                $notification['order_id']
-            )->first();
-
-            if (!$pembayaran) {
-
-                DB::rollBack();
-
-                return response()->json([
-                    'message' => 'Data pembayaran tidak ditemukan'
-                ], 404);
-            }
-
-            if ($status == 'paid') {
-                $pembayaran->update([
-                    'status_pembayaran' => 'sukses',
-                    'metode_pembayaran' => $notification['payment_type'] ?? 'midtrans',
-                    'midtrans_transaction_id' => $notification['transaction_id'] ?? null,
-                    'tanggal_bayar' => now()
-                ]);
-
-                /**
-                 * DEPOSIT
-                 */
-                if ($pembayaran->jenis_pembayaran == 'deposit') {
-                    $pembayaran->booking->update([
-                        'status_deposit' => 'sudah lunas'
-                    ]);
-                }
-
-                /**
-                 * PELUNASAN
-                 */
-                if ($pembayaran->jenis_pembayaran == 'pelunasan' && $pembayaran->servis) {
-                    $pembayaran->servis->update([
-                        'status_pelunasan' => 'sudah lunas',
-                        'status_servis' => 'bisa diambil'
-                    ]);
-                }
-            }
-
-            if ($status == 'failed') {
-
-                $pembayaran->update([
-                    'status_pembayaran' => 'gagal'
-                ]);
-            }
-
-            if ($status == 'expired') {
-
-                $pembayaran->update([
-                    'status_pembayaran' => 'gagal'
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'OK'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('MIDTRANS CALLBACK ERROR', [
-                'message' => $e->getMessage()
-            ]);
-            return response()->json([
-                'message' => 'ERROR'
-            ], 500);
         }
     }
 }

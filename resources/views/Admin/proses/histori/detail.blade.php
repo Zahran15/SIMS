@@ -33,10 +33,6 @@
                     <strong class="text-gray-800 text-sm">{{ date('d M Y', strtotime($histori->tanggal)) }}</strong>
                 </div>
                 <div>
-                    <span class="text-gray-400 block">Operator / Aktor</span>
-                    <span class="text-blue-600 font-semibold text-sm">{{ $histori->user->name ?? '-' }}</span>
-                </div>
-                <div>
                     <span class="text-gray-400 block">Role Operator</span>
                     <span class="text-gray-800 font-semibold">{{ $histori->user->role ?? '-' }}</span>
                 </div>

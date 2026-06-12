@@ -50,7 +50,7 @@
             
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
                 <a href="{{ route('login') }}" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-blue-600 transition-all duration-300 shadow-xl">
-                    Cek Status Servis
+                    Masuk Sistem
                 </a>
             </div>
 

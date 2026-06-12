@@ -3,7 +3,6 @@
 @section('title', 'Detail Servis Selesai')
 
 @section('content')
-<div class="p-4">
 
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">

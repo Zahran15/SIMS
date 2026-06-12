@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ToolsController extends Controller
 {
-    // 🔹 TAMPIL DATA (INDEX)
+    // 🔹 TAMPIL DATA
     public function index()
     {
         $tools = Tools::with('user')->latest()->paginate(10);
@@ -22,20 +22,19 @@ class ToolsController extends Controller
         }
     }
 
-    // 🔹 HALAMAN TAMBAH DATA (CREATE)
+    // 🔹 HALAMAN TAMBAH DATA 
     public function create()
     {
-        // Hanya Teknisi yang bisa dipilih untuk memegang alat
         $teknisi = User::where('role', 'teknisi')->get();
         $role = Auth::user()->role;
         return view('admin.pengadaan.pengadaan_tools.tambah', compact('teknisi', 'role'));
     }
 
-    // 🔹 SIMPAN DATA (STORE)
+    // 🔹 SIMPAN DATA 
     public function store(Request $request)
     {
         $request->validate([
-            'id_user'    => 'required|exists:users,id', // Memastikan teknisi valid
+            'id_user'    => 'required|exists:users,id', 
             'nama_tools' => 'required',
             'jumlah'     => 'required|integer|min:0',
         ]);
@@ -50,7 +49,7 @@ class ToolsController extends Controller
         return redirect()->route('admin.tools.index')->with('success', 'Data tools berhasil ditambahkan');
     }
 
-    // 🔹 HALAMAN EDIT DATA (EDIT)
+    // 🔹 EDIT DATA 
     public function edit($id)
     {
         $tool = Tools::findOrFail($id);
@@ -59,7 +58,7 @@ class ToolsController extends Controller
         return view('admin.pengadaan.pengadaan_tools.edit', compact('tool', 'teknisi', 'role'));
     }
 
-    // 🔹 UPDATE DATA (UPDATE)
+    // 🔹 UPDATE DATA 
     public function update(Request $request, $id)
     {
         $data = Tools::findOrFail($id);
@@ -80,7 +79,7 @@ class ToolsController extends Controller
         return redirect()->route('admin.tools.index')->with('success', 'Data tools berhasil diupdate');
     }
 
-    // 🔹 DELETE (DESTROY)
+    // 🔹 DELETE 
     public function destroy($id)
     {
         Tools::findOrFail($id)->delete();

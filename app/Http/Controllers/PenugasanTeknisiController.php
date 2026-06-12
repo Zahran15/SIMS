@@ -12,10 +12,7 @@ class PenugasanTeknisiController extends Controller
     // 🔹 LIST SERVIS YANG BELUM ADA TEKNISI
     public function index()
     {
-        $servis = Servis::with('booking', 'penugasan')
-            ->latest()
-            ->paginate(10);
-
+        $servis = Servis::with('booking', 'penugasan')->latest()->paginate(10);
         return view('admin.proses.penugasan.index', compact('servis'));
     }
 
@@ -23,8 +20,6 @@ class PenugasanTeknisiController extends Controller
     public function create($id_servis)
     {
         $servis = Servis::findOrFail($id_servis);
-
-        // Ambil user role teknisi
         $teknisi = User::where('role', 'teknisi')->get();
         return view('admin.proses.penugasan.tambah', compact('servis', 'teknisi'));
     }
@@ -48,12 +43,8 @@ class PenugasanTeknisiController extends Controller
             'catatan_teknisi' => $request->catatan_teknisi
         ]);
 
-        // 🔥 otomatis ubah status servis jadi proses
-        Servis::where('id_servis', $request->id_servis)
-            ->update(['status_servis' => 'proses']);
-
-        return redirect()->route('admin.penugasan.index')
-            ->with('success', 'Teknisi berhasil ditugaskan');
+        Servis::where('id_servis', $request->id_servis)->update(['status_servis' => 'proses']);
+        return redirect()->route('admin.penugasan.index')->with('success', 'Teknisi berhasil ditugaskan');
     }
 
     // 🔹 EDIT PENUGASAN
@@ -61,7 +52,6 @@ class PenugasanTeknisiController extends Controller
     {
         $penugasan = PenugasanTeknisi::findOrFail($id);
         $teknisi = User::where('role', 'teknisi')->get();
-
         return view('admin.proses.penugasan.edit', compact('penugasan', 'teknisi'));
     }
 

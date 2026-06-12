@@ -21,6 +21,7 @@
                         <th class="px-5 py-4 text-center">Kode Servis</th>
                         <th class="px-5 py-4 text-center">Pelanggan</th>
                         <th class="px-5 py-4 text-center">Status Servis</th>
+                        <th class="px-5 py-4 text-center">Status Penugasan</th>
                         <th class="px-5 py-4 text-center">Teknisi</th>
                         <th class="px-5 py-4 text-center">Prioritas</th>
                         <th class="px-5 py-4 text-center">Aksi</th>
@@ -44,6 +45,24 @@
                                 <span class="px-3 py-1 rounded-full text-xs font-bold {{ $class }}">
                                     {{ strtoupper($s->status_servis) }}
                                 </span>
+                            </td>
+                            {{-- STATUS PENUGASAN --}}
+                            <td class="px-5 py-4 text-center">
+                                @if($s->penugasan)
+                                    @php
+                                        $penugasanClasses = [
+                                            'belum dikerjakan' => 'bg-gray-100 text-gray-600',
+                                            'sedang dikerjakan' => 'bg-blue-100 text-blue-600',
+                                            'menunggu sparepart' => 'bg-yellow-100 text-yellow-700',
+                                            'selesai' => 'bg-green-100 text-green-600',
+                                            'gagal' => 'bg-red-100 text-red-600',
+                                        ];
+                                        $spClass = $penugasanClasses[$s->penugasan->status_penugasan]?? 'bg-gray-100 text-gray-600';
+                                    @endphp
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $spClass }}">{{ strtoupper($s->penugasan->status_penugasan) }}</span>
+                                @else
+                                    <span class="text-red-500 italic text-xs">Belum Ditugaskan</span>
+                                @endif
                             </td>
 
                             {{-- TEKNISI --}}
@@ -112,7 +131,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-10 text-gray-500 italic">
+                            <td colspan="8" class="text-center py-10 text-gray-500 italic">
                                 Belum ada data penugasan teknisi
                             </td>
                         </tr>

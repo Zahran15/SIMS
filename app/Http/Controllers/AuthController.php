@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Pelanggan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -25,7 +24,6 @@ class AuthController extends Controller
         if ($user && $user->status == 'aktif') {
             if (Auth::guard('web')->attempt($credentials)) {
                 $request->session()->regenerate(); // Mengamankan session ID
-
                 // Redirect sesuai role
                 if ($user->role == 'admin') return redirect()->intended('/admin/dashboard');
                 if ($user->role == 'owner') return redirect()->intended('/owner/dashboard');
@@ -39,7 +37,6 @@ class AuthController extends Controller
             if ($pelanggan->status != 'aktif') {
                 return back()->with('error', 'Akun Anda nonaktif.');
             }
-
             if (Auth::guard('pelanggan')->attempt($credentials)) {
                 $request->session()->regenerate();
                 return redirect()->intended('/pelanggan/dashboard');

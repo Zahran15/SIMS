@@ -30,7 +30,6 @@ class PengaturanController extends Controller
         $dbPass = env('DB_PASSWORD', '');
 
         return new StreamedResponse(function () use ($dbHost, $dbName, $dbUser, $dbPass) {
-            // Jika password kosong, jangan sertakan flag --password
             if ($dbPass) {
                 $command = "mysqldump --user={$dbUser} --password='{$dbPass}' --host={$dbHost} {$dbName}";
             } else {
@@ -63,11 +62,9 @@ class PengaturanController extends Controller
             );
 
             foreach ($files as $name => $file) {
-                // Lewati folder vendor, node_modules, dan file zip itu sendiri
                 if (!$file->isDir()) {
                     $filePath = $file->getRealPath();
                     $relativePath = substr($filePath, strlen(base_path()) + 1);
-
                     // Filter agar tidak terlalu berat
                     // if (str_contains($relativePath, 'vendor/') || 
                     //     str_contains($relativePath, 'node_modules/') ||
@@ -88,7 +85,6 @@ class PengaturanController extends Controller
         $data = $request->except('_token');
         foreach ($data as $key => $value) {
             if ($request->hasFile($key)) {
-                // Proses Upload Gambar (Logo/Background)
                 $file = $request->file($key);
                 $namaFile = $key . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/settings'), $namaFile);

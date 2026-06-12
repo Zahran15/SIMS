@@ -3,7 +3,6 @@
 @section('title', 'Detail Penugasan Teknisi')
 
 @section('content')
-<div class="p-4">
 
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
@@ -69,7 +68,7 @@
                 <div>
                     <span class="text-gray-400 block">Estimasi Waktu Selesai</span>
                     <span class="text-gray-800 font-semibold">
-                        {{ $penugasan->estimasi_selesai ? date('d M Y - H:i', strtotime($penugasan->estimasi_selesai)) . ' WIB' : '-' }}
+                        {{ $penugasan->estimasi_selesai ? date('d M Y', strtotime($penugasan->estimasi_selesai)) . ' ' : '-' }}
                     </span>
                 </div>
             </div>

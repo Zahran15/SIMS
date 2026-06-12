@@ -14,19 +14,9 @@ class ServisStatusController extends Controller
      */
     public function index()
     {
-        // Mengambil data servis yang 'id_pelanggan'-nya cocok dengan pelanggan yang login
-        $riwayatServis = Servis::with([
-            'booking', 
-            'penugasan.user' // Untuk melihat siapa teknisi yang menangani
-        ])
-        ->whereHas('booking', function ($q) {
-            // Mengunci pencarian berdasarkan ID Pelanggan yang sedang login
-            // Jika kamu menggunakan custom guard (misal: 'pelanggan'), ganti jadi Auth::guard('pelanggan')->id()
-            $q->where('id_pelanggan', Auth::guard('pelanggan')->id()); 
-        })
-        ->latest()
-        ->paginate(10);
-
+        $riwayatServis = Servis::with(['booking', 'penugasan.user' ])
+        ->whereHas('booking', function ($q) {$q->where('id_pelanggan', Auth::guard('pelanggan')->id());
+        })->latest()->paginate(10);
         return view('pelanggan.proses.servis_status.index', compact('riwayatServis'));
     }
 
@@ -35,19 +25,9 @@ class ServisStatusController extends Controller
      */
     public function show($id)
     {
-        // Mengambil detail satu data servis tertentu, tetapi diproteksi agar tidak bisa diintip pelanggan lain
-        $servis = Servis::with([
-            'booking',
-            'penugasan.user',
-            'detailJasa.jasa',
-            'detailSparepart.sparepart'
-        ])
-        ->whereHas('booking', function ($q) {
-            // Validasi keamanan: Pastikan booking ini memang milik si pelanggan
-            $q->where('id_pelanggan', Auth::guard('pelanggan')->id());
-        })
-        ->findOrFail($id); // Jika mencoba akses ID milik orang lain, otomatis return 404 (Not Found)
-
+        $servis = Servis::with(['booking', 'penugasan.user', 'detailJasa.jasa', 'detailSparepart.sparepart'])
+        ->whereHas('booking', function ($q) {$q->where('id_pelanggan', Auth::guard('pelanggan')->id());
+        })->findOrFail($id); 
         return view('pelanggan.proses.servis_status.detail', compact('servis'));
     }
 }

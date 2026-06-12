@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Servis;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LaporanServisController extends Controller
@@ -18,7 +17,6 @@ class LaporanServisController extends Controller
         $servis_dibatalkan = Servis::where('status_servis', 'Dibatalkan')->count();
 
         // 2. MENGAMBIL DETAIL DATA SERVIS (Eager Loading)
-        // Disarankan menggunakan select agar tidak membebani memori jika field database gemuk
         $detail_servis = Servis::with(['penugasan.user', 'booking.pelanggan'])
             ->orderBy('tgl_masuk', 'desc')
             ->get();
@@ -26,7 +24,6 @@ class LaporanServisController extends Controller
         // 3. REKAP PER TEKNISI (Menggunakan Eloquent secara bersih)
         $rekap_teknisi = User::where('role', 'teknisi')
             ->leftJoin('penugasan_teknisi', 'users.id_user', '=', 'penugasan_teknisi.id_user')
-            // Berikan alias penamaan yang jelas agar tidak bentrok dengan object Servis utama
             ->leftJoin('servis as s', 'penugasan_teknisi.id_servis', '=', 's.id_servis')
             ->select('users.id_user','users.nama',
                 DB::raw('COUNT(s.id_servis) as total_servis_ditangani'),

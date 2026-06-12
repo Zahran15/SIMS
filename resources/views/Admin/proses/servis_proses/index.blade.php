@@ -62,20 +62,6 @@
                                         <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">Proses</span>
                                     @endif
                                 </div>
-                            
-                                {{-- Indikator Tambahan untuk Memantau Kerja Teknisi --}}
-                                @if($s->penugasan && $s->penugasan->status_penugasan == 'selesai')
-                                    <div class="flex items-center justify-center gap-1 mt-1 text-xs font-bold text-green-600">
-                                        <span>Teknisi Selesai</span>
-                                    </div>
-                                @elseif($s->penugasan && $s->penugasan->status_penugasan == 'proses')
-                                    <div class="flex items-center gap-1 mt-1 text-xs text-gray-400 italic">
-                                        <span class="inline-block w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                                        <span>Dikerjakan Teknisi</span>
-                                    </div>
-                                @else
-                                    <div class="text-xs text-gray-400 mt-1 italic">Belum Ada Teknisi</div>
-                                @endif
                             </td>
                             <td class="px-5 py-4 text-center font-bold text-green-600">Rp {{ number_format($s->total_biaya, 0, ',', '.') }}</td>
                         {{-- AKSI --}}

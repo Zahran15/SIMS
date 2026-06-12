@@ -20,19 +20,13 @@ class ServisController extends Controller
 {
     public function prosesindex()
     {
-        $servis = Servis::with('booking.pelanggan', 'penugasan')
-            ->whereIn('status_servis', ['menunggu','proses'])
-            ->latest()
-            ->paginate(10);
+        $servis = Servis::with('booking.pelanggan', 'penugasan')->whereIn('status_servis', ['menunggu','proses'])->latest()->paginate(10);
         return view('admin.proses.servis_proses.index', compact('servis'));
     }
 
     public function selesaiindex()
     {
-        $servis = Servis::with('booking.pelanggan')
-            ->whereIn('status_servis', ['selesai','bisa diambil','sudah diambil'])
-            ->latest()
-            ->paginate(10);
+        $servis = Servis::with('booking.pelanggan')->whereIn('status_servis', ['selesai','bisa diambil','sudah diambil'])->latest()->paginate(10);
         return view('admin.proses.servis_selesai.index', compact('servis'));
     }
 

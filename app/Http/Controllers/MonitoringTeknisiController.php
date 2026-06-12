@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 
 class MonitoringTeknisiController extends Controller
 {
     public function index()
     {
-        $monitoring = User::where('role', 'teknisi')
-            ->withCount([
+        $monitoring = User::where('role', 'teknisi')->withCount([
                 // TOTAL SERVIS
                 'penugasan as total_servis_ditangani',
 
@@ -40,12 +38,6 @@ class MonitoringTeknisiController extends Controller
         $nama_teknisi = $monitoring->pluck('nama')->toArray();
         $data_selesai = $monitoring->pluck('servis_selesai')->toArray();
         $data_pending = $monitoring->pluck('servis_pending')->toArray();
-
-        return view('owner.monitoring.index', compact(
-            'monitoring',
-            'nama_teknisi',
-            'data_selesai',
-            'data_pending'
-        ));
+        return view('owner.monitoring.index', compact('monitoring', 'nama_teknisi', 'data_selesai', 'data_pending'));
     }
 }

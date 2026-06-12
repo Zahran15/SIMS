@@ -15,7 +15,6 @@ class RequestSparepartController extends Controller
     {
         $role = Auth::user()->role;
         $requestSparepart = RequestSparepart::with(['penugasan.servis', 'sparepart'])->latest()->paginate(10);
-
         if ($role == 'teknisi') {
             return view('teknisi.proses.request_sparepart.index', compact('requestSparepart'));
         } elseif ($role == 'admin') {
@@ -53,9 +52,8 @@ class RequestSparepartController extends Controller
             'id_sparepart' => $request->id_sparepart,
             'jumlah' => $request->jumlah,
             'alasan' => $request->alasan,
-            'status_request' => 'pending' // 💡 Diubah dari 'status' ke 'status_request' sesuai migration
+            'status_request' => 'pending'
         ]);
-
         return redirect()->route('teknisi.request_sparepart.index')->with('success', 'Request berhasil dikirim');
     }
 
@@ -64,7 +62,6 @@ class RequestSparepartController extends Controller
     {
         $requestSparepart = RequestSparepart::with(['penugasan.servis', 'sparepart'])->where('id_request', $id)->firstOrFail();
         $role = Auth::user()->role;
-
         if ($role == 'teknisi') {
             return view('teknisi.proses.request_sparepart.detail', compact('requestSparepart'));
         } elseif ($role == 'admin') {
@@ -74,41 +71,32 @@ class RequestSparepartController extends Controller
         }
     }
 
-    // 🔹 APPROVE (Admin menyetujui & potong stok)
+    // 🔹 APPROVE 
     public function approve(Request $request, $id)
     {
         $requestSparepart = RequestSparepart::where('id_request', $id)->firstOrFail();
-
         if ($requestSparepart->status_request == 'disetujui') {
             return back()->with('error', 'Request ini sudah disetujui sebelumnya.');
         }
-
         $sparepart = Sparepart::where('id_sparepart', $requestSparepart->id_sparepart)->firstOrFail();
         if ($sparepart->stok < $requestSparepart->jumlah) {
             return back()->with('error', 'Stok gudang tidak mencukupi. Sisa stok: ' . $sparepart->stok);
         }
-
-        // Potong stok master
         $sparepart->stok -= $requestSparepart->jumlah;
         $sparepart->status = $sparepart->stok > 0 ? 'tersedia' : 'tidak tersedia';
         $sparepart->save();
-
         $requestSparepart->update(['status_request' => 'disetujui']);
-
         return back()->with('success', 'Request disetujui dan stok berhasil dipotong.');
     }
 
-    // 🔹 REJECT (Admin menolak)
+    // 🔹 REJECT 
     public function reject(Request $request, $id)
     {
         $requestSparepart = RequestSparepart::where('id_request', $id)->firstOrFail();
-
         if ($requestSparepart->status_request != 'pending') {
             return back()->with('error', 'Hanya request berstatus pending yang bisa ditolak.');
         }
-
         $requestSparepart->update(['status_request' => 'ditolak']);
-
         return back()->with('success', 'Request sparepart telah ditolak.');
     }
 }

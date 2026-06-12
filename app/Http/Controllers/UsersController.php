@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -25,12 +24,12 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         User::create([
-            'nama'              => $request->nama,
-            'email'             => $request->email,
-            'password'          => $request->password,
-            'no_hp'             => $request->no_hp,
-            'role'              => $request->role,
-            'status'            => $request->status,
+            'nama'     => $request->nama,
+            'email'    => $request->email,
+            'password' => $request->password,
+            'no_hp'    => $request->no_hp,
+            'role'     => $request->role,
+            'status'   => $request->status,
         ]);
         return redirect()->back()->with('success', 'User berhasil ditambahkan');
     }
@@ -52,11 +51,11 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
         
         $data = [
-            'nama'              => $request->nama,
-            'email'             => $request->email,
-            'no_hp'             => $request->no_hp,
-            'role'              => $request->role,
-            'status'            => $request->status,
+            'nama'   => $request->nama,
+            'email'  => $request->email,
+            'no_hp'  => $request->no_hp,
+            'role'   => $request->role,
+            'status' => $request->status,
         ];
         if ($user->role === 'owner') {
             $data = $request->except('role');

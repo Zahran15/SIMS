@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PengadaanSparepartController extends Controller
 {
-    // 🔹 TAMPIL DATA (Admin & Owner bisa lihat)
+    // 🔹 TAMPIL DATA 
     public function index()
     {
         $pengadaan = PengadaanSparepart::with('sparepart')->latest()->paginate(10);
@@ -22,7 +22,7 @@ class PengadaanSparepartController extends Controller
         }
     }
 
-    // 🔹 FORM TAMBAH (Hanya Admin, Owner Ditolak)
+    // 🔹 FORM TAMBAH 
     public function create()
     {
         $role = Auth::user()->role;
@@ -31,7 +31,7 @@ class PengadaanSparepartController extends Controller
         return view('admin.pengadaan.pengadaan_sparepart.tambah', compact('sparepart'));
     }
 
-    // 🔹 SIMPAN DATA (Hanya Admin)
+    // 🔹 SIMPAN DATA 
     public function store(Request $request)
     {
         $role = Auth::user()->role;
@@ -61,7 +61,7 @@ class PengadaanSparepartController extends Controller
         return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dicatat.');
     }
 
-    // 🔹 FORM EDIT (Hanya Admin, Owner Ditolak)
+    // 🔹 FORM EDIT 
     public function edit($id)
     {
         $role = Auth::user()->role;
@@ -71,7 +71,7 @@ class PengadaanSparepartController extends Controller
         return view('admin.pengadaan.pengadaan_sparepart.edit', compact('pengadaan', 'sparepart'));
     }
 
-    // 🔹 PROSES UPDATE DATA (Hanya Admin)
+    // UPDATE DATA
     public function update(Request $request, $id)
     {
         $role = Auth::user()->role; if ($role !== 'admin') {abort(403, 'Tindakan ini tidak diizinkan.');}
@@ -110,7 +110,7 @@ class PengadaanSparepartController extends Controller
         return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil diperbarui dan stok telah disesuaikan.');
     }
 
-    // 🔹 DETAIL DATA JSON (Admin & Owner bisa lihat)
+    // 🔹 DETAIL DATA
     public function detail($id)
     {
         $data = PengadaanSparepart::with('sparepart')->where('id_pengadaan', $id)->firstOrFail();
