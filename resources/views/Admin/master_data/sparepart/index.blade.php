@@ -6,7 +6,7 @@
     {{-- HEADER SECTION --}}
     <div class="mb-8 flex justify-between items-center">
         <div>
-            <h2 class="text-3xl font-bold text-gray-800">Data Master Sparepart</h2>
+            <h2 class="text-3xl font-bold text-gray-800">Data Sparepart</h2>
             <p class="text-gray-500 mt-1">Kelola seluruh katalog suku cadang, kategori, harga, dan kontrol stok gudang.</p>
         </div>
 
@@ -21,6 +21,43 @@
     @if(session('success'))
         <div class="mb-5 p-4 rounded-xl bg-green-100 text-green-700 font-medium border border-green-200">
             {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- FILTER --}}
+    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+        <form action="{{ route('admin.sparepart.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+                {{-- Filter Status --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status"
+                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                        <option value="tidak tersedia" {{ request('status') == 'tidak tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
+                    </select>
+                </div>
+                {{-- Tombol Aksi --}}
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                        Cari
+                    </button>
+                    <a href="{{ route('admin.sparepart.index') }}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('status'))
+        <div class="mb-4 text-sm text-gray-600">
+            Menampilkan data filter: 
+            @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
         </div>
     @endif
 
@@ -47,7 +84,7 @@
                         <tr class="hover:bg-gray-50/80 transition-colors">
                             <td class="px-5 py-4 text-center text-gray-500">{{ $sparepart->firstItem() + $index }}</td>
                             <td class="px-5 py-4 text-center font-medium text-gray-900">{{ $s->nama_sparepart }}</td>
-                            <td class="px-5 py-4 text-center text-gray-600 font-normal">{{ $s->kategori }}</td>
+                            <td class="px-5 py-4 text-center text-gray-600 font-medium">{{ $s->kategori }}</td>
                             <td class="px-5 py-4 text-center font-medium">
                                 @if($s->stok <= 5)
                                     <span class="text-center text-red-600 font-medium flex items-center justify-center gap-1" title="Stok kritis!">{{ $s->stok }} Pcs</span>
@@ -73,8 +110,7 @@
                                     {{-- DELETE --}}
                                     <form action="{{ route('admin.sparepart.delete', $s->id_sparepart) }}" 
                                         method="POST"
-                                        onsubmit="return confirm('Yakin ingin menghapus data ini dari master katalog?')" 
-                                        class="inline-block m-0">
+                                        class="form-hapus inline-block m-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
@@ -102,7 +138,29 @@
 
     {{-- PAGINATION --}}
     <div class="mt-4">
-        {{ $sparepart->links() }}
+        {{ $sparepart->appends(request()->query())->links() }}
     </div>
-</div>
+
+    <script>
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data sparepart ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

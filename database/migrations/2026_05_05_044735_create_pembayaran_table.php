@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('id_pembayaran');
             $table->foreignId('id_booking')->constrained('booking','id_booking')->cascadeOnDelete();
             $table->foreignId('id_servis')->nullable()->constrained('servis', 'id_servis')->nullOnDelete();
-            $table->enum('jenis_pembayaran', ['deposit', 'pelunasan']);
-            $table->enum('metode_pembayaran', ['cash', 'midtrans']);
+            $table->enum('jenis_pembayaran', ['dp', 'pelunasan']);
+            $table->enum('metode_pembayaran', ['cash', 'transfer']);
             $table->decimal('nominal', 12, 2);
             $table->enum('status_pembayaran', ['pending', 'sukses', 'gagal'])->default('pending');
             $table->string('snap_token')->nullable();

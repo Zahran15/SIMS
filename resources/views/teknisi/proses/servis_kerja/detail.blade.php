@@ -3,9 +3,6 @@
 @section('title', 'Detail Servis')
 
 @section('content')
-@php
-    $penugasanAktif = $servis->penugasan->where('id_user', auth()->id())->first();
-@endphp
 
 <div class="p-4">
 
@@ -33,28 +30,42 @@
                 <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Informasi Perangkat & Status</h3>
             </div>
 
-            <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
                 <div>
                     <span class="text-gray-400 block">Kode Servis</span>
                     <strong class="text-blue-600 text-sm">{{ $servis->kode_servis }}</strong>
-                </div>
-                <div>
-                    <span class="text-gray-400 block">Tanggal Masuk</span>
-                    <span class="text-gray-800 font-semibold">{{ date('d M Y', strtotime($servis->tgl_masuk)) }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400 block">Nama Pelanggan</span>
                     <span class="text-gray-800 font-semibold">{{ $servis->booking->pelanggan->nama }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-400 block">Merk / Tipe Device</span>
+                    <span class="text-gray-400 block">Device</span>
                     <span class="text-gray-800 font-semibold">{{ $servis->booking->merk_tipe }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-400 block">Status Perbaikan</span>
-                    <span class="text-blue-600 font-bold uppercase tracking-wide mt-0.5 inline-block">
-                        {{ $servis->status_servis }}
+                    <span class="text-gray-400 block">Prioritas Tugas</span>
+                    <span class="mt-0.5 inline-block px-2.5 py-0.5 text-[11px] rounded-full font-bold uppercase
+                        {{ $penugasan->prioritas == 'urgent' ? 'bg-purple-100 text-purple-700' : '' }}
+                        {{ $penugasan->prioritas == 'tinggi' ? 'bg-red-100 text-red-700' : '' }}
+                        {{ $penugasan->prioritas == 'normal' || $penugasan->prioritas == 'sedang' ? 'bg-yellow-100 text-yellow-700' : '' }}
+                        {{ $penugasan->prioritas == 'rendah' ? 'bg-green-100 text-green-700' : '' }}">
+                        {{ $penugasan->prioritas }}
                     </span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block">Status Tugas</span>
+                    <span class="text-blue-600 font-bold uppercase tracking-wide mt-0.5 inline-block">
+                        {{ $penugasan->status_penugasan }}
+                    </span>
+                </div>
+            </div>
+            
+            {{-- TAMPILKAN KELUHAN DI SINI --}}
+            <div class="px-4 pb-4 text-xs">
+                <span class="text-gray-400 block mb-1">Keluhan / Kerusakan:</span>
+                <div class="bg-gray-50 border rounded p-2 text-gray-700">
+                    {{ $servis->keluhan ?? $servis->booking->keluhan ?? 'Tidak ada catatan keluhan khusus.' }}
                 </div>
             </div>
         </div>
@@ -127,7 +138,7 @@
             </div>
         </div>
 
-        {{-- BLOK 3: CATATAN TEKNISI --}}
+{{-- BLOK 3: CATATAN TEKNISI --}}
         <div class="bg-white rounded border border-gray-200 shadow-sm">
             <div class="px-4 py-2 border-b bg-gray-50">
                 <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Riwayat Catatan Pengerjaan</h3>
@@ -135,11 +146,10 @@
             <div class="p-4 text-xs bg-gray-50/30">
                 <span class="text-gray-400 block mb-1">Catatan internal Anda untuk unit ini:</span>
                 <div class="bg-white border border-gray-200 rounded p-3 text-gray-700 italic min-h-[60px]">
-                    "{{ $penugasanAktif->catatan_teknisi ?? 'Anda belum memberikan catatan pengerjaan.' }}"
+                    "{{ $penugasan->catatan_teknisi ?? 'Anda belum memberikan catatan pengerjaan.' }}"
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 @endsection

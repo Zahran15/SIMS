@@ -10,15 +10,24 @@ use Illuminate\Support\Facades\Auth;
 class PengadaanSparepartController extends Controller
 {
     // 🔹 TAMPIL DATA 
-    public function index()
+// 🔹 TAMPIL DATA 
+    public function index(Request $request)
     {
-        $pengadaan = PengadaanSparepart::with('sparepart')->latest()->paginate(10);
+        $query = PengadaanSparepart::query();
+        if ($request->has('status_pengadaan') && $request->status_pengadaan != '') {
+            $query->where('status_pengadaan', $request->status_pengadaan);
+        }
+        $pengadaan = $query->with('sparepart')->latest()->paginate(10);
+        $totalNota = PengadaanSparepart::count();
+        $totalModal = PengadaanSparepart::where('status_pengadaan', 'diterima')->sum('total');
+        $totalDiterima = PengadaanSparepart::where('status_pengadaan', 'diterima')->count();
+        $stats = ['total_nota' => $totalNota,'total_modal' => $totalModal,'total_diterima' => $totalDiterima];
         $sparepart = Sparepart::all(); 
         $role = Auth::user()->role;
         if ($role == 'admin') {
-            return view('admin.pengadaan.pengadaan_sparepart.index', compact('pengadaan', 'sparepart'));
+            return view('admin.pengadaan.pengadaan_sparepart.index', compact('pengadaan', 'sparepart', 'stats'));
         } else {
-            return view('owner.pengadaan.pengadaan_sparepart.index', compact('pengadaan', 'sparepart'));
+            return view('owner.pengadaan.pengadaan_sparepart.index', compact('pengadaan', 'sparepart', 'stats'));
         }
     }
 
@@ -41,7 +50,7 @@ class PengadaanSparepartController extends Controller
             'tgl_pesan' => 'required|date',
             'jumlah' => 'required|integer|min:1',
             'harga_beli' => 'required|numeric|min:0',
-            'status_pengadaan' => 'required|in:dipesan,diterima,ditolak',
+            'status_pengadaan' => 'required|in:dipesan,diterima,dibatalkan',
         ]);
         $total = $request->jumlah * $request->harga_beli;
         PengadaanSparepart::create([
@@ -80,7 +89,7 @@ class PengadaanSparepartController extends Controller
             'tgl_pesan' => 'required|date',
             'jumlah' => 'required|integer|min:1',
             'harga_beli' => 'required|numeric|min:0',
-            'status_pengadaan' => 'required|in:dipesan,diterima,ditolak',
+            'status_pengadaan' => 'required|in:dipesan,diterima,dibatalkan',
         ]);
         $pengadaan = PengadaanSparepart::where('id_pengadaan', $id)->firstOrFail();
         // KONDISI A: Jika status LAMA adalah 'diterima', kita harus tarik kembali (kurangi) stok lamanya dulu

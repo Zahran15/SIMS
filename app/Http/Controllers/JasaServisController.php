@@ -10,7 +10,6 @@ class JasaServisController extends Controller
     public function index()
     {
         $jasa = JasaServis::paginate(10);
-
         return view('admin.master_data.jasa_servis.index', compact('jasa'));
     }
 
@@ -23,7 +22,7 @@ class JasaServisController extends Controller
     {
         $data = $request->validate(['nama_jasa' => 'required', 'harga' => 'required|numeric']);
         JasaServis::create($data);
-        return redirect()->route('admin.jasa_servis')->with('success', 'Data jasa berhasil ditambahkan');
+        return redirect()->route('admin.jasa_servis.index')->with('success', 'Data jasa berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -37,13 +36,13 @@ class JasaServisController extends Controller
         $jasa = JasaServis::findOrFail($id);
         $data = $request->validate(['nama_jasa' => 'required', 'harga' => 'required|numeric']);
         $jasa->update($data);
-        return redirect()->route('admin.jasa_servis')->with('success', 'Data jasa berhasil diupdate');
+        return redirect()->route('admin.jasa_servis.index')->with('success', 'Data jasa berhasil diupdate');
     }
 
     public function destroy($id)
     {
         $jasa = JasaServis::findOrFail($id);
         $jasa->delete();
-        return redirect()->route('admin.jasa_servis')->with('success', 'Data jasa berhasil dihapus');
+        return redirect()->route('admin.jasa_servis.index')->with('success', 'Data jasa berhasil dihapus');
     }
 }

@@ -24,7 +24,10 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Harga (Rp)</label>
-                    <input type="number" name="harga" required placeholder="Masukkan nominal harga (contoh: 50000)" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
+                    <div class="flex items-center border border-gray-200 rounded-xl transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+                        <span class="pl-4 pr-3 text-gray-400 font-semibold border-r border-gray-200 py-3">Rp</span>
+                        <input type="number" name="harga" required placeholder="Masukkan nominal harga (contoh: 50000)" class="w-full p-3 outline-none rounded-r-xl">
+                    </div>
                 </div>
             </div>
 

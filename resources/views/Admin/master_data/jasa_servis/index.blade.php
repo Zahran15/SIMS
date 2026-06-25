@@ -45,7 +45,7 @@
                                 </a>
                                 {{-- Tombol Delete --}}
                                 <form action="{{ route('admin.jasa_servis.delete', $j->id_jasa) }}" method="POST"
-                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="inline-block m-0">
+                                    class="form-hapus inline-block m-0">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -74,5 +74,28 @@
 <div class="mt-4">
     {{ $jasa->links() }}
 </div>
+
+    <script>
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data jasa ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection

@@ -57,18 +57,6 @@
                 <div class="bg-white border rounded-2xl p-5 shadow-sm">
                     <h4 class="text-sm font-bold uppercase text-gray-500 mb-4">Detail Penugasan</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {{-- PRIORITAS --}}
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Prioritas</label>
-                            <select name="prioritas" required
-                                class="w-full border rounded-xl p-3 mt-1 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                <option value="">-- Pilih Prioritas --</option>
-                                <option value="rendah">Rendah</option>
-                                <option value="normal">Normal</option>
-                                <option value="tinggi">Tinggi</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
-                        </div>
                         {{-- ESTIMASI --}}
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Estimasi Selesai</label>
@@ -99,21 +87,14 @@
                             placeholder="Opsional..."></textarea>
                     </div>
                 </div>
-
                 {{-- HIDDEN --}}
                 <input type="hidden" name="id_servis" value="{{ $servis->id_servis }}">
             </div>
 
             {{-- FOOTER --}}
             <div class="px-6 py-4 bg-white border-t flex justify-end gap-3">
-                <a href="{{ route('admin.penugasan.index') }}"
-                    class="px-5 py-3 rounded-xl border text-gray-600 hover:bg-gray-50 transition">
-                    Kembali
-                </a>
-                <button type="submit"
-                    class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition">
-                    Simpan Penugasan
-                </button>
+                <a href="{{ route('admin.penugasan.index') }}" class="px-5 py-3 rounded-xl border text-gray-600 hover:bg-gray-50 transition">Kembali</a>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition">Simpan Penugasan</button>
             </div>
         </form>
     </div>

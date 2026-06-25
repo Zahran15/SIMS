@@ -40,7 +40,6 @@
         
         <!-- Sisi Kiri: Visual Branding (Register Version - Simpel) -->
         <div class="hidden md:flex w-1/2 bg-slate-900/80 text-white p-12 flex-col justify-between relative overflow-hidden border-r border-white/10">
-
             <!-- [ATAS] Judul & Branding -->
             <div class="relative z-10">
                 <div class="flex items-center gap-3">
@@ -53,17 +52,14 @@
                     </span>
                 </div>
             </div>
-
             <!-- [TENGAH] Visual Simbolik (Satu Icon Utama - Simpel) -->
             <div class="relative z-10 flex justify-center items-center py-10">
                 <div class="relative w-64 h-64 flex items-center justify-center">
-                    <!-- Icon Utama -->
-                    <div class="z-20 bg-slate-800/50 p-8 rounded-[3rem] border border-white/10 backdrop-blur-xl animate-pulse">
+                    <div class="z-20 bg-slate-800/50 p-8 rounded-[3rem] border border-white/10 backdrop-blur-xl">
                         <i class="fas fa-id-card text-7xl text-emerald-500"></i>
                     </div>
                 </div>
             </div>
-
             <!-- [BAWAH] Teks Deskripsi -->
             <div class="relative z-10">
                 <!-- Footer Kecil -->

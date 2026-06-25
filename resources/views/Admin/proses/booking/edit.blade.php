@@ -88,34 +88,30 @@
                     </div>
                 </div>
 
-            {{-- STATUS --}}
-            <div class="bg-white border rounded-2xl p-5">
-                <h4 class="text-sm font-bold uppercase text-gray-500 mb-4">Status & Kategori</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Metode Pengambilan</label>
-                        <select name="metode_pengambilan" class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none">
-                            <option value="diantar" {{ $booking->metode_pengambilan == 'diantar' ? 'selected' : '' }}>Diantar</option>
-                            <option value="ambil sendiri" {{ $booking->metode_pengambilan == 'ambil sendiri' ? 'selected' : '' }}>Ambil Sendiri</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Status Deposit</label>
-                        <select name="status_deposit" class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none">
-                            <option value="belum lunas" {{ $booking->status_deposit == 'belum lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                            <option value="sudah lunas" {{ $booking->status_deposit == 'sudah lunas' ? 'selected' : '' }}>Sudah Lunas</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Status Booking</label>
-                        <select name="status_booking" class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none">
-                            <option value="pending" {{ $booking->status_booking == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="diterima" {{ $booking->status_booking == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                            <option value="ditolak" {{ $booking->status_booking == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
+                {{-- STATUS --}}
+                <div class="bg-white border rounded-2xl p-5">
+                    <h4 class="text-sm font-bold uppercase text-gray-500 mb-4">Status & Kategori</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Metode Pengembalian Unit</label>
+                            <select name="metode_pengembalian" class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="diantar" {{ $booking->metode_pengambilan == 'diantar' }}>Diantar Kurir</option>
+                                <option value="ambil sendiri" {{ $booking->metode_pengambilan == 'ambil sendiri' }}>Ambil Sendiri</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Status Dp</label>
+                            <input type="text" value="{{ ucwords($booking->status_dp) }}" readonly class="w-full border bg-gray-100 text-gray-600 rounded-xl p-3 outline-none cursor-not-allowed">
+                            <input type="hidden" name="status_dp" value="{{ $booking->status_dp }}">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Status Booking</label>
+                            <input type="text" value="{{ ucwords($booking->status_booking) }}" readonly class="w-full border bg-gray-100 text-gray-600 rounded-xl p-3 outline-none cursor-not-allowed">
+                            <input type="hidden" name="status_booking" value="{{ $booking->status_booking }}">
+                        </div>
+
                     </div>
                 </div>
-            </div>
 
             {{-- FOOTER --}}
             <div class="px-6 py-4 flex justify-end gap-3 bg-white border-t">

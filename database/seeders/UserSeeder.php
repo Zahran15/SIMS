@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Faker\Factory as Faker;
 
 class UserSeeder extends Seeder
 {
@@ -13,48 +15,54 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Akun Default untuk Login Awal (Admin, Owner, & Teknisi Asli)
         $users = [
             [
+                'nama' => 'Super Admin',
                 'role' => 'admin',
-                'nama' => 'Administrator Sistem',
                 'email' => 'admin@gmail.com',
-                'password' => Hash::make('admin'),
+                'no_hp' => '081234567890',
+                'password' => Hash::make('admin'), // Password: admin
+                'status' => 'aktif',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
+                'nama' => 'Chief Owner',
                 'role' => 'owner',
-                'nama' => 'Owner Perusahaan',
                 'email' => 'owner@gmail.com',
-                'password' => Hash::make('owner'),
+                'no_hp' => '081234567891',
+                'password' => Hash::make('owner'), // Password: owner
+                'status' => 'aktif',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
+                'nama' => 'Teknisi Utama',
                 'role' => 'teknisi',
-                'nama' => 'Teknisi Lapangan',
                 'email' => 'teknisi@gmail.com',
-                'password' => Hash::make('teknisi'),
+                'no_hp' => '081234567892',
+                'password' => Hash::make('teknisi'), // Password: teknisi
+                'status' => 'aktif',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            [
-                'role' => 'teknisi',
-                'nama' => 'Teknisi Cadangan',
-                'email' => 'teknisi2@gmail.com',
-                'password' => Hash::make('teknisi2'),
-            ],
-            [
-                'role' => 'teknisi',
-                'nama' => 'Teknisi Cadangan 2',
-                'email' => 'teknisi3@gmail.com',
-                'password' => Hash::make('teknisi3'),
-            ],
-
         ];
 
-        foreach ($users as $user) {
+        DB::table('users')->insert($users);
+
+        // 2. Data Dummy Tambahan (Menggunakan Faker)
+        $faker = Faker::create('id_ID'); 
+
+        for ($i = 0; $i < 10; $i++) {
             DB::table('users')->insert([
-                'role' => $user['role'],
-                'nama' => $user['nama'],
-                'email' => $user['email'],
-                'password' => $user['password'],
-                'status' => 'aktif',
-                'no_hp' => '08123456789',
+                'nama' => $faker->name,
+                // Dummy tetap mengacak ke tiga role yang tersedia
+                'role' => $faker->randomElement(['admin', 'owner', 'teknisi']),
+                'email' => $faker->unique()->safeEmail,
+                'no_hp' => $faker->phoneNumber,
+                'password' => Hash::make('password123'), 
+                'status' => $faker->randomElement(['aktif', 'nonaktif']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

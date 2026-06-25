@@ -11,10 +11,8 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
-
     protected $table = 'users';
     protected $primaryKey = 'id_user';
-    
     protected $fillable = [
         'nama',
         'role',
@@ -23,10 +21,7 @@ class User extends Authenticatable
         'password',
         'status'
     ];
-
-    protected $hidden = [
-        'password'
-    ];
+    protected $hidden = ['password'];
 
     public function setPasswordAttribute($value)
     {

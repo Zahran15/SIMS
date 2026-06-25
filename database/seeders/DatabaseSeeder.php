@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Seeders;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -17,6 +17,13 @@ class DatabaseSeeder extends Seeder
             JasaServisSeeder::class,
             SparepartSeeder::class,
             ToolsSeeder::class,
+            BookingSeeder::class,
+            ServisSeeder::class,
+            PenugasanTeknisiSeeder::class,
+            RequestSparepartSeeder::class,
+            PengadaanSparepartSeeder::class,
+            HistoriAktivitasSeeder::class,
+            PembayaranSeeder::class, 
         ]);
     }
 }

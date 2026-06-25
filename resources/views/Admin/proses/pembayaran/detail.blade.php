@@ -21,10 +21,10 @@
         <div><span class="text-gray-400 block">Jenis</span> <span class="uppercase font-semibold">{{ $pembayaran->jenis_pembayaran }}</span></div>
         <div><span class="text-gray-400 block">Metode Pembayaran</span> <span class="uppercase font-semibold text-purple-700">{{ $pembayaran->metode_pembayaran }}</span></div>
         <div><span class="text-gray-400 block">Status</span> <span class="uppercase font-bold text-green-600">{{ $pembayaran->status_pembayaran }}</span></div>
-        <div><span class="text-gray-400 block">Tanggal Bayar</span> <span>{{ $pembayaran->tanggal_bayar ?? '-' }}</span></div>
+        <div><span class="text-gray-400 block">Tanggal Bayar</span> <span>{{ $pembayaran->tanggal_bayar }}</span></div>
     </div>
     
-    @if($pembayaran->metode_pembayaran == 'midtrans')
+    @if($pembayaran->metode_pembayaran == 'transfer')
     <div class="bg-gray-50 p-3 rounded border mt-2">
         <span class="font-bold text-gray-700 block mb-1">Metadata Midtrans:</span>
         <p>Snap Token: <code class="bg-gray-200 px-1 rounded">{{ $pembayaran->snap_token ?? 'Belum Digenerate' }}</code></p>

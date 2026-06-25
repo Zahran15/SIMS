@@ -23,6 +23,46 @@
     </a>
 </div>
 
+{{-- FILTER --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.pengadaan_tools.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+
+            {{-- Filter Status --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                    <option value="tidak tersedia" {{ request('status') == 'tidak tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                    Cari
+                </button>
+
+                <a href="{{ route('admin.pengadaan_tools.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{{-- Info Badge Filter Aktif --}}
+@if(request('status'))
+    <div class="mb-4 text-sm text-gray-600">
+        Menampilkan data filter: 
+        @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
+    </div>
+@endif
+
 {{-- TABLE --}}
 <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
@@ -65,8 +105,7 @@
                                 {{-- DELETE --}}
                                 <form action="{{ route('admin.pengadaan_tools.delete', $t->id_tools) }}"
                                     method="POST"
-                                    onsubmit="return confirm('Yakin ingin menghapus alat ini?')"
-                                    class="inline-block m-0">
+                                    class="form-hapus inline-block m-0">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -93,7 +132,30 @@
 </div>
 
 <div class="mt-4">
-    {{ $tools->links() }}
+    {{ $tools->appends(request()->query())->links() }}
 </div>
+
+    <script>
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data tools ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection

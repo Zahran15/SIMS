@@ -37,12 +37,7 @@
                 <div class="grid md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kategori</label>
-                        <select name="kategori" required class="w-full border border-gray-200 rounded-xl p-3 bg-white outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 cursor-pointer">
-                            <option value="Layar" {{ $sparepart->kategori == 'Layar' ? 'selected' : '' }}>Layar/LCD</option>
-                            <option value="Baterai" {{ $sparepart->kategori == 'Baterai' ? 'selected' : '' }}>Baterai</option>
-                            <option value="Hardware" {{ $sparepart->kategori == 'Hardware' ? 'selected' : '' }}>Hardware</option>
-                            <option value="Aksesoris" {{ $sparepart->kategori == 'Aksesoris' ? 'selected' : '' }}>Aksesoris</option>
-                        </select>
+                        <input type="text" name="kategori" value="{{ $sparepart->kategori }}" required placeholder="Masukkan kategori" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100">
                     </div>
                     
                     <div>
@@ -64,8 +59,8 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Ketersediaan</label>
                         <select name="status" required class="w-full border border-gray-200 rounded-xl p-3 bg-white outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 cursor-pointer">
-                            <option value="tersedia" {{ $sparepart->status == 'tersedia' ? 'selected' : '' }}>TERSEDIA</option>
-                            <option value="habis" {{ $sparepart->status == 'habis' ? 'selected' : '' }}>HABIS / KOSONG</option>
+                            <option value="tersedia" {{ $sparepart->status == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                            <option value="tidak tersedia" {{ $sparepart->status == 'tidak tersedia' ? 'selected' : '' }}>Habis/Kosong</option>
                         </select>
                     </div>
                 </div>

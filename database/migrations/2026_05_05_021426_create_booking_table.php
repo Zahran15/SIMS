@@ -19,10 +19,10 @@ return new class extends Migration
             $table->string('merk_tipe');
             $table->string('spesifikasi');
             $table->string('keluhan');
-            $table->enum('metode_pengambilan', ['diantar', 'ambil sendiri']);
+            $table->enum('metode_pengembalian', ['diantar', 'ambil sendiri']);
             $table->text('kelengkapan');
             $table->enum('kategori_servis', ['ringan', 'sedang', 'berat']);
-            $table->enum('status_deposit', ['belum lunas', 'sudah lunas']);
+            $table->enum('status_dp', ['belum lunas', 'sudah lunas']);
             $table->enum('status_booking', ['pending', 'diterima', 'ditolak'])->default('pending');
             $table->timestamps();
         });

@@ -34,6 +34,43 @@ $sparepart_stats = [
     @endforeach
 </div>
 
+    {{-- FILTER --}}
+    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+        <form action="{{ route('owner.sparepart.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+                {{-- Filter Status --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status"
+                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                        <option value="tidak tersedia" {{ request('status') == 'tidak tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
+                    </select>
+                </div>
+                {{-- Tombol Aksi --}}
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                        Cari
+                    </button>
+                    <a href="{{ route('owner.sparepart.index') }}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('status'))
+        <div class="mb-4 text-sm text-gray-600">
+            Menampilkan data filter: 
+            @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
+        </div>
+    @endif
+
     {{-- TABLE SECTION --}}
     <div class="bg-white mb-6 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
@@ -67,7 +104,7 @@ $sparepart_stats = [
                             </td>
                             <td class="px-5 py-4 text-center text-green-600 font-medium">Rp {{ number_format($s->harga_jual, 0, ',', '.') }}</td>
                             <td class="px-5 py-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-xs font-normal border whitespace-nowrap {{ $s->status == 'tersedia' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200' }}">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap {{ $s->status == 'tersedia' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200' }}">
                                     {{ ucfirst($s->status) }}
                                 </span>
                             </td>
@@ -86,6 +123,6 @@ $sparepart_stats = [
 
     {{-- PAGINATION --}}
     <div class="mt-4">
-        {{ $sparepart->links() }}
+        {{ $sparepart->appends(request()->query())->links() }}
     </div>
 @endsection

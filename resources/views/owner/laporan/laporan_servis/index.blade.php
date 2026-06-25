@@ -60,20 +60,21 @@ $stats = [
                         <th class="px-6 py-3 text-center">Nama Pelanggan</th>
                         <th class="px-6 py-3 text-center">Keluhan</th>
                         <th class="px-6 py-3 text-center">Teknisi</th>
-                        <th class="px-6 py-3 text-center">Tgl. Selesai</th>
+                        <th class="px-6 py-3 text-center">Estimasi Selesai</th>
                         <th class="px-6 py-3 text-center">Total Biaya</th>
                         <th class="px-6 py-3 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm text-gray-700">
-                    @forelse ($detail_servis as $ds)
+                    {{-- Diubah Menggunakan Paginator Baru --}}
+                    @forelse ($detail_servis_paginated as $ds)
                         <tr class="border-b hover:bg-gray-50 transition">
                             <td class="px-6 py-4 text-center">{{ $ds->tgl_masuk }}</td>
                             <td class="px-6 py-4 text-center font-semibold text-gray-900">{{ $ds->kode_servis }}</td>
-                            <td class="px-6 py-4 text-center">{{ $ds->booking->pelanggan->nama ?? $ds->booking->pelanggan->nama_pelanggan ?? '-' }}</td>                            
-                            <td class="px-6 py-4 text-center max-w-xs truncate">{{ $ds->booking->keluhan ?? '-' }}</td>
-                            <td class="px-6 py-4 text-center">{{ $ds->penugasan->user->nama ?? 'Belum Ditugaskan' }}</td>
-                            <td class="px-6 py-4 text-center">{{ $ds->perkiraan_selesai ?? '-' }}</td>
+                            <td class="px-6 py-4 text-center">{{ $ds->nama_pelanggan }}</td>                            
+                            <td class="px-6 py-4 text-center max-w-xs truncate">{{ $ds->keluhan }}</td>
+                            <td class="px-6 py-4 text-center">{{ $ds->teknisi }}</td>
+                            <td class="px-6 py-4 text-center font-medium text-gray-800">{{ $ds->perkiraan_selesai }}</td>
                             <td class="px-6 py-4 text-center font-bold text-gray-800">Rp {{ number_format($ds->total_biaya, 0, ',', '.') }}</td>
                             <td class="px-6 py-4 text-center">
                                 <span class="px-3 py-1 rounded-full text-xs font-bold 
@@ -91,6 +92,11 @@ $stats = [
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- TOMBOL NAVIGASI NEXT / PREVIOUS (SERVIS) --}}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            {{ $detail_servis_paginated->links() }}
         </div>
     </div>
 

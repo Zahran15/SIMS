@@ -8,13 +8,24 @@ use Carbon\Carbon;
 
 class PelangganController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pelanggan = Pelanggan::latest()->paginate(10);
+        $query = Pelanggan::query();
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama', 'LIKE', $request->search . '%');
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        $pelanggan = $query->latest()->paginate(10);
+        $total_pelanggan = Pelanggan::count();
+        $pelanggan_aktif = Pelanggan::where('status', 'aktif')->count();
+        $pelanggan_nonaktif = Pelanggan::where('status', 'nonaktif')->count();
         $tanggal = Carbon::now()->format('Ymd');
         $count = Pelanggan::whereDate('created_at', Carbon::today())->count();
         $kode = 'PLG-' . $tanggal . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-        return view('admin.master_data.pelanggan.index', compact('pelanggan', 'kode'));    
+        return view('admin.master_data.pelanggan.index', compact('pelanggan', 'kode', 'total_pelanggan', 'pelanggan_aktif', 'pelanggan_nonaktif'));    
     }
 
     public function create()

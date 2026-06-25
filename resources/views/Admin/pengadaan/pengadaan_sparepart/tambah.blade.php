@@ -43,7 +43,7 @@
                             <option value="" disabled selected>-- Pilih Status --</option>
                             <option value="dipesan">Dipesan</option>
                             <option value="diterima">Diterima</option>
-                            <option value="ditolak">Ditolak</option>
+                            <option value="dibatalkan">Dibatalkan</option>
                         </select>
                     </div>
                 </div>

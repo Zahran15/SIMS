@@ -16,12 +16,26 @@ class LaporanServisController extends Controller
         $servis_proses = Servis::where('status_servis', 'Proses')->count();
         $servis_dibatalkan = Servis::where('status_servis', 'Dibatalkan')->count();
 
-        // 2. MENGAMBIL DETAIL DATA SERVIS (Eager Loading)
-        $detail_servis = Servis::with(['penugasan.user', 'booking.pelanggan'])
-            ->orderBy('tgl_masuk', 'desc')
-            ->get();
+        // 2. MENGAMBIL DETAIL DATA SERVIS (Ubah ->get() menjadi ->paginate(5))
+        $detail_servis_paginated = Servis::with(['penugasan.user', 'booking.pelanggan'])->orderBy('tgl_masuk', 'desc')->paginate(5, ['*'], 'page_servis');
 
-        // 3. REKAP PER TEKNISI (Menggunakan Eloquent secara bersih)
+        // Melakukan mapping data didalam collection paginator sekaligus memformat tanggal selesai
+        $mapped_servis = $detail_servis_paginated->getCollection()->map(function ($item) {            
+            $tanggal_selesai_raw = $item->penugasan->estimasi_selesai ?? $item->perkiraan_selesai;
+            return (object) [
+                'tgl_masuk' => $item->tgl_masuk,
+                'kode_servis' => $item->kode_servis,
+                'nama_pelanggan' => $item->booking->pelanggan->nama ?? $item->booking->pelanggan->nama_pelanggan,
+                'keluhan' => $item->booking->keluhan,
+                'teknisi' => $item->penugasan->user->nama ?? 'Belum Ditugaskan',
+                'perkiraan_selesai' => $tanggal_selesai_raw ? \Carbon\Carbon::parse($tanggal_selesai_raw)->format('d M Y') : '-',                
+                'total_biaya' => $item->total_biaya,
+                'status_servis' => $item->status_servis
+            ];
+        });
+        $detail_servis_paginated->setCollection($mapped_servis);
+
+        // 3. REKAP PER TEKNISI
         $rekap_teknisi = User::where('role', 'teknisi')
             ->leftJoin('penugasan_teknisi', 'users.id_user', '=', 'penugasan_teknisi.id_user')
             ->leftJoin('servis as s', 'penugasan_teknisi.id_servis', '=', 's.id_servis')
@@ -50,12 +64,14 @@ class LaporanServisController extends Controller
         }
 
         $data_chart = array_values($bulanan);
+
+        // 5. KIRIM DATA KE VIEW (Kirim variabel $detail_servis_paginated)
         return view('owner.laporan.laporan_servis.index', compact(
             'total_servis',
             'servis_selesai',
             'servis_proses',
             'servis_dibatalkan',
-            'detail_servis',
+            'detail_servis_paginated',
             'rekap_teknisi',
             'data_chart' 
         ));

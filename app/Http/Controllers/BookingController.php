@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Pelanggan;
 use App\Models\Servis;
 use App\Models\Pembayaran;
+use App\Models\PenugasanTeknisi;
 use App\Models\HistoriAktivitas;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,14 +15,27 @@ use Carbon\Carbon;
 class BookingController extends Controller
 {
     // 🔹 TAMPIL DATA
-    public function index()
+    public function index(Request $request)
     {
-        // Jika yang login adalah admin lewat guard web biasa
+        $query = Booking::query();
+        // 1. Filter Cari Nama Pelanggan (Melalui Relasi Pelanggan)
+        if ($request->has('search') && $request->search != '') {
+            $query->whereHas('pelanggan', function($q) use ($request) {
+                $q->where('nama', 'LIKE', $request->search . '%');
+            });
+        }
+        // 2. Filter Berdasarkan Kategori Servis
+        if ($request->has('kategori_servis') && $request->kategori_servis != '') {
+            $query->where('kategori_servis', $request->kategori_servis);
+        }
+        // 3. Filter Berdasarkan Status Deposit
+        if ($request->has('status_dp') && $request->status_deposit != '') {
+            $query->where('status_dp', $request->status_deposit);
+        }
         if (Auth::guard('web')->check() && Auth::user()->role == 'admin') { 
-            $booking = Booking::with('pelanggan')->latest()->paginate(10);
+            $booking = $query->with('pelanggan')->latest()->paginate(10);
             return view('admin.proses.booking.index', compact('booking'));
         } 
-        // Jika yang login pelanggan lewat guard 'pelanggan'
         $id_pelanggan = Auth::guard('pelanggan')->id();
         if (!$id_pelanggan) {
             abort(401, 'Silahkan login terlebih dahulu.');
@@ -36,7 +50,6 @@ class BookingController extends Controller
         $tanggal = Carbon::now()->format('Ymd');
         $count = Booking::count() + 1;
         $kode_booking = 'BK-' . $tanggal . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
-
         // Cek apakah admin yang akses
         if (Auth::guard('web')->check() && Auth::user()->role == 'admin') {
             $pelanggan = Pelanggan::all();
@@ -54,29 +67,25 @@ class BookingController extends Controller
             'merk_tipe' => 'required|string',
             'spesifikasi' => 'required|string',
             'keluhan' => 'required|string',
-            'metode_pengambilan' => 'required|in:diantar,ambil sendiri',
+            'metode_pengembalian' => 'required|in:diantar,ambil sendiri',
             'kategori_servis' => 'required|in:ringan,sedang,berat',
         ];
-
-        // ✅ PERBAIKAN: Pastikan Auth::user() tidak null sebelum mengecek role
         $isAdmin = Auth::guard('web')->check() && Auth::user() && Auth::user()->role == 'admin';
-
         if ($isAdmin) {
-            $rules['id_pelanggan'] = 'required';
-            $rules['status_deposit'] = 'required|in:belum lunas,sudah lunas';
+            $rules['id_pelanggan']   = 'required';
+            $rules['status_dp']      = 'required|in:belum lunas,sudah lunas';
             $rules['status_booking'] = 'required|in:pending,diterima,ditolak';
         }
 
         $request->validate($rules);
-
         // Set Variabel Berdasarkan Role
         if ($isAdmin) {
-            $id_pelanggan = $request->id_pelanggan;
-            $status_deposit = $request->status_deposit;
+            $id_pelanggan   = $request->id_pelanggan;
+            $status_dp      = $request->status_dp;
             $status_booking = $request->status_booking;
         } else {
-            $id_pelanggan = Auth::guard('pelanggan')->id(); 
-            $status_deposit = 'belum lunas'; 
+            $id_pelanggan   = Auth::guard('pelanggan')->id(); 
+            $status_dp      = 'belum lunas'; 
             $status_booking = 'pending';
         }
 
@@ -94,17 +103,17 @@ class BookingController extends Controller
             'spesifikasi'        => $request->spesifikasi,
             'keluhan'            => $request->keluhan,
             'metode_pengambilan' => $request->metode_pengambilan,
-            'kelengkapan'        => $request->kelengkapan ?? '-',
+            'kelengkapan'        => $request->kelengkapan,
             'kategori_servis'    => $request->kategori_servis,
-            'status_deposit'     => $status_deposit,
+            'status_dp'          => $status_dp,
             'status_booking'     => $status_booking,
         ]);
 
         Pembayaran::create([
             'id_booking'        => $booking->id_booking,
             'id_servis'         => null,
-            'jenis_pembayaran'  => 'deposit',
-            'metode_pembayaran' => 'midtrans',
+            'jenis_pembayaran'  => 'dp',
+            'metode_pembayaran' => 'transfer',
             'nominal'           => 50000,
             'status_pembayaran' => 'pending'
         ]);
@@ -112,7 +121,6 @@ class BookingController extends Controller
         if ($isAdmin) {
             return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil ditambahkan');
         }
-
         return redirect()->route('pelanggan.booking.index')->with('success', 'Booking berhasil dibuat!');
     }
 
@@ -139,7 +147,6 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
         $isAdmin = Auth::guard('web')->check() && Auth::user()->role == 'admin';
-
         if ($isAdmin) {
             $booking->update([
                 'id_pelanggan' => $request->id_pelanggan,
@@ -150,12 +157,12 @@ class BookingController extends Controller
                 'metode_pengambilan' => $request->metode_pengambilan,
                 'kelengkapan' => $request->kelengkapan,
                 'kategori_servis' => $request->kategori_servis,
-                'status_deposit' => $request->status_deposit,
+                'status_dp' => $request->status_dp,
                 'status_booking' => $request->status_booking,
             ]);
 
             if ($request->status_booking == 'diterima' &&
-                $booking->status_deposit == 'sudah lunas') {
+                $booking->status_dp == 'sudah lunas') {
                 $cekServis = Servis::where('id_booking', $booking->id_booking)->first();
                 if (!$cekServis) {
                     $kode_servis = 'SRV-' . date('Ymd') . '-' . str_pad(Servis::count() + 1, 3, '0', STR_PAD_LEFT);
@@ -212,7 +219,6 @@ class BookingController extends Controller
             }
             return view('pelanggan.proses.booking.detail', compact('booking'));
         }
-
         return view('admin.proses.booking.detail', compact('booking'));
     }
 
@@ -221,7 +227,6 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
         $isAdmin = Auth::guard('web')->check() && Auth::user()->role == 'admin';
-
         if (!$isAdmin) {
             $id_pelanggan = Auth::guard('pelanggan')->id();
             if ($booking->id_pelanggan != $id_pelanggan || $booking->status_booking != 'pending') {
@@ -233,5 +238,45 @@ class BookingController extends Controller
 
         $booking->delete();
         return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil dihapus');
+    }
+
+    public function terima($id)
+    {
+        $booking = Booking::findOrFail($id);
+        // 1. Update status booking menjadi diterima
+        $booking->update(['status_booking' => 'diterima']);
+        // 2. Cek apakah data servis untuk booking ini sudah pernah dibuat/belum (biar gak double)
+        $cekServis = Servis::where('id_booking', $booking->id_booking)->first();
+        if (!$cekServis) {
+            $kode_servis = 'SRV-' . date('Ymd') . '-' . str_pad(Servis::count() + 1, 3, '0', STR_PAD_LEFT);
+            // Buat data Servis Baru
+            $newServis = Servis::create([
+                'id_booking'        => $booking->id_booking,
+                'kode_servis'       => $kode_servis,
+                'tgl_masuk'         => Carbon::now(),
+                'perkiraan_selesai' => Carbon::now()->addDays(3), 
+                'status_servis'     => 'menunggu',                
+                'total_biaya'       => 0
+            ]);
+
+            // 3. Buat Otomatis Penugasan Teknisi (Status: Belum Ditugaskan / Menunggu Plotting)
+            PenugasanTeknisi::create([
+                'id_servis'         => $newServis->id_servis,
+                'id_user'           => null,
+                'status_tugas'      => 'menunggu', 
+                'tanggal_tugas'     => Carbon::now(),
+            ]);
+
+            // 4. Catat ke Histori Aktivitas
+            HistoriAktivitas::create([
+                'id_user'    => Auth::id(), 
+                'id_servis'  => $newServis->id_servis,
+                'aktivitas'  => 'Penerimaan Unit',
+                'keterangan' => 'Booking disetujui langsung oleh Admin. Unit masuk antrean servis dan penugasan dibuat.',
+                'tanggal'    => Carbon::now()
+            ]);
+        }
+
+        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil disetujui, data servis & penugasan telah dibuat!');
     }
 }

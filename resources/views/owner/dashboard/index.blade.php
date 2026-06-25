@@ -30,7 +30,7 @@
 @php
 $stats = [
     ['title' => 'Total Pendapatan', 'total' => 'Rp ' . number_format($totalPendapatan, 0, ',', '.'), 'icon' => 'fa-wallet', 'text_color' => 'text-emerald-600', 'bg_color' => 'bg-emerald-50', 'label' => 'Gross Revenue'],
-    ['title' => 'Deposit Masuk', 'total' => 'Rp ' . number_format($depositMasuk, 0, ',', '.'), 'icon' => 'fa-hand-holding-usd', 'text_color' => 'text-purple-600', 'bg_color' => 'bg-purple-50', 'label' => 'Uang Muka'],
+    ['title' => 'Dp Masuk', 'total' => 'Rp ' . number_format($dpMasuk, 0, ',', '.'), 'icon' => 'fa-hand-holding-usd', 'text_color' => 'text-purple-600', 'bg_color' => 'bg-purple-50', 'label' => 'Uang Muka'],
     ['title' => 'Total Pelunasan', 'total' => 'Rp ' . number_format($totalPelunasan, 0, ',', '.'), 'icon' => 'fa-money-check-alt', 'text_color' => 'text-cyan-600', 'bg_color' => 'bg-cyan-50', 'label' => 'Tagihan Selesai'],
     ['title' => 'Pembayaran Pending', 'total' => $pembayaranPending . ' Transaksi', 'icon' => 'fa-clock', 'text_color' => 'text-blue-600', 'bg_color' => 'bg-blue-50', 'label' => 'Piutang Berjalan'],
 ];

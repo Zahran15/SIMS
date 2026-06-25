@@ -3,7 +3,6 @@
 @section('title', 'Pengaturan Website')
 
 @section('content')
-<div class="p-6">
     <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8">
         <h2 class="text-2xl font-bold mb-6">Pengaturan Website</h2>
         
@@ -40,6 +39,12 @@
                         <label class="block text-sm font-medium text-gray-700">Background Register</label>
                         <input type="file" name="bg_register" class="mt-1 block w-full">
                     </div>
+
+                    <!-- Background Reset -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Background Reset</label>
+                        <input type="file" name="bg_reset" class="mt-1 block w-full">
+                    </div>
                 </div>
 
             <button type="submit" class="mt-8 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -47,5 +52,4 @@
             </button>
         </form>
     </div>
-</div>
 @endsection

@@ -130,7 +130,7 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div>
-                                <p class="font-bold text-gray-700">Senin - Sabtu: 08.00 - 17.00</p>
+                                <p class="font-bold text-gray-700">Senin - Sabtu: 08:00 - 21:00</p>
                                 <p class="text-sm text-gray-500">Minggu & Hari Libur Tutup</p>
                             </div>
                         </div>
@@ -165,6 +165,32 @@
     <a href="https://wa.me/6285879000070" target="_blank" class="fixed bottom-8 right-8 bg-[#25D366] text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-50 animate-bounce">
         <i class="fab fa-whatsapp text-3xl"></i>
     </a>
+
+<style>
+        html::-webkit-scrollbar {
+            width: 8px;
+        }
+        html::-webkit-scrollbar-thumb {
+            background-color: transparent;
+            border-radius: 9px;
+        }
+        html.is-scrolling::-webkit-scrollbar-thumb {
+            background-color: rgba(100, 116, 139, 0.5); 
+        }
+    </style>
+
+    <script>
+        const html = document.documentElement;
+        let isScrolling;
+
+        window.addEventListener('scroll', () => {
+            html.classList.add('is-scrolling');
+            window.clearTimeout(isScrolling);
+            isScrolling = setTimeout(() => {
+                html.classList.remove('is-scrolling');
+            }, 1000); 
+        }, { passive: true });
+    </script>
 
 </body>
 </html>

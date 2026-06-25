@@ -26,7 +26,6 @@
 </head>
 <body class="bg-login flex items-center justify-center min-h-screen p-4 relative overflow-hidden">
     
-    <!-- Tombol Back ke Home (Dibuat lebih kontras karena background gelap) -->
     <a href="/" class="absolute top-8 left-8 text-white/70 hover:text-white transition-all hidden md:flex items-center gap-2 font-bold text-xs uppercase tracking-widest z-20">
         <i class="fas fa-arrow-left"></i> Kembali ke Beranda
     </a>
@@ -35,7 +34,6 @@
         
         <!-- Sisi Kiri: Visual Branding -->
         <div class="hidden md:flex w-1/2 bg-slate-900/80 text-white p-12 flex-col justify-between relative overflow-hidden border-r border-white/10">
-        
             <!-- [ATAS] Judul & Branding -->
             <div class="relative z-10">
                 <div class="flex items-center gap-3">
@@ -48,17 +46,14 @@
                     </span>
                 </div>
             </div>
-        
             <!-- [TENGAH] Visual Simbolik (Floating Tech Orbit) -->
             <div class="relative z-10 flex justify-center items-center py-10">
                 <div class="relative w-64 h-64 flex items-center justify-center">
-                    <!-- Icon Utama -->
-                    <div class="z-20 bg-slate-800/50 p-8 rounded-[3rem] border border-white/10 backdrop-blur-xl animate-pulse">
+                    <div class="z-20 bg-slate-800/50 p-8 rounded-[3rem] border border-white/10 backdrop-blur-xl">
                         <i class="fas fa-microchip text-7xl text-blue-500"></i>
                     </div>
                 </div>
             </div>
-        
             <!-- [BAWAH] Teks Deskripsi -->
             <div class="relative z-10">
                 <!-- Footer Kecil -->
@@ -106,16 +101,20 @@
 
                 <div>
                     <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 block mb-2 ml-1">Password</label>
-                    <div class="relative group">
+                    <div class="relative group mb-2">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
                             <i class="fas fa-lock text-sm"></i>
                         </span>
                         <input type="password" name="password" placeholder="••••••••" required
-                            class="w-full bg-gray-100/50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 focus:bg-white transition-all duration-300 text-sm">
+                            class="w-full bg-gray-100/50 border border-gray-200 rounded-2xl pl-11 pr-12 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 focus:bg-white transition-all duration-300 text-sm">
+
                         <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors">
                             <i id="eyeIcon" class="fas fa-eye text-sm hidden"></i>
                             <i id="eyeOffIcon" class="fas fa-eye-slash text-sm"></i>
                         </button>
+                    </div>
+                    <div class="flex justify-end pr-1">
+                        <a href="{{ route('password.request') }}" class="text-xs text-green-600 hover:text-green-700 font-semibold transition-colors">Lupa kata sandi?</a>
                     </div>
                 </div>
 

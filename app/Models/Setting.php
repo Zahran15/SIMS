@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     use HasFactory;
-
     // Menentukan nama tabel (opsional, tapi aman jika nama tabelnya singular/plural)
     protected $table = 'settings';
-
     // Daftarkan kolom yang boleh diisi secara massal
     protected $fillable = [
         'key',

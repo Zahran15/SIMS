@@ -52,10 +52,12 @@
 
     {{-- FORM UPDATE --}}
     @if($penugasanAktif)
-<form action="{{ route('teknisi.servis_kerja.updateStatus', $penugasan->id_penugasan) }}" method="POST">
-    @csrf
-    @method('PUT')
+    <form action="{{ route('teknisi.servis_kerja.updateStatus', $penugasan->id_penugasan) }}" method="POST">
+        @csrf
+        @method('PUT')
         <div class="bg-white rounded-2xl shadow p-6">
+            
+            {{-- Input Status Pengerjaan --}}
             <div class="mb-5">
                 <label class="block mb-2 font-semibold text-gray-700">Status Pengerjaan Anda</label>
                 <select name="status_penugasan" class="w-full border rounded-xl p-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
@@ -66,19 +68,35 @@
                     <option value="gagal" {{ $penugasanAktif->status_penugasan == 'gagal' ? 'selected' : '' }}>Gagal / Tidak Bisa Diperbaiki</option>
                 </select>
             </div>
-            <div>
+
+            {{-- INPUT BARU: ESTIMASI SELESAI MANUAL DARI TEKNISI --}}
+            <div class="mb-5">
+                <label class="block mb-2 font-semibold text-gray-700">Estimasi Selesai (Tentukan Target Tanggal)</label>
+                <input type="date" name="estimasi_selesai" 
+                    value="{{ $penugasanAktif->estimasi_selesai ? \Carbon\Carbon::parse($penugasanAktif->estimasi_selesai)->format('Y-m-d') : '' }}"
+                    class="w-full border rounded-xl p-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                <p class="text-xs text-gray-400 mt-1">*Tentukan target kapan unit laptop ini selesai Anda kerjakan.</p>
+            </div>
+
+            {{-- Input Catatan Teknisi --}}
+            <div class="mb-2">
                 <label class="block mb-2 font-semibold text-gray-700">Catatan Teknisi</label>
                 <textarea name="catatan_teknisi" rows="5" class="w-full border rounded-xl p-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Tuliskan kendala atau hasil perbaikan perangkat disini...">{{ $penugasanAktif->catatan_teknisi ?? '' }}</textarea>
             </div>
         </div>
+        
         <div class="mt-6 flex justify-end gap-3">
             <a href="{{ route('teknisi.servis_kerja.index') }}" class="px-5 py-3 border rounded-xl hover:bg-gray-50 transition text-center min-w-[100px]">Kembali</a>
             <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md hover:shadow-lg transition font-medium min-w-[100px]">Simpan Progres</button>
         </div>
     </form>
     @else
-        <div class="p-4 mb-4 text-sm text-red-800 rounded-2xl bg-red-50" role="alert"><span class="font-medium">Peringatan!</span> Anda tidak memiliki hak akses atau tugas untuk mengupdate servis ini.</div>
-        <div class="mt-6 flex justify-end"><a href="{{ route('teknisi.servis_kerja.index') }}" class="px-5 py-3 border rounded-xl hover:bg-gray-50 transition">Kembali</a></div>
-        @endif
-    </div>
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-2xl bg-red-50" role="alert">
+            <span class="font-medium">Peringatan!</span> Anda tidak memiliki hak akses atau tugas untuk mengupdate servis ini.
+        </div>
+        <div class="mt-6 flex justify-end">
+            <a href="{{ route('teknisi.servis_kerja.index') }}" class="px-5 py-3 border rounded-xl hover:bg-gray-50 transition">Kembali</a>
+        </div>
+    @endif
+</div>
 @endsection

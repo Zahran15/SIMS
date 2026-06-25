@@ -8,7 +8,6 @@ class Tools extends Model
 {
     protected $table = 'tools';
     protected $primaryKey = 'id_tools';
-
     protected $fillable = [
         'id_user',
         'nama_tools',

@@ -27,6 +27,63 @@
     </div>
 @endif
 
+{{-- FILTER & SEARCH BOOKING --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.booking.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            {{-- Input Pencarian Nama Pelanggan --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Masukkan nama pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            {{-- Filter Kategori Servis --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Servis</label>
+                <select name="kategori_servis"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
+                    <option value="">Semua Kategori</option>
+                    <option value="ringan" {{ request('kategori_servis') == 'ringan' ? 'selected' : '' }}>Ringan</option>
+                    <option value="sedang" {{ request('kategori_servis') == 'sedang' ? 'selected' : '' }}>Sedang</option>
+                    <option value="berat" {{ request('kategori_servis') == 'berat' ? 'selected' : '' }}>Berat</option>
+                </select>
+            </div>
+            {{-- Filter Status Dp --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status Dp</label>
+                <select name="status_dp"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="sudah lunas" {{ request('status_dp') == 'sudah lunas' ? 'selected' : '' }}>Sudah Lunas</option>
+                    <option value="belum lunas" {{ request('status_dp') == 'belum lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                </select>
+            </div>
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition font-medium">
+                    Cari
+                </button>
+                <a href="{{ route('admin.booking.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{{-- Info Badge Filter Aktif --}}
+@if(request('search') || request('kategori_servis') || request('status_deposit'))
+    <div class="mb-4 text-sm text-gray-600">
+        Menampilkan hasil filter
+        @if(request('search')) Nama <span class="font-semibold text-gray-800">"{{ request('search') }}"</span> @endif
+        @if(request('kategori_servis')) Kategori <span class="font-semibold text-gray-800">{{ ucfirst(request('kategori_servis')) }}</span> @endif
+        @if(request('status_dp')) Deposit <span class="font-semibold text-gray-800">{{ ucfirst(request('status_dp')) }}</span> @endif
+    </div>
+@endif
+
 {{-- TABLE --}}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
@@ -38,10 +95,10 @@
                     <th class="px-5 py-5 text-center">Kode Booking</th>
                     <th class="px-5 py-5 text-center">Pelanggan</th>
                     <th class="px-5 py-5 text-center">Tgl Booking</th>
-                    <th class="px-5 py-5 text-center">Merk / Tipe</th>
+                    <th class="px-5 py-5 text-center">Merk/Tipe</th>
                     <th class="px-5 py-5 text-center">Kategori</th>
-                    <th class="px-5 py-5 text-center">Deposit</th>
-                    <th class="px-5 py-5 text-center">Status</th>
+                    <th class="px-5 py-5 text-center">Status Dp</th>
+                    <th class="px-5 py-5 text-center">Status Booking</th>
                     <th class="px-5 py-5 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -68,13 +125,13 @@
                                 {{ ucfirst($b->kategori_servis) }}
                             </span>
                         </td>
-                        <td class="px-5 py-5 text-center ">
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                {{ $b->status_deposit == 'sudah lunas'
+                        <td class="px-5 py-5 text-center">
+                            <span class="px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap
+                                {{ $b->status_dp == 'sudah lunas'
                                     ? 'bg-green-100 text-green-700'
                                     : 'bg-red-100 text-red-700'
                                 }}">
-                                {{ ucfirst($b->status_deposit) }}
+                                {{ ucfirst($b->status_dp) }}
                             </span>
                         </td>
 
@@ -94,6 +151,23 @@
                         
                         <td class="px-5 py-5 text-center">
                             <div class="flex items-center justify-center gap-2">
+                                {{-- Tombol Setuju (Hanya muncul jika pending DAN sudah lunas) --}}
+                                @if($b->status_booking == 'pending' && $b->status_dp == 'sudah lunas')
+                                    <!-- Hapus onsubmit, tambahkan class 'form-setuju' -->
+                                    <form action="{{ route('admin.booking.terima', $b->id_booking) }}" 
+                                          method="POST" 
+                                          class="form-setuju inline-block m-0">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all"
+                                                title="Setujui Booking">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
                                 {{-- Tombol Detail --}}
                                 <a href="{{ route('admin.booking.show', $b->id_booking) }}"
                                     class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all" 
@@ -114,8 +188,7 @@
                                 {{-- Tombol Delete --}}
                                 <form action="{{ route('admin.booking.destroy', $b->id_booking) }}" 
                                     method="POST"
-                                    onsubmit="return confirm('Yakin ingin menghapus booking ini?')" 
-                                    class="inline-block m-0">
+                                    class="form-hapus inline-block m-0">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -144,7 +217,56 @@
 
 {{-- PAGINATION --}}
 <div class="mt-5">
-    {{ $booking->links() }}
+    {{ $booking->appends(request()->query())->links() }}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        // 1. LOGIKA UNTUK TOMBOL SETUJU
+        const formsSetuju = document.querySelectorAll('.form-setuju');
+        formsSetuju.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Status booking akan diubah menjadi 'Diterima'!",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Setujui!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // 2. LOGIKA UNTUK TOMBOL HAPUS
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Tahan submit asli
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data booking ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+    });
+</script>
 
 @endsection

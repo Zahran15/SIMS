@@ -13,20 +13,17 @@ class NotifServisSelesai extends Notification
     protected $namaPelanggan;
     protected $perangkat;
 
-    // Ambil data dari Controller
     public function __construct($namaPelanggan, $perangkat)
     {
         $this->namaPelanggan = $namaPelanggan;
         $this->perangkat = $perangkat;
     }
 
-    // Aktifkan channel 'mail' saja
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    // Atur Struktur dan Isi Email
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)

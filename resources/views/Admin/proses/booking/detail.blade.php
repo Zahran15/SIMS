@@ -101,19 +101,19 @@
         {{-- BLOK 3: METODE & STATUS PENGAJUAN --}}
         <div class="bg-white rounded border border-gray-200 shadow-sm">
             <div class="px-4 py-2 border-b bg-gray-50">
-                <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Status Pengambilan & Deposit</h3>
+                <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Status Pengambilan & Dp</h3>
             </div>
 
             <div class="p-4 grid grid-cols-3 gap-4 text-xs">
                 <div>
-                    <span class="text-gray-400 block">Metode Pengambilan</span>
+                    <span class="text-gray-400 block">Metode Pengembalian Unit</span>
                     <span class="text-gray-800 font-bold uppercase tracking-wide text-sm block mt-0.5">
-                        {{ $booking->metode_pengambilan }}
+                        {{ $booking->metode_pengembalian }}
                     </span>
                 </div>
                 <div>
-                    <span class="text-gray-400 block mb-1">Status Deposit</span>
-                    @if($booking->status_deposit == 'sudah lunas')
+                    <span class="text-gray-400 block mb-1">Status Dp</span>
+                    @if($booking->status_dp == 'sudah lunas')
                         <span class="px-2 py-0.5 rounded font-bold bg-green-100 text-green-800 border border-green-200 uppercase">
                             Lunas
                         </span>

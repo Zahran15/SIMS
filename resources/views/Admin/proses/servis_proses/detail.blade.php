@@ -44,7 +44,7 @@
                 </div>
                 <div>
                     <span class="text-gray-400 block">Perkiraan Selesai</span>
-                    <span class="text-gray-800 font-semibold">{{ $servis->perkiraan_selesai ?? '-' }}</span>
+                    <span class="text-gray-800 font-semibold">{{ date('d M Y', strtotime($servis->perkiraan_selesai)) }}</span>
                 </div>
             </div>
             

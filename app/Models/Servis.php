@@ -8,7 +8,6 @@ class Servis extends Model
 {
     protected $table = 'servis';
     protected $primaryKey = 'id_servis';
-
     protected $fillable = [
         'id_booking',
         'kode_servis',

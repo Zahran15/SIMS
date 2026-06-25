@@ -30,7 +30,7 @@
 @php
 $stats = [
     ['title'=>'Booking Baru', 'total' => $totalBookingBaru, 'icon'=>'fa-clipboard-list', 'color'=>'emerald', 'label' => 'Perlu Konfirmasi'],
-    ['title'=>'Verifikasi Deposit', 'total' => $totalVerifikasiDeposit, 'icon'=>'fa-receipt', 'color'=>'blue', 'label' => 'Cek Pembayaran'],
+    ['title'=>'Verifikasi Dp', 'total' => $totalVerifikasiDp, 'icon'=>'fa-receipt', 'color'=>'blue', 'label' => 'Cek Pembayaran'],
     ['title'=>'Dalam Proses', 'total' => $totalDalamProses, 'icon'=>'fa-tools', 'color'=>'amber', 'label' => 'Sedang Dikerjakan'],
     ['title'=>'Siap Diambil', 'total' => $totalSiapDiambil, 'icon'=>'fa-box-open', 'color'=>'indigo', 'label' => 'Selesai Servis'],
 ];
@@ -41,15 +41,9 @@ $stats = [
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all group">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-[10px] uppercase text-gray-400 font-extrabold tracking-wider mb-1">
-                    {{ $stat['title'] }}
-                </p>
-                <h3 class="text-3xl font-black text-gray-800 group-hover:text-{{ $stat['color'] }}-600 transition-colors">
-                    {{ $stat['total'] }}
-                </h3>
-                <span class="text-[9px] font-bold text-{{ $stat['color'] }}-500 bg-{{ $stat['color'] }}-50 px-2 py-0.5 rounded uppercase mt-2 block w-max">
-                    {{ $stat['label'] }}
-                </span>
+                <p class="text-[10px] uppercase text-gray-400 font-extrabold tracking-wider mb-1">{{ $stat['title'] }}</p>
+                <h3 class="text-3xl font-black text-gray-800 group-hover:text-{{ $stat['color'] }}-600 transition-colors">{{ $stat['total'] }}</h3>
+                <span class="text-[9px] font-bold text-{{ $stat['color'] }}-500 bg-{{ $stat['color'] }}-50 px-2 py-0.5 rounded uppercase mt-2 block w-max">{{ $stat['label'] }}</span>
             </div>
             <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-{{ $stat['color'] }}-50 transition-colors">
                 <i class="fas {{ $stat['icon'] }} text-{{ $stat['color'] }}-500 text-xl"></i>

@@ -15,18 +15,18 @@ class DashboardController extends Controller
     {
         if (Auth::user()->role !== 'admin') {abort(403, 'Anda tidak memiliki akses ke halaman ini.');}
         $totalBookingBaru = Booking::where('status_booking', 'pending')->count();
-        $totalVerifikasiDeposit = Booking::where('status_deposit', 'belum lunas')->count();
+        $totalVerifikasiDp = Booking::where('status_dp', 'belum lunas')->count();
         $totalDalamProses = Servis::where('status_servis', 'proses')->count();
         $totalSiapDiambil = Servis::whereIn('status_servis', ['selesai', 'bisa diambil', 'sudah diambil'])->count();
-        $bookings = Booking::latest()->take(5)->get();
-        return view('admin.dashboard.index', compact('totalBookingBaru', 'totalVerifikasiDeposit', 'totalDalamProses', 'totalSiapDiambil', 'bookings'));
+        $bookings = Booking::where('status_booking', 'pending')->latest()->take(5)->get();        
+        return view('admin.dashboard.index', compact('totalBookingBaru', 'totalVerifikasiDp', 'totalDalamProses', 'totalSiapDiambil', 'bookings'));
     }
 
     public function owner()
     {
         if (Auth::user()->role !== 'owner') {abort(403, 'Anda tidak memiliki akses ke halaman ini.');}
         $totalPendapatan = Pembayaran::where('status_pembayaran', 'sukses')->sum('nominal');
-        $depositMasuk = Pembayaran::where('jenis_pembayaran', 'deposit')->where('status_pembayaran', 'sukses')->sum('nominal');
+        $dpMasuk = Pembayaran::where('jenis_pembayaran', 'dp')->where('status_pembayaran', 'sukses')->sum('nominal');
         $totalPelunasan = Pembayaran::where('jenis_pembayaran', 'pelunasan')->where('status_pembayaran', 'sukses')->sum('nominal');
         $pembayaranPending = Pembayaran::where('status_pembayaran', 'pending')->count();
         $pembayaran_terbaru = Pembayaran::with(['booking.pelanggan', 'servis'])->where('status_pembayaran', 'sukses')->latest('tanggal_bayar')->take(5)->get();
@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $pendapatan_per_bulan = Pembayaran::where('status_pembayaran', 'sukses')->whereYear('tanggal_bayar', $tahun_ini)->select(DB::raw('MONTH(tanggal_bayar) as bulan'),DB::raw('SUM(nominal) as total'))->groupBy('bulan')->pluck('total', 'bulan')->toArray();
         $data_chart_owner = [];for ($i = 1; $i <= 12; $i++) {
         $data_chart_owner[] = isset($pendapatan_per_bulan[$i]) ? (float)$pendapatan_per_bulan[$i] : 0;}
-        return view('owner.dashboard.index', compact('totalPendapatan', 'depositMasuk', 'totalPelunasan', 'pembayaranPending','pembayaran_terbaru','data_chart_owner'));
+        return view('owner.dashboard.index', compact('totalPendapatan', 'dpMasuk', 'totalPelunasan', 'pembayaranPending','pembayaran_terbaru','data_chart_owner'));
     }  
 
     public function teknisi()

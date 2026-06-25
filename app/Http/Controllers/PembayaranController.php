@@ -100,14 +100,13 @@ class PembayaranController extends Controller
                 'items' => [
                     [
                         'id' => $pembayaran->id_pembayaran,
-                        'name' => $pembayaran->jenis_pembayaran == 'deposit'
-                            ? 'Deposit Booking Servis'
+                        'name' => $pembayaran->jenis_pembayaran == 'dp'
+                            ? 'Dp Booking Servis'
                             : 'Pelunasan Servis Laptop',
                         'price' => $pembayaran->nominal,
                         'quantity' => 1
                     ]
                 ],
-
                 'finish_url' => route('pelanggan.pembayaran.detail', $pembayaran->id_pembayaran)
             ]);
 
@@ -150,15 +149,13 @@ class PembayaranController extends Controller
             'tanggal_bayar' => now()
         ]);
     
-        if ($pembayaran->jenis_pembayaran == 'deposit') {
-    
+        if ($pembayaran->jenis_pembayaran == 'dp') {
             $pembayaran->booking->update([
-                'status_deposit' => 'sudah lunas'
+                'status_dp' => 'sudah lunas'
             ]);
         } 
     
-        if (
-            $pembayaran->jenis_pembayaran == 'pelunasan' &&
+        if ($pembayaran->jenis_pembayaran == 'pelunasan' &&
             $pembayaran->servis
         ) {
     
@@ -173,10 +170,21 @@ class PembayaranController extends Controller
         ]);
     }
 
-    public function indexAdmin()
+    public function indexAdmin(Request $request)
     {
-        // Mengambil semua pembayaran milik seluruh pelanggan
-        $pembayaran = Pembayaran::with(['booking.pelanggan', 'servis'])->latest()->paginate(10);
+        $query = Pembayaran::query();
+        if ($request->has('search') && $request->search != '') {
+            $query->whereHas('booking.pelanggan', function($q) use ($request) {
+                $q->where('nama', 'LIKE', $request->search . '%');
+            });
+        }
+        if ($request->has('jenis_pembayaran') && $request->jenis_pembayaran != '') {
+        $query->where('jenis_pembayaran', $request->jenis_pembayaran);
+        }
+        if ($request->has('status_pembayaran') && $request->status_pembayaran != '') {
+            $query->where('status_pembayaran', $request->status_pembayaran);
+        }
+        $pembayaran = $query->with(['booking.pelanggan', 'servis'])->latest()->paginate(10);
         return view('admin.proses.pembayaran.index', compact('pembayaran'));
     }
 
@@ -195,7 +203,6 @@ class PembayaranController extends Controller
     public function updateAdmin(Request $request, $id)
     {
         $pembayaran = Pembayaran::findOrFail($id);
-
         DB::beginTransaction();
         try {
             if ($request->metode_pembayaran == 'cash') {
@@ -206,17 +213,14 @@ class PembayaranController extends Controller
                     'midtrans_order_id' => null,
                     'tanggal_bayar'     => now(),
                 ]);
-                // Sinkronisasi status deposit booking jika jenisnya deposit
-                if ($pembayaran->jenis_pembayaran == 'deposit') {
-                    $pembayaran->booking->update(['status_deposit' => 'sudah lunas']);
+                if ($pembayaran->jenis_pembayaran == 'dp') {
+                    $pembayaran->booking->update(['status_dp' => 'sudah lunas']);
                 }
-                // Sinkronisasi status servis jika jenisnya pelunasan
                 if ($pembayaran->jenis_pembayaran == 'pelunasan' && $pembayaran->servis) {
                     $pembayaran->servis->update(['status_pelunasan' => 'sudah lunas', 'status_servis' => 'bisa diambil']);
                 }
                 } else {
-                // Jika admin mengembalikan ke mode midtrans (opsional)
-                $pembayaran->update(['metode_pembayaran' => 'midtrans','status_pembayaran' => 'pending','tanggal_bayar' => null]);
+                $pembayaran->update(['metode_pembayaran' => 'transfer','status_pembayaran' => 'pending','tanggal_bayar' => null]);
             }
 
             DB::commit();

@@ -21,7 +21,6 @@
         <form action="{{ route('pelanggan.booking.update', $booking->id_booking) }}" method="POST">
             @csrf
             @method('PUT')
-
             <div class="p-6 space-y-6 bg-gray-50">
                 {{-- DATA BOOKING --}}
                 <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
@@ -58,16 +57,16 @@
                     <div class="mt-5 flex flex-col">
                         <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Kategori Estimasi Kerusakan</label>
                         <select name="kategori_servis" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none bg-white transition-all">
-                            <option value="ringan" {{ $booking->kategori_servis == 'ringan' ? 'selected' : '' }}>Ringan (Install OS, Ganti RAM, Keyboard, Kebersihan)</option>
-                            <option value="sedang" {{ $booking->kategori_servis == 'sedang' ? 'selected' : '' }}>Sedang (Ganti LCD, Ganti Baterai, Engsel)</option>
-                            <option value="berat" {{ $booking->kategori_servis == 'berat' ? 'selected' : '' }}>Berat (Mati Total, Short Motherboard, Chipset)</option>
+                            <option value="ringan" {{ $booking->kategori_servis == 'ringan' }}>Ringan (Install OS, Ganti RAM, Keyboard, Kebersihan)</option>
+                            <option value="sedang" {{ $booking->kategori_servis == 'sedang' }}>Sedang (Ganti LCD, Ganti Baterai, Engsel)</option>
+                            <option value="berat" {{ $booking->kategori_servis == 'berat' }}>Berat (Mati Total, Short Motherboard, Chipset)</option>
                         </select>
                     </div>
                     <div class="mt-5 flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Metode Penyerahan Unit</label>
-                        <select name="metode_pengambilan" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none bg-white transition-all">
-                            <option value="diantar" {{ $booking->metode_pengambilan == 'diantar' ? 'selected' : '' }}>Diantar</option>
-                            <option value="ambil sendiri" {{ $booking->metode_pengambilan == 'ambil sendiri' ? 'selected' : '' }}>Ambil Sendiri</option>
+                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Metode Pengembalian Unit</label>
+                        <select name="metode_pengembalian" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none bg-white transition-all">
+                            <option value="diantar" {{ $booking->metode_pengembalian == 'diantar' }}>Diantar Kurir</option>
+                            <option value="ambil sendiri" {{ $booking->metode_pengembalian == 'ambil sendiri' }}>Ambil Sendiri</option>
                         </select>
                     </div>
                     <div class="flex flex-col mt-5">

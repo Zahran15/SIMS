@@ -42,9 +42,9 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Transaksi</label>
                         <select name="status_pengadaan" required class="w-full border border-gray-200 rounded-xl p-3 bg-white outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 cursor-pointer">
                             <option value="" disabled>-- Pilih Status --</option>
-                            <option value="dipesan" {{ $pengadaan->status_pengadaan == 'dipesan' ? 'selected' : '' }}>DIPESAN</option>
-                            <option value="diterima" {{ $pengadaan->status_pengadaan == 'diterima' ? 'selected' : '' }}>DITERIMA</option>
-                            <option value="ditolak" {{ $pengadaan->status_pengadaan == 'ditolak' ? 'selected' : '' }}>DITOLAK</option>
+                            <option value="dipesan" {{ $pengadaan->status_pengadaan == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
+                            <option value="diterima" {{ $pengadaan->status_pengadaan == 'diterima' ? 'selected' : '' }}>Diterima</option>
+                            <option value="dibatalkan" {{ $pengadaan->status_pengadaan == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                         </select>
                     </div>
                 </div>

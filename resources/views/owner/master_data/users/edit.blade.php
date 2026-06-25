@@ -66,6 +66,13 @@
                     @endif
                 </div>
 
+                {{-- Kolom Password Baru (Tambahan) --}}
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Password Baru</label>
+                    <input type="password" name="password" placeholder="••••••••" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100">
+                    <p class="text-xs text-gray-400 mt-1.5">*Kosongkan jika tidak ingin mengubah password.</p>
+                </div>
+
                 {{-- Status Akun --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">

@@ -9,18 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('request_sparepart', function (Blueprint $table) {
-            $table->id('id_request');
-            $table->foreignId('id_penugasan')->constrained('penugasan_teknisi', 'id_penugasan')->cascadeOnDelete();
-            $table->foreignId('id_sparepart')->constrained('sparepart', 'id_sparepart')->cascadeOnDelete();
-            $table->integer('jumlah');
-            $table->text('alasan');
-            $table->enum('status_request', ['pending', 'disetujui', 'ditolak'])->default('pending');
-            $table->timestamps();
-        });
-    }
+public function up(): void
+{
+    Schema::create('request_sparepart', function (Blueprint $table) {
+        $table->id('id_request');
+        $table->foreignId('id_penugasan')->constrained('penugasan_teknisi', 'id_penugasan')->cascadeOnDelete();
+        $table->foreignId('id_sparepart')->constrained('sparepart', 'id_sparepart')->cascadeOnDelete();
+        $table->integer('jumlah');
+        $table->text('alasan');
+        $table->enum('status_request',['pending_admin', 'dikirim_ke_pelanggan', 'disetujui_pelanggan', 'disetujui', 'ditolak'])->default('pending_admin');
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

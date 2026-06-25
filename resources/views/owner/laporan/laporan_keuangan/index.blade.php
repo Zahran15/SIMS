@@ -15,7 +15,7 @@
 @php
 $stats = [
     ['title' => 'Total Pendapatan', 'total' => 'Rp ' . number_format($total_pendapatan, 0, ',', '.'), 'icon' => 'fa-money-bill-wave', 'color' => 'green', 'label' => 'Total Bersih'],
-    ['title' => 'Total Deposit Masuk', 'total' => 'Rp ' . number_format($total_deposit, 0, ',', '.'), 'icon' => 'fa-wallet', 'color' => 'purple', 'label' => 'Uang Muka/DP'],
+    ['title' => 'Total Dp Masuk', 'total' => 'Rp ' . number_format($total_dp, 0, ',', '.'), 'icon' => 'fa-wallet', 'color' => 'purple', 'label' => 'Uang Muka/DP'],
     ['title' => 'Total Pelunasan', 'total' => 'Rp ' . number_format($total_pelunasan, 0, ',', '.'), 'icon' => 'fa-hand-holding-usd', 'color' => 'blue', 'label' => 'Sisa Pembayaran'],
     ['title' => 'Pembayaran Pending', 'total' => $pembayaran_pending . ' Transaksi', 'icon' => 'fa-hourglass-start', 'color' => 'amber', 'label' => 'Belum Bayar'],
 ];
@@ -65,7 +65,7 @@ $stats = [
                     </tr>
                 </thead>
                 <tbody class="text-sm text-gray-700">
-                    @forelse ($detail_pemasukan as $dp)
+                    @forelse ($pembayaran_paginated as $dp)
                         <tr class="border-b hover:bg-gray-50 transition">
                             <td class="px-6 py-4 text-center">{{ $dp->tanggal }}</td>
                             <td class="px-6 py-4 text-center font-semibold text-gray-900">{{ $dp->kode_servis }}</td>
@@ -73,7 +73,7 @@ $stats = [
                             <td class="px-6 py-4 text-center uppercase font-medium">{{ $dp->jenis_pembayaran }}</td>
                             <td class="px-6 py-4 text-center font-bold">Rp {{ number_format($dp->nominal, 0, ',', '.') }}</td>
                             <td class="px-6 py-4 text-center uppercase">
-                                <span class="px-2 py-0.5 rounded text-xs {{ $dp->metode_pembayaran == 'cash' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                                <span class="px-2 py-0.5 rounded text-medium {{ $dp->metode_pembayaran == 'cash' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
                                     {{ $dp->metode_pembayaran }}
                                 </span>
                             </td>
@@ -94,9 +94,14 @@ $stats = [
                 </tbody>
             </table>
         </div>
+        
+        {{-- TOMBOL NAVIGASI NEXT / PREVIOUS (PEMASUKAN) --}}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            {{ $pembayaran_paginated->links() }}
+        </div>
     </div>
 
-    {{-- DETAIL PENGELUARAN --}}
+{{-- DETAIL PENGELUARAN --}}
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200 mb-8">
         <div class="bg-orange-500 px-6 py-3">
             <h3 class="text-white text-md font-bold uppercase tracking-wider">
@@ -115,7 +120,8 @@ $stats = [
                     </tr>
                 </thead>
                 <tbody class="text-sm text-gray-700">
-                    @forelse ($detail_pengeluaran as $dk)
+                    {{-- Ganti ke $pengadaan_paginated --}}
+                    @forelse ($pengadaan_paginated as $dk)
                         <tr class="border-b hover:bg-gray-50 transition">
                             <td class="px-6 py-4 text-center">{{ $dk->tanggal }}</td>
                             <td class="px-6 py-4 text-center font-semibold text-gray-900">{{ $dk->nama_sparepart }}</td>
@@ -130,6 +136,11 @@ $stats = [
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- TOMBOL NAVIGASI NEXT / PREVIOUS (PENGELUARAN) --}}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            {{ $pengadaan_paginated->links() }}
         </div>
     </div>
 

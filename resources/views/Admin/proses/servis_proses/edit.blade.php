@@ -3,11 +3,10 @@
 @section('title', 'Edit Servis')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto">
     {{-- HEADER --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Edit Servis</h2>
+            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Edit Servis</h2>
             <p class="text-gray-500 mt-1 flex items-center">
                 <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                 Manajemen pembaruan status dan rincian servis pelanggan
@@ -48,10 +47,20 @@
                             <input type="text" value="{{ $servis->kode_servis }}" readonly
                                 class="w-full border-none bg-blue-50 text-blue-700 font-mono font-bold rounded-2xl p-4 ring-1 ring-blue-100">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Perkiraan Selesai</label>
-                            <input type="date" name="perkiraan_selesai" value="{{ $servis->perkiraan_selesai }}"
-                                class="w-full border border-gray-200 rounded-2xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Estimasi Selesai (Bisa Diedit Admin)</label>
+                            {{-- Input date aktif kembali agar admin bisa memilih tanggal --}}
+                            <input type="date" name="perkiraan_selesai" 
+                                   value="{{ $servis->perkiraan_selesai ? \Carbon\Carbon::parse($servis->perkiraan_selesai)->format('Y-m-d') : '' }}" 
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            {{-- Teks info pembantu untuk contek tanggal teknisi --}}
+                            <p class="text-xs text-gray-500 mt-2 bg-orange-50 px-3 py-1.5 rounded border border-orange-200">
+                                <i class="fas fa-info-circle text-orange-500 mr-1"></i>
+                                <strong>Info dari Teknisi:</strong> Estimasi selesai yang diajukan teknisi adalah 
+                                <span class="font-bold text-orange-700">
+                                    {{ $servis->penugasan->estimasi_selesai ? \Carbon\Carbon::parse($servis->penugasan->estimasi_selesai)->format('d-m-Y') : 'Belum ditentukan oleh teknisi' }}
+                                </span>
+                            </p>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Status Servis</label>
@@ -95,7 +104,7 @@
                                 <p class="text-sm text-gray-500 mt-1">{{ $servis->booking->pelanggan->no_hp }}</p>
                             </div>
                             <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Kendaraan / Unit</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Merk/Tipe</p>
                                 <p class="text-lg font-bold text-gray-800">{{ $servis->booking->merk_tipe }}</p>
                                 <p class="text-sm text-gray-500 mt-1">Tgl Masuk: {{ \Carbon\Carbon::parse($servis->tgl_masuk)->format('d M Y') }}</p>
                             </div>

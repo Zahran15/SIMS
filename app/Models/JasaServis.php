@@ -8,7 +8,6 @@ class JasaServis extends Model
 {
     protected $table = 'jasa_servis';
     protected $primaryKey = 'id_jasa';
-
     protected $fillable = [
         'nama_jasa',
         'harga'

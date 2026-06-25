@@ -21,12 +21,59 @@
         </div>
     @endif
 
+{{-- FILTER & SEARCH SERVIS SELESAI --}}
+    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+        <form action="{{ route('admin.servis_selesai.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+                
+                {{-- Input Pencarian Nama Pelanggan --}}
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                        placeholder="Masukkan nama pelanggan..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                </div>
+
+                {{-- Filter Status Servis Selesai --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status_servis"
+                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[180px] text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="selesai" {{ request('status_servis') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        <option value="bisa diambil" {{ request('status_servis') == 'bisa diambil' ? 'selected' : '' }}>Bisa Diambil</option>
+                        <option value="sudah diambil" {{ request('status_servis') == 'sudah diambil' ? 'selected' : '' }}>Sudah Diambil</option>
+                    </select>
+                </div>
+
+                {{-- Tombol Aksi --}}
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition font-medium">
+                        Cari
+                    </button>
+                    <a href="{{ route('admin.servis_selesai.index') }}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+        {{-- Info Badge Filter Aktif --}}
+    @if(request('search') || request('status_servis'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
+            <span>Filter aktif:</span>
+            @if(request('search')) <span class="font-semibold text-gray-800">Pelanggan: "{{ request('search') }}"</span> @endif
+            @if(request('status_servis')) <span class="font-semibold text-gray-800">Status: {{ ucfirst(request('status_servis')) }}</span> @endif
+        </div>
+    @endif
+
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
-
             <table class="w-full text-sm text-left text-gray-600">
-
                 {{-- HEAD --}}
                 <thead class="bg-green-600 text-white uppercase text-xs">
                     <tr>
@@ -106,7 +153,7 @@
 
     {{-- PAGINATION --}}
     <div class="mt-5">
-        {{ $servis->links() }}
+        {{ $servis->appends(request()->query())->links() }}
     </div>
 
 </div>

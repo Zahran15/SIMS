@@ -37,7 +37,7 @@
                     <th class="px-5 py-5 text-center">Tgl Booking</th>
                     <th class="px-5 py-5 text-center">Merk / Tipe</th>
                     <th class="px-5 py-5 text-center">Kategori</th>
-                    <th class="px-5 py-5 text-center">Deposit</th>
+                    <th class="px-5 py-5 text-center">Dp</th>
                     <th class="px-5 py-5 text-center">Status</th>
                     <th class="px-5 py-5 text-center">Aksi</th>
                 </tr>
@@ -66,11 +66,11 @@
                         </td>
                         <td class="px-5 py-5 text-center">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                {{ $b->status_deposit == 'sudah lunas'
+                                {{ $b->status_dp == 'sudah lunas'
                                     ? 'bg-green-100 text-green-700'
                                     : 'bg-red-100 text-red-700'
                                 }}">
-                                {{ ucfirst($b->status_deposit) }}
+                                {{ ucfirst($b->status_dp) }}
                             </span>
                         </td>
 
@@ -126,8 +126,6 @@
                                             </svg>
                                         </button>
                                     </form>
-                                @else
-                                    <span class="text-xs text-gray-400 italic">Terkunci</span>
                                 @endif
                             </div>
                         </td>

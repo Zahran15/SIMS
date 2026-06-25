@@ -10,11 +10,33 @@ use App\Models\User;
 class PenugasanTeknisiController extends Controller
 {
     // 🔹 LIST SERVIS YANG BELUM ADA TEKNISI
-    public function index()
-    {
-        $servis = Servis::with('booking', 'penugasan')->latest()->paginate(10);
-        return view('admin.proses.penugasan.index', compact('servis'));
+public function index(Request $request)
+{
+    $query = Servis::query();
+    if ($request->has('search') && $request->search != '') {
+        $query->whereHas('booking.pelanggan', function($q) use ($request) {
+            $q->where('nama', 'LIKE', $request->search . '%');
+        });
     }
+    if ($request->has('id_teknisi') && $request->id_teknisi != '') {
+        $query->whereHas('penugasan', function($q) use ($request) {
+            $q->where('id_user', $request->id_teknisi); 
+        });
+    }
+    if ($request->has('status_penugasan') && $request->status_penugasan != '') {
+        $query->whereHas('penugasan', function($q) use ($request) {
+            $q->where('status_penugasan', $request->status_penugasan);
+        });
+    }
+    if ($request->has('prioritas') && $request->prioritas != '') {
+        $query->whereHas('penugasan', function($q) use ($request) {
+            $q->where('prioritas', $request->prioritas);
+        });
+    }
+    $servis = $query->with(['booking.pelanggan', 'penugasan.teknisi'])->latest()->paginate(10);
+    $list_teknisi = User::where('role', 'teknisi')->get();
+    return view('admin.proses.penugasan.index', compact('servis', 'list_teknisi'));
+}
 
     // 🔹 FORM PILIH TEKNISI
     public function create($id_servis)
@@ -30,14 +52,13 @@ class PenugasanTeknisiController extends Controller
         $request->validate([
             'id_servis' => 'required',
             'id_user' => 'required',
-            'prioritas' => 'required',
-            'status_penugasan' => 'required'
+            'status_penugasan' => 'required',
+            'estimasi_selesai' => 'nullable|date',
         ]);
 
         PenugasanTeknisi::create([
             'id_servis' => $request->id_servis,
             'id_user' => $request->id_user,
-            'prioritas' => $request->prioritas,
             'estimasi_selesai' => $request->estimasi_selesai,
             'status_penugasan' => $request->status_penugasan,
             'catatan_teknisi' => $request->catatan_teknisi

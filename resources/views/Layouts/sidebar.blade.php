@@ -221,6 +221,7 @@
                         <a href="/pelanggan/booking" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Booking Servis</a>
                         <a href="/pelanggan/status_servis" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Cek Status</a>
                         <a href="/pelanggan/pembayaran" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Pembayaran</a>
+                        <a href="/pelanggan/request_sparepart" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Request Sparepart</a>
                         <a href="/pelanggan/riwayat_servis" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Riwayat Servis</a>
                     </div>
                 </div>

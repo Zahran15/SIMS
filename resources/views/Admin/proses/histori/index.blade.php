@@ -50,11 +50,9 @@
                 <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white font-medium text-sm rounded-xl hover:bg-blue-700 transition-all shadow-sm">
                     Cari
                 </button>
-                @if(request('bulan') || request('tahun'))
-                    <a href="{{ url()->current() }}" class="w-full sm:w-auto px-5 py-2.5 bg-gray-100 text-gray-600 font-medium text-sm rounded-xl hover:bg-gray-200 text-center transition-all">
-                        Reset
-                    </a>
-                @endif
+                <a href="{{ url()->current() }}" class="w-full sm:w-auto px-5 py-2.5 bg-gray-100 text-gray-600 font-medium text-sm rounded-xl hover:bg-gray-200 text-center transition-all block">
+                    Reset
+                </a>
             </div>
         </form>
     </div>

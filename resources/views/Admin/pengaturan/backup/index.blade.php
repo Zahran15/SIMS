@@ -3,8 +3,6 @@
 @section('title', 'Backup Data')
 
 @section('content')
-<div class="p-6">
-    <div class="max-w-4xl mx-auto">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-800">Pusat Cadangan Data (Backup)</h1>
             <p class="text-gray-600">Amankan data database dan source code aplikasi secara berkala.</p>
@@ -61,6 +59,4 @@
                 </a>
             </div>
         </div>
-    </div>
-</div>
 @endsection

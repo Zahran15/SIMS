@@ -31,6 +31,9 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::get('/register', [AuthController::class, 'showRegister']);
 Route::post('/register', [AuthController::class, 'registerPelanggan']);
 Route::get('/logout', [AuthController::class, 'logout']);
+Route::get('/reset', [AuthController::class, 'showResetForm'])->name('password.request');
+Route::post('/send-reset-code', [AuthController::class, 'sendResetCode'])->name('password.send_code');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // GROUP UTAMA ADMIN
 Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(function () {
@@ -76,8 +79,9 @@ Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(functi
     // DATA REQUEST SPAREPART ADMIN
     Route::get('/request_sparepart', [RequestSparepartController::class, 'index'])->name('admin.request_sparepart.index');
     Route::get('/request_sparepart/detail/{id}', [RequestSparepartController::class, 'detail'])->name('admin.request_sparepart.detail');
-    Route::post('/request_sparepart/{id}/approve', [RequestSparepartController::class, 'approve'])->name('request.approve');
-    Route::post(' /request_sparepart/{id}/reject', [RequestSparepartController::class, 'reject'])->name('request.reject');
+    Route::post('/request_sparepart/{id}/kirim_pelanggan', [RequestSparepartController::class, 'kirimKePelanggan'])->name('admin.request_sparepart.kirim_pelanggan');
+    Route::post('/request_sparepart/{id}/approve_final', [RequestSparepartController::class, 'approveFinal'])->name('admin.request_sparepart.approve_final');
+    Route::post('/request_sparepart/{id}/reject', [RequestSparepartController::class, 'rejectAdmin'])->name('admin.request_sparepart.reject');
     // DATA BOOKING
     Route::get('/booking', [BookingController::class, 'index'])->name('admin.booking.index');
     Route::get('/booking/tambah', [BookingController::class, 'create'])->name('admin.booking.create'); 
@@ -86,6 +90,7 @@ Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(functi
     Route::put('/booking/update/{id}', [BookingController::class, 'update'])->name('admin.booking.update');
     Route::get('/booking/detail/{id}', [BookingController::class, 'show'])->name('admin.booking.show');
     Route::delete('/booking/delete/{id}', [BookingController::class, 'destroy'])->name('admin.booking.destroy');
+    Route::patch('/booking/{id}/terima', [BookingController::class, 'terima'])->name('admin.booking.terima');
     // AUTO BUAT SERVIS DARI BOOKING
     Route::post('/servis/create_from_booking/{id_booking}', [ServisController::class, 'createFromBooking'])->name('admin.servis.create');
     // DATA PENUGASAN TEKNISI
@@ -187,11 +192,16 @@ Route::middleware(['auth:pelanggan'])->prefix('pelanggan')->group(function () {
     Route::put('/booking/update/{id}', [BookingController::class, 'update'])->name('pelanggan.booking.update');
     Route::get('/booking/detail/{id}', [BookingController::class, 'show'])->name('pelanggan.booking.show'); 
     Route::delete('/booking/delete/{id}', [BookingController::class, 'destroy'])->name('pelanggan.booking.destroy');
-    // PEMBAYARAN MIDTRANS
+    // PEMBAYARAN 
     Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pelanggan.pembayaran.index');
     Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pelanggan.pembayaran.detail');
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'bayar'])->name('pelanggan.pembayaran.bayar');
     Route::post('/pembayaran/{id}/success',[PembayaranController::class, 'success'])->name('pelanggan.pembayaran.success');
+    // REQUEST SPAREPART
+    Route::get('/request_sparepart', [RequestSparepartController::class, 'index'])->name('pelanggan.request_sparepart.index');
+    Route::get('/request_sparepart/detail/{id}', [RequestSparepartController::class, 'detail'])->name('pelanggan.request_sparepart.detail');
+    Route::post('/request_sparepart/{id}/approve', [RequestSparepartController::class, 'approvePelanggan'])->name('pelanggan.request_sparepart.approve');
+    Route::post('/request_sparepart/{id}/reject', [RequestSparepartController::class, 'rejectPelanggan'])->name('pelanggan.request_sparepart.reject');
     // STATUS SERVIS
     Route::get('/status_servis', [ServisStatusController::class, 'index'])->name('pelanggan.servis_status.index');
     Route::get('/status_servis/detail/{id}', [ServisStatusController::class, 'show'])->name('pelanggan.servis_status.detail');

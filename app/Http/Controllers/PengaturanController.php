@@ -55,12 +55,10 @@ class PengaturanController extends Controller
         $zipPath = storage_path($fileName);
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            // Tentukan folder mana yang mau di backup (base_path adalah root project)
             $files = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator(base_path()),
                 RecursiveIteratorIterator::LEAVES_ONLY
             );
-
             foreach ($files as $name => $file) {
                 if (!$file->isDir()) {
                     $filePath = $file->getRealPath();

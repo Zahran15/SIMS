@@ -18,31 +18,51 @@ use Illuminate\Support\Facades\Notification;
 
 class ServisController extends Controller
 {
-    public function prosesindex()
+    public function prosesindex(Request $request)
     {
-        $servis = Servis::with('booking.pelanggan', 'penugasan')->whereIn('status_servis', ['menunggu','proses'])->latest()->paginate(10);
+        $query = Servis::with(['booking.pelanggan', 'penugasan']);
+        if ($request->has('search') && $request->search != '') {
+            $query->whereHas('booking.pelanggan', function($q) use ($request) {
+                $q->where('nama', 'LIKE', '%' . $request->search . '%');
+            });
+        }
+        if ($request->has('status_servis') && $request->status_servis != '') {
+            $query->where('status_servis', $request->status_servis);
+        }
+        $servis = $query->with('booking.pelanggan', 'penugasan')->whereIn('status_servis', ['menunggu','proses'])->latest()->paginate(10);
         return view('admin.proses.servis_proses.index', compact('servis'));
     }
 
-    public function selesaiindex()
+    public function selesaiindex(Request $request)
     {
-        $servis = Servis::with('booking.pelanggan')->whereIn('status_servis', ['selesai','bisa diambil','sudah diambil'])->latest()->paginate(10);
+    // Eager loading relasi utama
+    $query = Servis::with(['booking.pelanggan']);
+    if ($request->has('search') && $request->search != '') {
+        $query->whereHas('booking.pelanggan', function($q) use ($request) {
+            $q->where('nama', 'LIKE', '%' . $request->search . '%');
+        });
+    }
+    if ($request->has('status_servis') && $request->status_servis != '') {
+        $query->where('status_servis', $request->status_servis);
+    }
+        $servis = $query->with('booking.pelanggan')->whereIn('status_servis', ['selesai','bisa diambil','sudah diambil'])->latest()->paginate(10);
         return view('admin.proses.servis_selesai.index', compact('servis'));
     }
 
     // 🔹 AUTO CREATE DARI BOOKING
     public function createFromBooking($id_booking)
     {
-        $booking = Booking::findOrFail($id_booking);
+        $booking = Booking::with('servis.penugasan')->findOrFail($id_booking);
         if ($booking->servis) {
             return back()->with('error', 'Servis sudah dibuat');
         }
         $kode = 'SRV-' . date('Ymd') . '-' . rand(100,999);
+        $estimasiSelesai = $booking->servis->penugasan->estimasi_selesai ?? Carbon::now()->addDays(3); 
         $servis = Servis::create([
             'id_booking' => $booking->id_booking,
             'kode_servis' => $kode,
             'tgl_masuk' => Carbon::now(),
-            'perkiraan_selesai' => Carbon::now()->addDays(3),
+            'perkiraan_selesai' => $estimasiSelesai,
             'status_servis' => 'menunggu',
             'status_pelunasan' => 'belum lunas',
             'total_biaya' => 0
@@ -126,10 +146,7 @@ class ServisController extends Controller
             'penugasan.teknisi',
             'detailJasa.jasa',
             'detailSparepart.sparepart'
-        ])
-        ->whereIn('status_servis', ['selesai', 'bisa diambil', 'sudah diambil'])
-        ->findOrFail($id);
-
+        ])->whereIn('status_servis', ['selesai', 'bisa diambil', 'sudah diambil'])->findOrFail($id);
         return view('admin.proses.servis_selesai.detail', compact('servis'));
     }
 
@@ -138,10 +155,12 @@ class ServisController extends Controller
     {
         $servis = Servis::findOrFail($id);
         $statusLama = $servis->status_servis;
+        $tanggalSelesaiFix = $request->perkiraan_selesai 
+            ? \Carbon\Carbon::parse($request->perkiraan_selesai)->format('Y-m-d') 
+            : $servis->perkiraan_selesai;
         // UPDATE SERVIS
-        $servis->update
-        ([
-            'perkiraan_selesai' => $request->perkiraan_selesai,
+        $servis->update([
+            'perkiraan_selesai' => $tanggalSelesaiFix, 
             'status_servis' => $request->status_servis,
             'status_pelunasan' => $request->status_pelunasan,
         ]);
@@ -189,9 +208,8 @@ class ServisController extends Controller
         $servis->update([
             'total_biaya' => $totalJasa + $totalSparepart
         ]);
-        $namaAktivitas = 'Update Servis';
+        $namaAktivitas = 'Admin: Update Servis';
         if ($statusLama != $request->status_servis) {
-        // Jika statusnya berubah, sesuaikan nama aktivitasnya agar dinamis
         $namaAktivitas = 'Status: ' . ucwords($request->status_servis);
     }
 
@@ -204,44 +222,46 @@ class ServisController extends Controller
     ]);
 
     if ($statusLama != $request->status_servis && in_array($request->status_servis, ['selesai', 'bisa diambil'])) {
-            
-            // Cek ketersediaan data pelanggan
             if ($servis->booking && $servis->booking->pelanggan) {
                 $emailPelanggan = $servis->booking->pelanggan->email;
                 $namaPelanggan  = $servis->booking->pelanggan->nama;
-                
-                // Ambil data nama laptop/perangkat dari table booking
                 $namaPerangkat  = $servis->booking->nama_laptop ?? 'Perangkat Laptop';
-
-                // Eksekusi kirim email menggunakan data asli database
                 try {
-                    Notification::route('mail', $emailPelanggan)
-                                ->notify(new NotifServisSelesai($namaPelanggan, $namaPerangkat));
+                    Notification::route('mail', $emailPelanggan)->notify(new NotifServisSelesai($namaPelanggan, $namaPerangkat));
                 } catch (\Exception $e) {
-                    // Log error jika ingin memantau kegagalan kirim tanpa menghentikan sistem redirect web
                 }
             }
         }
 
-        if(in_array($servis->status_servis, ['selesai', 'bisa diambil', 'sudah diambil']))
-        {
-        if (
-        $statusLama != 'selesai' &&
-        $request->status_servis == 'selesai'
-        ) {
-            $cekPelunasan = Pembayaran::where('id_servis', $servis->id_servis)->where('jenis_pembayaran', 'pelunasan')->first();
-            if (!$cekPelunasan) {
-                Pembayaran::create([
-                    'id_booking'        => $servis->id_booking,
-                    'id_servis'         => $servis->id_servis,
-                    'jenis_pembayaran'  => 'pelunasan',
-                    'metode_pembayaran' => 'midtrans',
-                    'nominal'           => $servis->total_biaya,
-                    'status_pembayaran' => 'pending'
-                ]);
+        if (in_array($servis->status_servis, ['selesai', 'bisa diambil', 'sudah diambil'])) {
+            if ($statusLama != 'selesai' && $request->status_servis == 'selesai') {
+                $cekPelunasan = Pembayaran::where('id_servis', $servis->id_servis)->where('jenis_pembayaran', 'pelunasan')->first();
+                if (!$cekPelunasan) {
+                    // 1. Hitung total DP yang SUKSES dibayar untuk booking ini
+                    $totalDP = Pembayaran::where('id_booking', $servis->id_booking)
+                        ->where('jenis_pembayaran', 'dp')
+                        ->where('status_pembayaran', 'sukses')
+                        ->sum('nominal');
+        
+                    // 2. Nominal pelunasan adalah total biaya dikurangi DP
+                    $nominalPelunasan = $servis->total_biaya - $totalDP;
+        
+                    // 3. Pastikan nominal tidak minus (jika DP lebih besar dari biaya servis karena suatu hal)
+                    if ($nominalPelunasan < 0) {
+                        $nominalPelunasan = 0;
+                    }
+                    Pembayaran::create([
+                        'id_booking'        => $servis->id_booking,
+                        'id_servis'         => $servis->id_servis,
+                        'jenis_pembayaran'  => 'pelunasan',
+                        'metode_pembayaran' => 'transfer', 
+                        'nominal'           => $nominalPelunasan,
+                        'status_pembayaran' => 'pending'
+                    ]);
+                }
             }
+            return redirect()->route('admin.servis_selesai.index')->with('success', 'Servis berhasil diselesaikan');
         }
-            return redirect()->route('admin.servis_selesai.index')->with('success', 'Servis berhasil diselesaikan');}
             return redirect()->route('admin.servis_proses.index')->with('success', 'Servis berhasil diupdate'
         );
     }
@@ -278,5 +298,16 @@ class ServisController extends Controller
         ])->findOrFail($id);
         return view('admin.proses.servis_selesai.tanda_terima', compact('servis')
         );
+    }
+
+    // 🔹 TAMBAHAN HELPER STATIC METHOD UNTUK UPDATE TOTAL BIAYA DARI LUAR CONTROLLER
+    public static function updateTotalBiaya($id_servis)
+    {
+        $servis = Servis::findOrFail($id_servis);
+        $totalJasa = DetailServisJasa::where('id_servis', $id_servis)->sum('subtotal');
+        $totalSparepart = DetailServisSparepart::where('id_servis', $id_servis)->sum('subtotal');
+        $total = $totalJasa + $totalSparepart;
+        $servis->update(['total_biaya' => $total]);
+        return $total;
     }
 }

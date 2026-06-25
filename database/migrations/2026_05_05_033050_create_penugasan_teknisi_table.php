@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('id_penugasan');
             $table->foreignId('id_servis')->constrained('servis', 'id_servis')->cascadeOnDelete();
             $table->foreignId('id_user')->constrained('users', 'id_user')->cascadeOnDelete();
-            $table->enum('prioritas', ['rendah', 'normal', 'tinggi', 'urgent']);
-            $table->date('estimasi_selesai');
+            $table->enum('prioritas', ['ringan', 'sedang', 'berat']);
+            $table->date('estimasi_selesai')->nullable();            
             $table->enum('status_penugasan', ['belum dikerjakan', 'sedang dikerjakan', 'menunggu sparepart', 'selesai', 'gagal']);
             $table->text('catatan_teknisi');
             $table->timestamps();

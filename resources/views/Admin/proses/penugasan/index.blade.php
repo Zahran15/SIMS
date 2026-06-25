@@ -11,6 +11,84 @@
         </div>
     </div>
 
+{{-- FILTER & SEARCH PENUGASAN TEKNISI --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.penugasan.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            {{-- Input Pencarian Nama Pelanggan --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Nama pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+
+            {{-- Filter Teknisi --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Teknisi</label>
+                <select name="id_teknisi"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px] text-sm">
+                    <option value="">Semua Teknisi</option>
+                    @foreach($list_teknisi as $teknisi)
+                        <option value="{{ $teknisi->id_user }}" {{ request('id_teknisi') == $teknisi->id_user ? 'selected' : '' }}>
+                            {{ $teknisi->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Filter Status Penugasan --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status Penugasan</label>
+                <select name="status_penugasan"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="belum dikerjakan" {{ request('status_penugasan') == 'belum dikerjakan' ? 'selected' : '' }}>Belum Dikerjakan</option>
+                    <option value="sedang dikerjakan" {{ request('status_penugasan') == 'sedang dikerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+                    <option value="menunggu sparepart" {{ request('status_penugasan') == 'menunggu sparepart' ? 'selected' : '' }}>Menunggu Sparepart</option>
+                    <option value="selesai" {{ request('status_penugasan') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="gagal" {{ request('status_penugasan') == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                </select>
+            </div>
+
+            {{-- Filter Prioritas --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Prioritas</label>
+                <select name="prioritas"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px] text-sm">
+                    <option value="">Semua Prioritas</option>
+                    <option value="ringan" {{ request('prioritas') == 'ringan' ? 'selected' : '' }}>Ringan</option>
+                    <option value="sedang" {{ request('prioritas') == 'sedang' ? 'selected' : '' }}>Sedang</option>
+                    <option value="berat" {{ request('prioritas') == 'berat' ? 'selected' : '' }}>Berat</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm transition font-medium">
+                    Cari
+                </button>
+                <a href="{{ route('admin.penugasan.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('search') || request('id_teknisi') || request('status_penugasan') || request('prioritas'))
+        <div class="mb-4 text-sm text-gray-600">
+            <span>Filter aktif:</span>
+            @if(request('search')) <span class="font-semibold text-gray-800">Pelanggan: "{{ request('search') }}"</span> @endif
+            @if(request('id_teknisi')) <span class="font-semibold text-gray-800">Teknisi ID: {{ request('id_teknisi') }}</span> @endif
+            @if(request('status_penugasan')) <span class="font-semibold text-gray-800">Status: {{ ucwords(request('status_penugasan')) }}</span> @endif
+            @if(request('prioritas')) <span class="font-semibold text-gray-800">Prioritas: {{ ucfirst(request('prioritas')) }}</span> @endif
+        </div>
+    @endif
+
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">

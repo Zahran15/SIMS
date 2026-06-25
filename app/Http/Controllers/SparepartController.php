@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Auth;
 class SparepartController extends Controller
 {
     // 🔹 TAMPIL DATA
-    public function index()
+    public function index(Request $request)
     {
-        $sparepart = Sparepart::latest()->paginate(10);
+        $query = Sparepart::query();
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        $sparepart = $query->paginate(10);
         $role = Auth::user()->role; 
         if ($role == 'admin') {
             return view('admin.master_data.sparepart.index', compact('sparepart', 'role'));

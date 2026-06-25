@@ -43,6 +43,70 @@ $user_stats = [
     @endforeach
 </div>
 
+{{-- FILTER & SEARCH USER --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('owner.users.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            
+            {{-- Input Pencarian Nama --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Nama</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Masukkan nama..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            
+            {{-- Filter Role --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <select name="role"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                    <option value="">Semua Role</option>
+                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="owner" {{ request('role') == 'owner' ? 'selected' : '' }}>Owner</option>
+                    <option value="teknisi" {{ request('role') == 'teknisi' ? 'selected' : '' }}>Teknisi</option>
+                </select>
+            </div>
+
+            {{-- Filter Status --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                    Cari
+                </button>
+
+                <a href="{{ route('owner.users.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{{-- Info Badge Filter Aktif --}}
+@if(request('search') || request('role') || request('status'))
+    <div class="mb-4 text-sm text-gray-600">
+        Menampilkan data filter: 
+        @if(request('search')) Kata kunci <span class="font-semibold text-gray-800">"{{ request('search') }}"</span> @endif
+        @if(request('search') && (request('role') || request('status'))) dengan @endif
+        @if(request('role')) Role <span class="font-semibold text-gray-800">{{ ucfirst(str_replace('_', ' ', request('role'))) }}</span> @endif
+        @if(request('role') && request('status')) dan @endif
+        @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
+    </div>
+@endif
+
 {{-- Table Section --}}
 <div class="bg-white mb-6 rounded-lg shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
@@ -96,10 +160,10 @@ $user_stats = [
 
                                 {{-- Delete Button --}}
                                 <form action="{{ route('owner.users.delete', $user->id_user) }}" method="POST"
-                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="inline-block m-0">
+                                    class="form-hapus inline-block m-0">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
+                                    <button type="submit"
                                         class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-colors"
                                         title="Hapus">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -121,7 +185,30 @@ $user_stats = [
 </div>
 
 <div class="mt-4">
-    {{ $users->links() }}
+    {{ $users->appends(request()->query())->links() }}
 </div>
+
+    <script>
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data user ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection

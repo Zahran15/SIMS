@@ -7,11 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Pembayaran extends Model
 {
     protected $table = 'pembayaran';
-
     protected $primaryKey = 'id_pembayaran';
-
     protected $casts = ['tanggal_bayar' => 'datetime',];
-
     protected $fillable = [
         'id_booking',
         'id_servis',

@@ -1,72 +1,93 @@
 @extends('layouts.layout')
 
-@section('title', 'Detail Laporan Pengadaan - Owner')
+@section('title', 'Detail Laporan Pengadaan')
 
 @section('content')
-<div class="p-6 max-w-3xl mx-auto">
-    {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
+    {{-- HEADER HALAMAN & TOMBOL --}}
+    <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
-            <a href="{{ route('owner.pengadaan_sparepart.index') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali ke Daftar
+            <h2 class="text-2xl font-bold text-gray-800">Detail Nota Pengadaan</h2>
+            <p class="text-gray-500 text-xs">Laporan internal pembiayaan asset inventori gudang (ID Register: #PGD-{{ str_pad($data->id_pengadaan, 5, '0', STR_PAD_LEFT) }})</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <a href="{{ route('owner.pengadaan_sparepart.index') }}"
+               class="px-3 py-1.5 rounded bg-gray-500 hover:bg-gray-600 text-white font-medium text-xs shadow-sm transition-colors">
+                Kembali
             </a>
-            <h2 class="text-3xl font-bold text-gray-800">Detail Nota Pengadaan</h2>
-            <p class="text-gray-500 mt-1">Laporan internal pembiayaan asset inventori gudang.</p>
-        </div>
-
-        {{-- STATUS BADGE --}}
-        <div>
-            <span class="px-4 py-2 rounded-xl text-sm font-bold shadow-sm border
-                @if($data->status_pengadaan == 'dipesan') bg-yellow-100 text-yellow-700 border-yellow-200
-                @elseif($data->status_pengadaan == 'diterima') bg-green-100 text-green-700 border-green-200
-                @else bg-red-100 text-red-700 border-red-200
-                @endif">
-                📌 Status: {{ ucfirst($data->status_pengadaan) }}
-            </span>
         </div>
     </div>
 
-    {{-- CONTENT CARD --}}
-    <div class="bg-white rounded-2xl shadow border p-6 font-medium space-y-6">
-        <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Informasi Transaksi Pemesanan</h3>
+    {{-- LAYOUT MENURUN --}}
+    <div class="space-y-4">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-                <p class="text-gray-400 font-semibold uppercase tracking-wider text-xs">ID/Nomor Register</p>
-                <p class="text-base font-bold text-gray-800 mt-1">#PGD-{{ str_pad($data->id_pengadaan, 5, '0', STR_PAD_LEFT) }}</p>
+        {{-- BLOK 1: STATUS & INFORMASI NOTA --}}
+        <div class="bg-white rounded border border-gray-200 shadow-sm">
+            <div class="px-4 py-2 border-b bg-gray-50">
+                <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Informasi Transaksi Pemesanan</h3>
             </div>
-            <div>
-                <p class="text-gray-400 font-semibold uppercase tracking-wider text-xs">Tanggal Transaksi Masuk</p>
-                <p class="text-base font-bold text-gray-800 mt-1">{{ \Carbon\Carbon::parse($data->tgl_pesan)->translatedFormat('d F Y') }}</p>
-            </div>
-            
-            {{-- BOX KETERANGAN BARANG --}}
-            <div class="md:col-span-2 p-5 bg-gray-50 rounded-2xl border border-gray-100 grid grid-cols-3 gap-4 items-center">
+
+            <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                 <div>
-                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Nama Suku Cadang</p>
-                    <p class="text-sm font-bold text-blue-600 mt-1">{{ $data->sparepart->nama_sparepart ?? 'Komponen Terhapus' }}</p>
+                    <span class="text-gray-400 block">Tanggal Transaksi Masuk</span>
+                    <strong class="text-gray-800 text-sm">{{ \Carbon\Carbon::parse($data->tgl_pesan)->translatedFormat('d M Y') }}</strong>
                 </div>
-                <div class="text-center">
-                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Kuantitas Masuk</p>
-                    <p class="text-sm font-bold text-gray-800 mt-1">{{ $data->jumlah }} Unit</p>
+                <div>
+                    <span class="text-gray-400 block">ID / Nomor Register</span>
+                    <span class="text-gray-800 font-semibold">#PGD-{{ str_pad($data->id_pengadaan, 5, '0', STR_PAD_LEFT) }}</span>
                 </div>
-                <div class="text-right">
-                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Harga Beli Satuan</p>
-                    <p class="text-sm font-bold text-gray-800 mt-1">Rp {{ number_format($data->harga_beli, 0, ',', '.') }}</p>
+                <div>
+                    <span class="text-gray-400 block">Status Pengadaan</span>
+                    <div class="mt-0.5">
+                        @if($data->status_pengadaan == 'dipesan')
+                            <span class="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800 font-bold border border-yellow-200 uppercase">{{ $data->status_pengadaan }}</span>
+                        @elseif($data->status_pengadaan == 'diterima')
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold border border-green-200 uppercase">{{ $data->status_pengadaan }}</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800 font-bold border border-red-200 uppercase">{{ $data->status_pengadaan }}</span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- TOTAL PENGELUARAN AKHIR --}}
-        <div class="pt-4 border-t border-dashed flex justify-between items-center">
-            <span class="text-gray-500 font-bold">Total Arus Kas Keluar (Modal):</span>
-            <span class="text-2xl font-black text-green-600">
-                Rp {{ number_format($data->total, 0, ',', '.') }}
-            </span>
+        {{-- BLOK 2: TABEL RINCIAN PENGADAAN BARANG --}}
+        <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-4 py-2 border-b bg-gray-50">
+                <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Rincian Item Suku Cadang</h3>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left text-gray-600 table-fixed">
+                    <thead class="bg-gray-100 uppercase font-bold text-gray-600 border-b">
+                        <tr>
+                            <th class="w-1/2 px-4 py-2">Nama Suku Cadang</th>
+                            <th class="w-1/12 px-4 py-2 text-center">QTY</th>
+                            <th class="w-2/12 px-4 py-2 text-right">Harga Beli Satuan</th>
+                            <th class="w-2/12 px-4 py-2 text-right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-2 text-gray-800 font-medium">
+                                <span class="text-[10px] font-bold bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded mr-1 uppercase">Part</span>
+                                {{ $data->sparepart->nama_sparepart ?? 'Komponen Terhapus' }}
+                            </td>
+                            <td class="px-4 py-2 text-center text-gray-800">{{ $data->jumlah }}</td>
+                            <td class="px-4 py-2 text-right text-gray-800">Rp {{ number_format($data->harga_beli, 0, ',', '.') }}</td>
+                            <td class="px-4 py-2 text-right font-bold text-gray-800">Rp {{ number_format($data->total, 0, ',', '.') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- FOOTER TOTAL --}}
+            <div class="bg-gray-100 px-4 py-3 flex justify-between items-center border-t border-gray-200">
+                <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Total Arus Kas Keluar (Modal):</span>
+                <strong class="text-xl font-bold text-green-600">
+                    Rp {{ number_format($data->total, 0, ',', '.') }}
+                </strong>
+            </div>
         </div>
     </div>
-</div>
 @endsection

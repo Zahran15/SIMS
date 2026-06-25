@@ -16,10 +16,10 @@ class Booking extends Model
         'merk_tipe',
         'spesifikasi',
         'keluhan',
-        'metode_pengambilan',
+        'metode_pengembalian',
         'kelengkapan',
         'kategori_servis',
-        'status_deposit',
+        'status_dp',
         'status_booking'
     ];
 

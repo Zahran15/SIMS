@@ -27,6 +27,38 @@
         </div>
     @endif
 
+    {{-- FILTER --}}
+    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+        <form action="{{ route('teknisi.request_sparepart.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+                {{-- Filter Status --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status_request" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[250px] text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="pending_admin" {{ request('status_request') == 'pending_admin' ? 'selected' : '' }}>Pending Admin</option>
+                        <option value="dikirim_ke_pelanggan" {{ request('status_request') == 'dikirim_ke_pelanggan' ? 'selected' : '' }}>Menunggu Konfirmasi Pelanggan</option>
+                        <option value="disetujui_pelanggan" {{ request('status_request') == 'disetujui_pelanggan' ? 'selected' : '' }}>Disetujui Pelanggan</option>
+                        <option value="disetujui" {{ request('status_request') == 'disetujui' ? 'selected' : '' }}>Disetujui Admin (Selesai)</option>
+                        <option value="ditolak" {{ request('status_request') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </div>
+                {{-- Tombol Aksi --}}
+                <div class="flex gap-2">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">Cari</button>
+                    <a href="{{ route('teknisi.request_sparepart.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('status_request'))
+        <div class="mb-4 text-sm text-gray-600">
+            Menampilkan data filter: Status <span class="font-semibold text-gray-800">{{ ucfirst(str_replace('_', ' ', request('status_request'))) }}</span>
+        </div>
+    @endif
+
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow border overflow-hidden">
         <div class="overflow-x-auto">
@@ -52,10 +84,14 @@
                         <td class="px-5 py-4 text-center font-medium text-gray-800">{{ $r->sparepart->nama_sparepart ?? 'Terhapus' }}</td>
                         <td class="px-5 py-4 text-center text-gray-600 font-semibold">{{ $r->jumlah }} Pcs</td>
                         <td class="px-5 py-4 text-center">
-                            @if($r->status_request == 'pending')
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
+                            @if($r->status_request == 'pending_admin')
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending Admin</span>
+                            @elseif($r->status_request == 'dikirim_ke_pelanggan')
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Di Pelanggan</span>
+                            @elseif($r->status_request == 'disetujui_pelanggan')
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">ACC Pelanggan</span>
                             @elseif($r->status_request == 'disetujui')
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Disetujui</span>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Disetujui Admin</span>
                             @else
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Ditolak</span>
                             @endif
@@ -88,7 +124,7 @@
 
     {{-- PAGINATION --}}
     <div class="mt-5">
-        {{ $requestSparepart->links() }}
+        {{ $requestSparepart->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

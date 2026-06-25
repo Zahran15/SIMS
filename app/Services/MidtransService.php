@@ -73,8 +73,8 @@ class MidtransService
      */
     public function resolveTransactionStatus(array $notification): string
     {
-        $transactionStatus = $notification['transaction_status'] ?? '';
-        $fraudStatus       = $notification['fraud_status'] ?? '';
+        $transactionStatus = $notification['transaction_status'];
+        $fraudStatus       = $notification['fraud_status'];
         return match (true) {
             $transactionStatus === 'capture' && $fraudStatus === 'accept'  => 'paid',
             $transactionStatus === 'settlement'                            => 'paid',
@@ -112,9 +112,9 @@ class MidtransService
         // Wajib ada: order_id, amount, customer (name, email, phone)
         $orderId    = $params['order_id']    ?? 'ORDER-' . Str::upper(Str::random(10));
         $amount     = (int) ($params['amount'] ?? 0);
-        $firstName  = $params['customer']['name']  ?? 'Customer';
-        $email      = $params['customer']['email'] ?? '';
-        $phone      = $params['customer']['phone'] ?? '';
+        $firstName  = $params['customer']['name'];
+        $email      = $params['customer']['email'];
+        $phone      = $params['customer']['phone'];
         $items      = $params['items']        ?? [];
 
         $payload = [

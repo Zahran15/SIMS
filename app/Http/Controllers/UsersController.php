@@ -7,9 +7,24 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
+        $query = User::query();
+        // 1. Jalankan pencarian Nama
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama', 'LIKE', $request->search . '%');
+        }
+
+        // 2. Jalankan filter role
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // 3. Jalankan filter status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        $users = $query->paginate(10);
         $total_user = User::count();
         $user_aktif = User::where('status', 'aktif')->count();
         $user_nonaktif = User::where('status', 'nonaktif')->count();
@@ -31,7 +46,7 @@ class UsersController extends Controller
             'role'     => $request->role,
             'status'   => $request->status,
         ]);
-        return redirect()->back()->with('success', 'User berhasil ditambahkan');
+        return redirect()->route('owner.users.index')->with('success', 'User berhasil ditambahkan');
     }
 
     /**
@@ -49,21 +64,24 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        
-        $data = [
-            'nama'   => $request->nama,
-            'email'  => $request->email,
-            'no_hp'  => $request->no_hp,
-            'role'   => $request->role,
-            'status' => $request->status,
-        ];
+        $request->validate([
+            'nama'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . $id . ',id_user',
+            'no_hp'    => 'required',
+            'status'   => 'required',
+            'password' => 'nullable',
+        ]);
+        $data = $request->all();
         if ($user->role === 'owner') {
-            $data = $request->except('role');
-        } else {
-            $data = $request->all();
+            unset($data['role']); 
         }
-            $user->update($data);
-        return redirect()->back()->with('success', 'Data berhasil diperbarui');
+        if ($request->filled('password')) {
+            $data['password'] = $request->password; 
+        } else {
+            unset($data['password']); 
+        }
+        $user->update($data);
+        return redirect()->route('owner.users.index')->with('success', 'Data berhasil diperbarui');
     }
 
     /**

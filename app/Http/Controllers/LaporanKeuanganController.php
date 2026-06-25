@@ -12,16 +12,16 @@ class LaporanKeuanganController extends Controller
     {
         // 1. STATS CARDS (PEMASUKAN & PENDING)
         $total_pendapatan = Pembayaran::where('status_pembayaran', 'sukses')->sum('nominal');
-        $total_deposit = Pembayaran::where('status_pembayaran', 'sukses')->where('jenis_pembayaran', 'deposit')->sum('nominal');
+        $total_dp = Pembayaran::where('status_pembayaran', 'sukses')->where('jenis_pembayaran', 'dp')->sum('nominal');
         $total_pelunasan = Pembayaran::where('status_pembayaran', 'sukses')->where('jenis_pembayaran', 'pelunasan')->sum('nominal');
         $pembayaran_pending = Pembayaran::where('status_pembayaran', 'pending')->count();
         
-        // 2. DETAIL TRANSAKSI PEMASUKAN
-        $pembayaran_raw = Pembayaran::with(['booking.pelanggan', 'servis'])->latest()->get();
-        $detail_pemasukan = $pembayaran_raw->map(function ($item) {
+        // 2. DETAIL TRANSAKSI PEMASUKAN (DENGAN PAGINATE 5)
+        $pembayaran_paginated = Pembayaran::with(['booking.pelanggan', 'servis'])->latest()->paginate(5);
+        $detail_pemasukan = $pembayaran_paginated->getCollection()->map(function ($item) {
             return (object) [
-                'tanggal' => $item->tanggal_bayar ? $item->tanggal_bayar->format('Y-m-d') : $item->created_at->format('Y-m-d'),
-                'kode_servis' => $item->servis->kode_servis ?? $item->booking->kode_booking ?? '-',
+                'tanggal' => $item->tanggal_bayar ? $item->tanggal_bayar->format('d M Y') : $item->created_at->format('d M Y'),
+                'kode_servis' => $item->servis->kode_servis ?? $item->booking->kode_booking,
                 'nama_pelanggan' => $item->booking->pelanggan->nama ?? '-',
                 'jenis_pembayaran' => $item->jenis_pembayaran,
                 'nominal' => $item->nominal,
@@ -29,19 +29,20 @@ class LaporanKeuanganController extends Controller
                 'status' => $item->status_pembayaran
             ];
         });
+        $pembayaran_paginated->setCollection($detail_pemasukan);
 
-        // 3. DETAIL TRANSAKSI PENGELUARAN (PENGADAAN SPAREPART)
-        $pengadaan_raw = PengadaanSparepart::with('sparepart')->where('status_pengadaan', 'diterima')->latest()->get();
-        $detail_pengeluaran = $pengadaan_raw->map(function ($item) {
+        // 3. DETAIL TRANSAKSI PENGELUARAN (PENGADAAN SPAREPART) - PAGINATE 5
+        $pengadaan_paginated = PengadaanSparepart::with('sparepart')->where('status_pengadaan', 'diterima')->latest()->paginate(5);
+        $detail_pengeluaran = $pengadaan_paginated->getCollection()->map(function ($item) {
             return (object) [
                 'tanggal' => $item->tgl_pesan,
-                'nama_sparepart' => $item->sparepart->nama_sparepart ?? '-',
+                'nama_sparepart' => $item->sparepart->nama_sparepart,
                 'jumlah' => $item->jumlah,
                 'harga_satuan' => $item->harga_beli,
                 'total' => $item->total
             ];
         });
-
+        $pengadaan_paginated->setCollection($detail_pengeluaran);
 
         // 4. DATA GRAFIK LINE CHART (PENDAPATAN BULANAN TAHUN INI)
         $tahun_ini = date('Y');
@@ -59,21 +60,21 @@ class LaporanKeuanganController extends Controller
             )
             ->groupBy('bulan')
             ->pluck('total', 'bulan')
-                ->toArray();
+            ->toArray();
+            
         $data_chart_pendapatan = [];
         for ($i = 1; $i <= 12; $i++) {
-            // Paksa konversi ke tipe float/int agar terbaca sebagai angka di Chart.js
             $data_chart_pendapatan[] = isset($pendapatan_per_bulan[$i]) ? (float)$pendapatan_per_bulan[$i] : 0;
         }
 
         // 5. KIRIM DATA KE VIEW
         return view('owner.laporan.laporan_keuangan.index', compact(
             'total_pendapatan',
-            'total_deposit',
+            'total_dp',
             'total_pelunasan',
             'pembayaran_pending',
-            'detail_pemasukan',
-            'detail_pengeluaran',
+            'pembayaran_paginated', 
+            'pengadaan_paginated',
             'data_chart_pendapatan'
         ));
     }

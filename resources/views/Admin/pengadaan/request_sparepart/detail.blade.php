@@ -3,9 +3,8 @@
 @section('title', 'Proses Request Sparepart - Admin')
 
 @section('content')
-<div class="p-6 max-w-4xl mx-auto">
     {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
             <a href="{{ route('admin.request_sparepart.index') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 mb-2 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -14,35 +13,33 @@
                 Kembali ke Daftar
             </a>
             <h2 class="text-3xl font-bold text-gray-800">Verifikasi Request Sparepart</h2>
-            <p class="text-gray-500 mt-1">Periksa ketersediaan stok sebelum melakukan persetujuan barang.</p>
+            <p class="text-gray-500 mt-1">Kelola alur persetujuan komponen dan periksa ketersediaan stok fisik gudang.</p>
         </div>
 
         {{-- BADGE STATUS --}}
         <div>
-            @if($requestSparepart->status_request == 'pending')
-                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-yellow-100 text-yellow-700 border border-yellow-200 animate-pulse">
-                    ⏱️ Butuh Tindakan
-                </span>
+            @if($requestSparepart->status_request == 'pending_admin')
+                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">Pending Admin</span>
+            @elseif($requestSparepart->status_request == 'dikirim_ke_pelanggan')
+                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-orange-100 text-orange-700 border border-orange-200 animate-pulse">Di Pelanggan</span>
+            @elseif($requestSparepart->status_request == 'disetujui_pelanggan')
+                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-100 text-blue-700 border border-blue-200">ACC Pelanggan</span>
             @elseif($requestSparepart->status_request == 'disetujui')
-                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-green-100 text-green-700 border border-green-200">
-                    ✅ Sudah Disetujui
-                </span>
+                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-green-100 text-green-700 border border-green-200">Selesai / Disetujui</span>
             @else
-                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-100 text-red-700 border border-red-200">
-                    ❌ Sudah Ditolak
-                </span>
+                <span class="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-100 text-red-700 border border-red-200">Sudah Ditolak</span>
             @endif
         </div>
     </div>
 
     {{-- NOTIFIKASI SUKSES / GAGAL --}}
     @if(session('success'))
-        <div class="mb-5 p-4 rounded-xl bg-green-100 text-green-700 font-medium">
+        <div class="mb-5 p-4 rounded-xl bg-green-100 text-green-700 font-medium shadow-sm border border-green-200">
             {{ session('success') }}
         </div>
     @endif
     @if(session('error'))
-        <div class="mb-5 p-4 rounded-xl bg-red-100 text-red-700 font-medium">
+        <div class="mb-5 p-4 rounded-xl bg-red-100 text-red-700 font-medium shadow-sm border border-red-200">
             {{ session('error') }}
         </div>
     @endif
@@ -55,12 +52,12 @@
             <div class="bg-white rounded-2xl shadow border p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Detail Permintaan Barang</h3>
                 
-                <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-gray-400">Kode Servis / Pelanggan</p>
                         <p class="text-base font-bold text-gray-800 mt-0.5">
                             {{ $requestSparepart->penugasan->servis->kode_servis ?? '-' }} 
-                            <span class="text-gray-400 font-normal">({{ $requestSparepart->penugasan->servis->nama_pelanggan ?? 'Umum' }})</span>
+                            <span class="text-gray-400 font-normal">({{ $requestSparepart->penugasan->servis->booking->pelanggan->nama ?? '-' }})</span>
                         </p>
                     </div>
                     <div>
@@ -93,52 +90,81 @@
             </div>
         </div>
 
-        {{-- CARD KANAN: PANEL AKSI APPROVE / REJECT (HANYA MUNCUL JIKA PENDING) --}}
+        {{-- CARD KANAN: PANEL AKSI OTORISASI ADMIN --}}
         <div class="space-y-6">
             <div class="bg-white rounded-2xl shadow border p-6 text-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Panel Otorisasi Admin</h3>
                 
-                @if($requestSparepart->status_request == 'pending')
+                {{-- KONDISI 1: STATUS PENDING ADMIN (BARU MASUK DARI TEKNISI) --}}
+                @if($requestSparepart->status_request == 'pending_admin')
                     <p class="text-gray-500 mb-4 leading-relaxed">
-                        Silakan lakukan verifikasi fisik barang. Klik <strong>Approve</strong> jika barang siap diserahkan ke teknisi (stok otomatis terpotong).
+                        Request baru diajukan oleh teknisi. Silakan klik <strong>Teruskan ke Pelanggan</strong> untuk meminta konfirmasi persetujuan biaya komponen terlebih dahulu.
                     </p>
 
                     <div class="space-y-3">
-                        {{-- TOMBOL APPROVE --}}
-                        <form action="{{ route('request.approve', $requestSparepart->id_request) }}" method="POST">
+                        <form action="{{ route('admin.request_sparepart.kirim_pelanggan', $requestSparepart->id_request) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all shadow-md shadow-orange-100 flex items-center justify-center gap-1">
+                                Teruskan ke Pelanggan
+                            </button>
+                        </form>
+
+                        <form action="{{ route('admin.request_sparepart.reject', $requestSparepart->id_request) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-semibold transition-all border border-red-200 flex items-center justify-center gap-1" onclick="return confirm('Apakah Anda yakin ingin MENOLAK permintaan ini?')">
+                                Tolak Request
+                            </button>
+                        </form>
+                    </div>
+
+                {{-- KONDISI 2: SEDANG DIKIRIM KE PELANGGAN (MENUNGGU RESPON) --}}
+                @elseif($requestSparepart->status_request == 'dikirim_ke_pelanggan')
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-200 text-center text-orange-700">
+                        <p class="font-semibold">Menunggu Respon Pelanggan</p>
+                        <p class="text-xs mt-1 leading-relaxed">
+                            Link persetujuan biaya perbaikan telah dikirim ke halaman akun pelanggan. Sistem mendeteksi antrean konfirmasi aktif.
+                        </p>
+                    </div>
+
+                {{-- KONDISI 3: SUDAH DI-ACC PELANGGAN (SIAP EKSEKUSI AKHIR & POTONG STOK) --}}
+                @elseif($requestSparepart->status_request == 'disetujui_pelanggan')
+                    <p class="text-gray-500 mb-4 leading-relaxed">
+                        Pelanggan telah <strong>menyetujui</strong> pengajuan ini. Pastikan fisik komponen tersedia, lalu klik <strong>Approve & Potong Stok</strong> untuk menyelesaikan perbaikan.
+                    </p>
+
+                    <div class="space-y-3">
+                        <form action="{{ route('admin.request_sparepart.approve_final', $requestSparepart->id_request) }}" method="POST">
                             @csrf
                             <button type="submit" 
                                     class="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold transition-all shadow-md shadow-green-100 flex items-center justify-center gap-1"
                                     {{ ($requestSparepart->sparepart->stok ?? 0) < $requestSparepart->jumlah ? 'disabled' : '' }}
-                                    onclick="return confirm('Apakah Anda yakin ingin MENYETUJUI permintaan ini? Stok gudang akan otomatis berkurang.')">
-                                ✅ Approve & Serahkan
+                                    onclick="return confirm('Apakah Anda yakin ingin MENYETUJUI FINAl permintaan ini? Stok gudang akan otomatis terpotong.')">
+                                Approve & Potong Stok
                             </button>
                             @if(($requestSparepart->sparepart->stok ?? 0) < $requestSparepart->jumlah)
-                                <p class="text-xs text-red-500 text-center mt-1 font-semibold">❌ Tidak bisa di-approve, stok gudang habis/kurang!</p>
+                                <p class="text-xs text-red-500 text-center mt-1 font-semibold">Tidak bisa di-approve, stok gudang habis/kurang!</p>
                             @endif
                         </form>
 
-                        {{-- TOMBOL REJECT --}}
-                        <form action="{{ route('request.reject', $requestSparepart->id_request) }}" method="POST">
+                        <form action="{{ route('admin.request_sparepart.reject', $requestSparepart->id_request) }}" method="POST">
                             @csrf
-                            <button type="submit" 
-                                    class="w-full py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-semibold transition-all border border-red-200 flex items-center justify-center gap-1"
-                                    onclick="return confirm('Apakah Anda yakin ingin MENOLAK permintaan ini?')">
-                                ❌ Tolak Request
+                            <button type="submit" class="w-full py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-semibold transition-all border border-red-200 flex items-center justify-center gap-1" onclick="return confirm('Apakah Anda yakin ingin MENOLAK permintaan ini meskipun pelanggan sudah setuju?')">
+                                Tolak Request
                             </button>
                         </form>
                     </div>
+
+                {{-- KONDISI 4: DATA SUDAH FINISH KUNCI (DISETUJUI / DITOLAK) --}}
                 @else
-                    {{-- JIKA SUDAH DIPROSES --}}
                     <div class="p-4 bg-gray-50 rounded-xl border text-center text-gray-500">
                         <p class="font-semibold">Selesai Diproses</p>
-                        <p class="text-xs mt-1">
-                            Data ini sudah dikunci pada {{ $requestSparepart->updated_at->translatedFormat('d F Y - H:i') }} WIB dan tidak dapat diubah lagi.
+                        <p class="text-xs mt-1 leading-relaxed">
+                            Transaksi request ini telah selesai diproses dan dikunci penuh pada {{ $requestSparepart->updated_at->translatedFormat('d F Y - H:i') }} WIB.
                         </p>
                     </div>
                 @endif
+
             </div>
         </div>
     </div>
-</div>
 @endsection

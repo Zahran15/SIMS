@@ -65,10 +65,10 @@
                         </select>
                     </div>
                     <div class="mt-5">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pengambilan  Unit</label>
-                        <select name="metode_pengambilan" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pengembalian Unit</label>
+                        <select name="metode_pengembalian" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
                             <option value="">-- Pilih Metode --</option>
-                            <option value="diantar">Diantar</option>
+                            <option value="diantar">Diantar Kurir</option>
                             <option value="ambil sendiri">Ambil Sendiri</option>
                         </select>
                     </div>

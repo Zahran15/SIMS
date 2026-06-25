@@ -8,7 +8,6 @@ class PenugasanTeknisi extends Model
 {
     protected $table = 'penugasan_teknisi';
     protected $primaryKey = 'id_penugasan';
-
     protected $fillable = [
         'id_servis',
         'id_user',

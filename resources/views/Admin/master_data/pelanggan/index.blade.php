@@ -17,6 +17,81 @@
         </a>
     </div>
 
+{{-- KARTU STATISTIK USER --}}
+@php
+$user_stats = [
+    ['title' => 'Total Pelanggan',  'total' => $total_pelanggan . ' Pengguna', 'icon'  => 'fa-users', 'color' => 'blue', 'label' => 'Semua Akun'],
+    ['title' => 'Pelanggan Aktif', 'total' => $pelanggan_aktif . ' Akun', 'icon'  => 'fa-user-check', 'color' => 'emerald', 'label' => 'Status Aktif'],
+    ['title' => 'Pelanggan Nonaktif', 'total' => $pelanggan_nonaktif . ' Akun', 'icon'  => 'fa-user-slash', 'color' => 'red', 'label' => 'Status Nonaktif'],
+];
+@endphp
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    @foreach($user_stats as $stat)
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all group duration-300">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-[10px] uppercase text-gray-400 font-medium tracking-wider mb-1">{{ $stat['title'] }}</p>
+                <h3 class="text-2xl font-medium text-gray-800 group-hover:text-{{ $stat['color'] }}-600 transition-colors mt-1">{{ $stat['total'] }}</h3>
+                <span class="text-[9px] font-bold text-{{ $stat['color'] }}-600 bg-{{ $stat['color'] }}-50 px-2 py-0.5 rounded uppercase mt-2 block w-max tracking-wide">{{ $stat['label'] }}</span>
+            </div>
+            <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-{{ $stat['color'] }}-50 transition-colors duration-300">
+                <i class="fas {{ $stat['icon'] }} text-{{ $stat['color'] }}-500 text-xl group-hover:scale-110 transition-transform"></i>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+{{-- FILTER & SEARCH --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.pelanggan.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            
+            {{-- Input Pencarian Nama --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Nama</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Masukkan nama..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            {{-- Filter Status --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                    Cari
+                </button>
+
+                <a href="{{ route('admin.pelanggan.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{{-- Info Badge Filter Aktif --}}
+@if(request('search') || request('status'))
+    <div class="mb-4 text-sm text-gray-600">
+        Menampilkan data filter: 
+        @if(request('search')) Nama <span class="font-semibold text-gray-800">{{ request('search') }}"</span> @endif
+        @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
+    </div>
+@endif
+
 {{-- Table Section --}}
 <div class="bg-white mb-6 rounded-lg shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
@@ -74,7 +149,7 @@
 
                                 {{-- DELETE --}}
                                 <form action="{{ route('admin.pelanggan.delete', $p->id_pelanggan) }}" method="POST"
-                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="inline-block m-0">
+                                    class="form-hapus inline-block m-0">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -102,7 +177,31 @@
 </div>
 
 <div class="mt-4">
-    {{ $pelanggan->links() }}
+    {{ $pelanggan->appends(request()->query())->links() }}
 </div>
+
+<script>
+        // 2. LOGIKA UNTUK TOMBOL HAPUS
+        const formsHapus = document.querySelectorAll('.form-hapus');
+        formsHapus.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data pelanggan ini akan dihapus permanen!",
+                    icon: 'warning', 
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626', 
+                    cancelButtonColor: '#6b7280',  
+                    confirmButtonText: 'Ya, Hapus saja!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                });
+            });
+        });
+</script>
 
 @endsection

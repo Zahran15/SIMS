@@ -8,7 +8,6 @@ class PengadaanSparepart extends Model
 {
     protected $table = 'pengadaan_sparepart';
     protected $primaryKey = 'id_pengadaan';
-
     protected $fillable = [
         'id_sparepart',
         'tgl_pesan',

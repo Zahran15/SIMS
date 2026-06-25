@@ -24,6 +24,54 @@
         </div>
     @endif
 
+{{-- FILTER SERVIS PROSES --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.servis_proses.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            
+            {{-- Input Pencarian Nama Pelanggan --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Masukkan nama pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            {{-- Filter Status Servis --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status Servis</label>
+                <select name="status_servis"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="menunggu" {{ request('status_servis') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                    <option value="proses" {{ request('status_servis') == 'proses' ? 'selected' : '' }}>Proses</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition font-medium">
+                    Cari
+                </button>
+                <a href="{{ route('admin.servis_proses.index') }}"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">
+                    Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('search') || request('status_servis'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
+            <span>Filter aktif:</span>
+            @if(request('search')) <span class="font-semibold text-gray-800">Pelanggan: "{{ request('search') }}"</span> @endif
+            @if(request('status_servis')) <span class="font-semibold text-gray-800">Status: {{ ucfirst(request('status_servis')) }}</span> @endif
+        </div>
+    @endif
+
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
@@ -54,8 +102,7 @@
                             <td class="px-5 py-4 text-center">{{ $s->booking->merk_tipe }}</td>
                             <td class="px-5 py-4 text-center">{{ date('d M Y', strtotime($s->tgl_masuk)) }}</td>
                             <td class="px-5 py-4 text-center">
-                                {{-- Menampilkan Badge Status Global Utama dari Admin --}}
-                                <div class="mb-1">
+                                 <div class="mb-1">
                                     @if($s->status_servis == 'menunggu')
                                         <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-semibold">Menunggu</span>
                                     @elseif($s->status_servis == 'proses')
@@ -110,7 +157,7 @@
 
     {{-- PAGINATION --}}
     <div class="mt-5">
-        {{ $servis->links() }}
+        {{ $servis->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

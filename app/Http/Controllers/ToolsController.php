@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\Auth;
 class ToolsController extends Controller
 {
     // 🔹 TAMPIL DATA
-    public function index()
+    public function index(Request $request)
     {
-        $tools = Tools::with('user')->latest()->paginate(10);
+        $query = Tools::query();
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        $tools = $query->with('user')->latest()->paginate(10);
         $role = Auth::user()->role; 
-
         if ($role == 'admin') {
             return view('admin.pengadaan.pengadaan_tools.index', compact('tools', 'role'));
         } else {
@@ -34,16 +37,17 @@ class ToolsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_user'    => 'required|exists:users,id', 
+            'id_user'    => 'required|exists:users,id_user', 
             'nama_tools' => 'required',
             'jumlah'     => 'required|integer|min:0',
+            'simpan'     => 'required|in:tersedia,tidak tersedia',
         ]);
 
         Tools::create([
             'id_user'    => $request->id_user,
             'nama_tools' => $request->nama_tools,
             'jumlah'     => $request->jumlah,
-            'status'     => $request->jumlah > 0 ? 'tersedia' : 'tidak tersedia',
+            'status'     => $request->status,
         ]);
 
         return redirect()->route('admin.tools.index')->with('success', 'Data tools berhasil ditambahkan');
@@ -52,7 +56,7 @@ class ToolsController extends Controller
     // 🔹 EDIT DATA 
     public function edit($id)
     {
-        $tool = Tools::findOrFail($id);
+        $tool = Tools::where('id_tools', $id)->firstOrFail();
         $teknisi = User::where('role', 'teknisi')->get();
         $role = Auth::user()->role;
         return view('admin.pengadaan.pengadaan_tools.edit', compact('tool', 'teknisi', 'role'));
@@ -61,28 +65,26 @@ class ToolsController extends Controller
     // 🔹 UPDATE DATA 
     public function update(Request $request, $id)
     {
-        $data = Tools::findOrFail($id);
-
+        $data = Tools::where('id_tools', $id)->firstOrFail();
         $request->validate([
-            'id_user'    => 'required|exists:users,id',
+            'id_user'    => 'required|exists:users,id_user', 
             'nama_tools' => 'required',
             'jumlah'     => 'required|integer|min:0',
+            'status'     => 'required|in:tersedia,tidak tersedia',
         ]);
-
         $data->update([
             'id_user'    => $request->id_user,
             'nama_tools' => $request->nama_tools,
             'jumlah'     => $request->jumlah,
-            'status'     => $request->jumlah > 0 ? 'tersedia' : 'tidak tersedia',
+            'status'     => $request->status, 
         ]);
-
-        return redirect()->route('admin.tools.index')->with('success', 'Data tools berhasil diupdate');
+        return redirect()->route('admin.pengadaan_tools.index')->with('success', 'Data tools berhasil diupdate');
     }
 
     // 🔹 DELETE 
     public function destroy($id)
     {
-        Tools::findOrFail($id)->delete();
+        Tools::where('id_tools', $id)->firstOrFail()->delete();
         return back()->with('success', 'Data tools berhasil dihapus');
     }
 }

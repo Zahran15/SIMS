@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RequestSparepart extends Model
 {
     protected $table = 'request_sparepart';
-
     protected $primaryKey = 'id_request';
-
     protected $fillable = [
         'id_penugasan',
         'id_sparepart',

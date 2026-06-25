@@ -36,7 +36,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Tanggal Booking</label>
-                            <input type="date" name="tgl_booking" value="{{ date('Y-m-d') }}" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
+                            <input type="date" name="tgl_booking" value="{{ date('d-m-Y') }}" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
                         </div>
                     </div>
                 </div>
@@ -89,37 +89,34 @@
                     </div>
                 </div>
 
-                {{-- STATUS --}}
-                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                    <h4 class="text-sm font-bold uppercase text-gray-500 mb-4">Status Booking</h4>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pengambilan</label>
-                            <select name="metode_pengambilan" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
-                                <option value="">-- Pilih Metode --</option>
-                                <option value="diantar">Diantar</option>
-                                <option value="ambil sendiri">Ambil Sendiri</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Status Deposit</label>
-                            <select name="status_deposit" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
-                                <option value="">-- Pilih Status --</option>
-                                <option value="belum lunas">Belum Lunas</option>
-                                <option value="sudah lunas">Sudah Lunas</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Status Booking</label>
-                            <select name="status_booking" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
-                                <option value="pending">Pending</option>
-                                <option value="diterima">Diterima</option>
-                                <option value="ditolak">Ditolak</option>
-                            </select>
-                        </div>
+            {{-- STATUS --}}
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                <h4 class="text-sm font-bold uppercase text-gray-500 mb-4">Status Booking</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Metode Pengembalian Unit</label>
+                        <select name="metode_pengembalian" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
+                            <option value="">-- Pilih Metode --</option>
+                            <option value="diantar">Diantar Kurir</option>
+                            <option value="ambil sendiri">Ambil Sendiri</option>
+                        </select>
+                    </div>
+            
+                    {{-- Status DP (Di-set otomatis ke Belum Lunas) --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Status DP</label>
+                        <input type="text" value="Belum Lunas" readonly class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-xl p-3 outline-none cursor-not-allowed">
+                        <input type="hidden" name="status_dp" value="belum lunas">
+                    </div>
+            
+                    {{-- Status Booking (Di-set otomatis ke Pending) --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Status Booking</label>
+                        <input type="text" value="Pending" readonly class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-xl p-3 outline-none cursor-not-allowed">
+                        <input type="hidden" name="status_booking" value="pending">
                     </div>
                 </div>
+            </div>
             </div>
 
             {{-- FOOTER --}}

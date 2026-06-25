@@ -9,12 +9,12 @@
         <p class="text-gray-500 mt-1">Pantau rincian pengeluaran modal modal pembelanjaan stok masuk toko.</p>
     </div>
 
-    {{-- KARTU STATISTIK FINANSIAL (Sangat Disukai Dosen Saat Sidang TA) --}}
+    {{-- KARTU STATISTIK FINANSIAL --}}
     @php
     $financial_stats = [
-        ['title' => 'Total Transaksi', 'total' => $pengadaan->total() . ' Nota', 'icon'  => 'fa-boxes', 'color' => 'blue', 'label' => 'Semua Pengadaan'],
-        ['title' => 'Total Pengeluaran Modal', 'total' => 'Rp ' . number_format($pengadaan->sum('total'), 0, ',', '.'), 'icon'  => 'fa-wallet', 'color' => 'emerald', 'label' => 'Kas Keluar'],
-        ['title' => 'Status Diterima', 'total' => $pengadaan->where('status_pengadaan', 'diterima')->count() . ' Item', 'icon'  => 'fa-check-double', 'color' => 'indigo', 'label' => 'Selesai Dicek'],
+        ['title' => 'Total Transaksi', 'total' => $stats['total_nota'] . ' Nota', 'icon'  => 'fa-boxes', 'color' => 'blue', 'label' => 'Semua Pengadaan'],
+        ['title' => 'Total Pengeluaran Modal', 'total' => 'Rp ' . number_format($stats['total_modal'], 0, ',', '.'), 'icon'  => 'fa-wallet', 'color' => 'emerald', 'label' => 'Hanya Kas Diterima' ],
+        ['title' => 'Status Diterima', 'total' => $stats['total_diterima'] . ' Item', 'icon'  => 'fa-check-double', 'color' => 'indigo', 'label' => 'Selesai Dicek'],
     ];
     @endphp
 
@@ -34,6 +34,44 @@
         </div>
         @endforeach
     </div>
+
+    {{-- FILTER --}}
+    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+        <form action="{{ route('owner.pengadaan_sparepart.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+                {{-- Filter Status --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status_pengadaan"
+                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="dipesan" {{ request('status_pengadaan') == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
+                        <option value="diterima" {{ request('status_pengadaan') == 'diterima' ? 'selected' : '' }}>Diterima</option>
+                        <option value="dibatalkan" {{ request('status_pengadaan') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                    </select>
+                </div>
+                {{-- Tombol Aksi --}}
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                        Cari
+                    </button>
+                    <a href="{{ route('owner.pengadaan_sparepart.index') }}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('status_pengadaan'))
+        <div class="mb-4 text-sm text-gray-600">
+            Menampilkan data filter: 
+            @if(request('status_pengadaan')) Status Pengadaan <span class="font-semibold text-gray-800">{{ ucfirst(request('status_pengadaan')) }}</span> @endif
+        </div>
+    @endif
 
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -78,12 +116,12 @@
                                 <div class="flex justify-center">
                                     {{-- OWNER HANYA BISA LIHAT DETAIL NOTA --}}
                                     <a href="{{ route('owner.pengadaan_sparepart.detail', $p->id_pengadaan) }}"
-                                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                                        title="Lihat Detail Nota Pembelian">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all" 
+                                        title="Lihat Detail Pengadaan">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
                                     </a>
                                 </div>
                             </td>
@@ -103,6 +141,6 @@
 
     {{-- PAGINATION --}}
     <div class="mt-5">
-        {{ $pengadaan->links() }}
+        {{ $pengadaan->appends(request()->query())->links() }}
     </div>
 @endsection

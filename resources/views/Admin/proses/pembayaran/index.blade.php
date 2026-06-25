@@ -18,6 +18,67 @@
     </div>
 @endif
 
+{{-- FILTER & SEARCH KELOLA PEMBAYARAN --}}
+<div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <form action="{{ route('admin.pembayaran.index') }}" method="GET">
+        <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            
+            {{-- Input Pencarian Nama --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Nama</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Masukkan nama..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            {{-- Filter Jenis Pembayaran --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Pembayaran</label>
+                <select name="jenis_pembayaran"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px] text-sm">
+                    <option value="">Semua Jenis</option>
+                    <option value="dp" {{ request('jenis_pembayaran') == 'dp' ? 'selected' : '' }}>Dp</option>
+                    <option value="pelunasan" {{ request('jenis_pembayaran') == 'pelunasan' ? 'selected' : '' }}>Pelunasan</option>
+                </select>
+            </div>
+
+            {{-- Filter Status Pembayaran --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status Pembayaran</label>
+                <select name="status_pembayaran"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="sukses" {{ request('status_pembayaran') == 'sukses' ? 'selected' : '' }}>Lunas</option>
+                    <option value="pending" {{ request('status_pembayaran') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="gagal" {{ request('status_pembayaran') == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                </select>
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition font-medium">Cari</button>
+                <a href="{{ route('admin.pembayaran.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{{-- Info Badge Filter Aktif --}}
+@if(request('search') || request('jenis_pembayaran') || request('status_pembayaran'))
+    <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
+        <span>Menampilkan data filter:</span> 
+        @if(request('search')) 
+            <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-medium text-gray-800">Nama: "{{ request('search') }}"</span> 
+        @endif
+        @if(request('jenis_pembayaran')) 
+            <span class="bg-blue-50 px-2 py-0.5 rounded text-xs font-medium text-blue-800">Jenis: {{ ucfirst(request('jenis_pembayaran')) }}</span> 
+        @endif
+        @if(request('status_pembayaran')) 
+            <span class="bg-green-50 px-2 py-0.5 rounded text-xs font-medium text-green-800">Status: {{ request('status_pembayaran') == 'sukses' ? 'Lunas' : ucfirst(request('status_pembayaran')) }}</span> 
+        @endif
+    </div>
+@endif
+
 {{-- TABLE --}}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
@@ -105,6 +166,6 @@
 
 {{-- PAGINATION --}}
 <div class="mt-5">
-    {{ $pembayaran->links() }}
+    {{ $pembayaran->appends(request()->query())->links() }}
 </div>
 @endsection
