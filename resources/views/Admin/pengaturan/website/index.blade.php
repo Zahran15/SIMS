@@ -42,7 +42,7 @@
 
                     <!-- Background Reset -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Background Reset</label>
+                        <label class="block text-sm font-medium text-gray-700">Background Reset Password</label>
                         <input type="file" name="bg_reset" class="mt-1 block w-full">
                     </div>
                 </div>

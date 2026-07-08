@@ -31,11 +31,17 @@
 <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
     <form action="{{ route('admin.booking.index') }}" method="GET">
         <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            {{-- Input Pencarian Kode Booking --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Booking</label>
+                <input type="text" name="kode_booking" value="{{ request('kode_booking') }}" placeholder="Masukkan kode booking..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
             {{-- Input Pencarian Nama Pelanggan --}}
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Masukkan nama pelanggan..."
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             {{-- Filter Kategori Servis --}}
@@ -44,9 +50,9 @@
                 <select name="kategori_servis"
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
                     <option value="">Semua Kategori</option>
-                    <option value="ringan" {{ request('kategori_servis') == 'ringan' ? 'selected' : '' }}>Ringan</option>
-                    <option value="sedang" {{ request('kategori_servis') == 'sedang' ? 'selected' : '' }}>Sedang</option>
-                    <option value="berat" {{ request('kategori_servis') == 'berat' ? 'selected' : '' }}>Berat</option>
+                    <option value="ringan" {{ request('kategori_servis') == 'ringan' }}>Ringan</option>
+                    <option value="sedang" {{ request('kategori_servis') == 'sedang' }}>Sedang</option>
+                    <option value="berat" {{ request('kategori_servis') == 'berat' }}>Berat</option>
                 </select>
             </div>
             {{-- Filter Status Dp --}}
@@ -55,10 +61,21 @@
                 <select name="status_dp"
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
                     <option value="">Semua Status</option>
-                    <option value="sudah lunas" {{ request('status_dp') == 'sudah lunas' ? 'selected' : '' }}>Sudah Lunas</option>
-                    <option value="belum lunas" {{ request('status_dp') == 'belum lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                    <option value="sudah lunas" {{ request('status_dp') == 'sudah lunas' }}>Sudah Lunas</option>
+                    <option value="belum lunas" {{ request('status_dp') == 'belum lunas' }}>Belum Lunas</option>
                 </select>
             </div>
+            {{-- Filter Status Booking --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status booking</label>
+                <select name="status_booking"
+                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="diterima" {{ request('status_booking') == 'diterima' }}>Diterima</option>
+                    <option value="pending" {{ request('status_booking') == 'pending' }}>Pending</option>
+                    <option value="ditolak" {{ request('status_booking') == 'ditolak' }}>Ditolak</option>
+                </select>
+            </div>    
             {{-- Tombol Aksi --}}
             <div class="flex gap-2">
                 <button type="submit"
@@ -75,12 +92,14 @@
 </div>
 
 {{-- Info Badge Filter Aktif --}}
-@if(request('search') || request('kategori_servis') || request('status_deposit'))
+@if(request('kode_booking') || request('nama_pelanggan') || request('kategori_servis') || request('status_dp') || request('status_booking'))
     <div class="mb-4 text-sm text-gray-600">
         Menampilkan hasil filter
-        @if(request('search')) Nama <span class="font-semibold text-gray-800">"{{ request('search') }}"</span> @endif
+        @if(request('kode_booking'))Kode Booking<span class="font-semibold text-gray-800">"{{ request('kode_booking') }}"</span>@endif
+        @if(request('nama_pelanggan'))Nama Pelanggan<span class="font-semibold text-gray-800">"{{ request('nama_pelanggan') }}"</span>@endif        
         @if(request('kategori_servis')) Kategori <span class="font-semibold text-gray-800">{{ ucfirst(request('kategori_servis')) }}</span> @endif
-        @if(request('status_dp')) Deposit <span class="font-semibold text-gray-800">{{ ucfirst(request('status_dp')) }}</span> @endif
+        @if(request('status_dp')) Dp <span class="font-semibold text-gray-800">{{ ucfirst(request('status_dp')) }}</span> @endif
+        @if(request('status_booking')) Booking <span class="font-semibold text-gray-800">{{ ucfirst(request('status_booking')) }}</span> @endif
     </div>
 @endif
 
@@ -153,7 +172,6 @@
                             <div class="flex items-center justify-center gap-2">
                                 {{-- Tombol Setuju (Hanya muncul jika pending DAN sudah lunas) --}}
                                 @if($b->status_booking == 'pending' && $b->status_dp == 'sudah lunas')
-                                    <!-- Hapus onsubmit, tambahkan class 'form-setuju' -->
                                     <form action="{{ route('admin.booking.terima', $b->id_booking) }}" 
                                           method="POST" 
                                           class="form-setuju inline-block m-0">
@@ -178,13 +196,16 @@
                                     </svg>
                                 </a>
                                 {{-- Tombol Edit --}}
-                                <a href="{{ route('admin.booking.edit', $b->id_booking) }}"
-                                    class="w-9 h-9 flex items-center justify-center rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all" 
-                                    title="Edit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </a>
+                                @if($b->status_booking == 'pending')
+                                    {{-- Muncul jika pending (DP belum lunas / sudah lunas) --}}
+                                    <a href="{{ route('admin.booking.edit', $b->id_booking) }}"
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all" 
+                                        title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                @endif
                                 {{-- Tombol Delete --}}
                                 <form action="{{ route('admin.booking.destroy', $b->id_booking) }}" 
                                     method="POST"
@@ -249,7 +270,7 @@
         const formsHapus = document.querySelectorAll('.form-hapus');
         formsHapus.forEach(form => {
             form.addEventListener('submit', function (e) {
-                e.preventDefault(); // Tahan submit asli
+                e.preventDefault(); 
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Data booking ini akan dihapus permanen!",

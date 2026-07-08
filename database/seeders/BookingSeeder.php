@@ -62,7 +62,7 @@ class BookingSeeder extends Seeder
         ];
 
         // 3. Generate 10 data booking dummy
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 25; $i++) {
             // Format kode booking otomatis: BKG001, BKG002, dst.
             $kodeBooking = 'BKG' . str_pad($i, 3, '0', STR_PAD_LEFT);
             $laptopRandom = $faker->randomElement($laptopBrands);

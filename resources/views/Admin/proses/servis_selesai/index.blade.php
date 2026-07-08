@@ -26,13 +26,19 @@
         <form action="{{ route('admin.servis_selesai.index') }}" method="GET">
             <div class="flex flex-col md:flex-row gap-4 md:items-end">
                 
-                {{-- Input Pencarian Nama Pelanggan --}}
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                        placeholder="Masukkan nama pelanggan..."
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
-                </div>
+            {{-- Input Pencarian Kode Servis --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Servis</label>
+                <input type="text" name="kode_servis" value="{{ request('kode_servis') }}" placeholder="Masukkan kode servis..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            {{-- Input Pencarian Nama Pelanggan --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
 
                 {{-- Filter Status Servis Selesai --}}
                 <div>
@@ -40,9 +46,9 @@
                     <select name="status_servis"
                         class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 min-w-[180px] text-sm">
                         <option value="">Semua Status</option>
-                        <option value="selesai" {{ request('status_servis') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                        <option value="bisa diambil" {{ request('status_servis') == 'bisa diambil' ? 'selected' : '' }}>Bisa Diambil</option>
-                        <option value="sudah diambil" {{ request('status_servis') == 'sudah diambil' ? 'selected' : '' }}>Sudah Diambil</option>
+                        <option value="selesai" {{ request('status_servis') == 'selesai' }}>Selesai</option>
+                        <option value="bisa diambil" {{ request('status_servis') == 'bisa diambil' }}>Bisa Diambil</option>
+                        <option value="sudah diambil" {{ request('status_servis') == 'sudah diambil' }}>Sudah Diambil</option>
                     </select>
                 </div>
 
@@ -61,14 +67,15 @@
         </form>
     </div>
 
-        {{-- Info Badge Filter Aktif --}}
-    @if(request('search') || request('status_servis'))
-        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
-            <span>Filter aktif:</span>
-            @if(request('search')) <span class="font-semibold text-gray-800">Pelanggan: "{{ request('search') }}"</span> @endif
-            @if(request('status_servis')) <span class="font-semibold text-gray-800">Status: {{ ucfirst(request('status_servis')) }}</span> @endif
-        </div>
-    @endif
+{{-- Info Badge Filter Aktif --}}
+@if(request('kode_servis') || request('nama_pelanggan') || request('status_servis'))
+    <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center"><span>Filter aktif:</span>
+        @if(request('kode_servis'))<span class="font-semibold text-gray-800">Kode Servis: "{{ request('kode_servis') }}"</span>@endif
+        @if(request('nama_pelanggan'))<span class="font-semibold text-gray-800">Pelanggan: "{{ request('nama_pelanggan') }}"</span>@endif
+        @if(request('status_servis'))<span class="font-semibold text-gray-800">Status: {{ ucfirst(request('status_servis')) }}</span>@endif
+    </div>
+@endif
+
 
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -99,7 +106,7 @@
                             <td class="px-5 py-4 text-center">{{ $s->booking->merk_tipe }}</td>
                             <td class="px-5 py-4 text-center">{{ date('d M Y', strtotime($s->tgl_masuk)) }}</td>
                             {{-- STATUS --}}
-                            <td class="px-5 py-4 text-center">
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
                                 @if($s->status_servis == 'selesai')
                                     <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">Selesai</span>
                                 @elseif($s->status_servis == 'bisa diambil')
@@ -111,6 +118,7 @@
                             <td class="px-5 py-4 text-center font-bold text-green-600">Rp {{ number_format($s->total_biaya, 0, ',', '.') }}</td>
                             <td class="px-5 py-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
+                                    {{-- Tombol Detail --}}
                                     <a href="{{ route('admin.servis_selesai.detail', $s->id_servis) }}"
                                         class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all" 
                                         title="Detail">
@@ -119,13 +127,19 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                     </a>
-                                    <a href="{{ route('admin.servis_selesai.edit', $s->id_servis) }}" 
-                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all" 
-                                        title="Edit">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </a>
+
+                                    {{-- TOMBOL EDIT --}}
+                                    @if($s->status_servis == 'bisa diambil')
+                                        <a href="{{ route('admin.servis_selesai.edit', $s->id_servis) }}" 
+                                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all" 
+                                            title="Edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                    @endif
+
+                                    {{-- Tombol Tanda Terima --}}
                                     <a href="{{ route('admin.servis_selesai.tanda_terima', $s->id_servis) }}"
                                         class="w-9 h-9 flex items-center justify-center rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all"
                                         title="Print Tanda Terima">

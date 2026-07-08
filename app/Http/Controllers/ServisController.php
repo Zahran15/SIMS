@@ -15,20 +15,34 @@ use App\Models\HistoriAktivitas;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NotifServisSelesai;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
 
 class ServisController extends Controller
 {
     public function prosesindex(Request $request)
     {
         $query = Servis::with(['booking.pelanggan', 'penugasan']);
-        if ($request->has('search') && $request->search != '') {
-            $query->whereHas('booking.pelanggan', function($q) use ($request) {
-                $q->where('nama', 'LIKE', '%' . $request->search . '%');
+        // Filter Kode Servis
+        if ($request->filled('kode_servis')) {
+            $query->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+        }
+
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->whereHas('booking.pelanggan', function ($q) use ($request) {
+                $q->where('nama', 'LIKE', $request->nama_pelanggan . '%');
             });
         }
         if ($request->has('status_servis') && $request->status_servis != '') {
             $query->where('status_servis', $request->status_servis);
         }
+
+        if ($request->has('status_penugasan') && $request->status_penugasan != '') {
+            $query->whereHas('penugasan', function ($q) use ($request) {
+                $q->where('status_penugasan', $request->status_penugasan);
+            });
+        }
+        
         $servis = $query->with('booking.pelanggan', 'penugasan')->whereIn('status_servis', ['menunggu','proses'])->latest()->paginate(10);
         return view('admin.proses.servis_proses.index', compact('servis'));
     }
@@ -37,9 +51,15 @@ class ServisController extends Controller
     {
     // Eager loading relasi utama
     $query = Servis::with(['booking.pelanggan']);
-    if ($request->has('search') && $request->search != '') {
-        $query->whereHas('booking.pelanggan', function($q) use ($request) {
-            $q->where('nama', 'LIKE', '%' . $request->search . '%');
+    // Filter Kode Servis
+    if ($request->filled('kode_servis')) {
+        $query->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+    }
+
+    // Filter Nama Pelanggan
+    if ($request->filled('nama_pelanggan')) {
+        $query->whereHas('booking.pelanggan', function ($q) use ($request) {
+            $q->where('nama', 'LIKE', $request->nama_pelanggan . '%');
         });
     }
     if ($request->has('status_servis') && $request->status_servis != '') {
@@ -220,48 +240,6 @@ class ServisController extends Controller
         'keterangan' => 'Data servis diperbarui. Status saat ini: ' . ucwords($request->status_servis) . '. Total biaya diperkirakan Rp ' . number_format($servis->total_biaya, 0, ',', '.'),
         'tanggal'    => Carbon::now()
     ]);
-
-    if ($statusLama != $request->status_servis && in_array($request->status_servis, ['selesai', 'bisa diambil'])) {
-            if ($servis->booking && $servis->booking->pelanggan) {
-                $emailPelanggan = $servis->booking->pelanggan->email;
-                $namaPelanggan  = $servis->booking->pelanggan->nama;
-                $namaPerangkat  = $servis->booking->nama_laptop ?? 'Perangkat Laptop';
-                try {
-                    Notification::route('mail', $emailPelanggan)->notify(new NotifServisSelesai($namaPelanggan, $namaPerangkat));
-                } catch (\Exception $e) {
-                }
-            }
-        }
-
-        if (in_array($servis->status_servis, ['selesai', 'bisa diambil', 'sudah diambil'])) {
-            if ($statusLama != 'selesai' && $request->status_servis == 'selesai') {
-                $cekPelunasan = Pembayaran::where('id_servis', $servis->id_servis)->where('jenis_pembayaran', 'pelunasan')->first();
-                if (!$cekPelunasan) {
-                    // 1. Hitung total DP yang SUKSES dibayar untuk booking ini
-                    $totalDP = Pembayaran::where('id_booking', $servis->id_booking)
-                        ->where('jenis_pembayaran', 'dp')
-                        ->where('status_pembayaran', 'sukses')
-                        ->sum('nominal');
-        
-                    // 2. Nominal pelunasan adalah total biaya dikurangi DP
-                    $nominalPelunasan = $servis->total_biaya - $totalDP;
-        
-                    // 3. Pastikan nominal tidak minus (jika DP lebih besar dari biaya servis karena suatu hal)
-                    if ($nominalPelunasan < 0) {
-                        $nominalPelunasan = 0;
-                    }
-                    Pembayaran::create([
-                        'id_booking'        => $servis->id_booking,
-                        'id_servis'         => $servis->id_servis,
-                        'jenis_pembayaran'  => 'pelunasan',
-                        'metode_pembayaran' => 'transfer', 
-                        'nominal'           => $nominalPelunasan,
-                        'status_pembayaran' => 'pending'
-                    ]);
-                }
-            }
-            return redirect()->route('admin.servis_selesai.index')->with('success', 'Servis berhasil diselesaikan');
-        }
             return redirect()->route('admin.servis_proses.index')->with('success', 'Servis berhasil diupdate'
         );
     }
@@ -309,5 +287,81 @@ class ServisController extends Controller
         $total = $totalJasa + $totalSparepart;
         $servis->update(['total_biaya' => $total]);
         return $total;
+    }
+
+    // 🔹 AKSI CEPAT SELESAI DARI INDEX (PERBAIKAN NOTIFIKASI EMAIL)
+    public function quickSelesai($id)
+    {
+        // Eager load relasi yang sama persis seperti halaman update
+        $servis = Servis::with(['booking.pelanggan'])->findOrFail($id);
+        $statusLama = $servis->status_servis;
+
+        // Proteksi: Pastikan hanya status 'proses' yang bisa menembus tombol ini
+        if ($statusLama != 'proses') {
+            return back()->with('error', 'Hanya servis berstatus proses yang dapat diselesaikan langsung.');
+        }
+
+        // 1. Update status utama ke selesai
+        $servis->update([
+            'status_servis' => 'selesai'
+        ]);
+
+        // 2. Buat Log Histori Aktivitas
+        HistoriAktivitas::create([
+            'id_user'    => Auth::id(),
+            'id_servis'  => $servis->id_servis,
+            'aktivitas'  => 'Status: Selesai',
+            'keterangan' => 'Servis diselesaikan cepat via tombol indeks. Status saat ini: Selesai. Total biaya Rp ' . number_format($servis->total_biaya, 0, ',', '.'),
+            'tanggal'    => Carbon::now()
+        ]);
+
+        // 3. PROSES KIRIM NOTIFIKASI EMAIL 
+        if ($servis->booking && $servis->booking->pelanggan) {
+            $emailPelanggan = $servis->booking->pelanggan->email;
+            $namaPelanggan  = $servis->booking->pelanggan->nama;
+            $namaPerangkat  = $servis->booking->merk_tipe;            
+            Log::info('Mencoba kirim notif quickSelesai', [
+                'email' => $emailPelanggan,
+                'nama' => $namaPelanggan,
+                'perangkat' => $namaPerangkat,
+            ]);
+
+            try {
+                Notification::route('mail', $emailPelanggan)->notify(
+                    new NotifServisSelesai($namaPelanggan, $namaPerangkat)
+                );
+                Log::info('Notif quickSelesai berhasil dikirim ke: ' . $emailPelanggan);
+            } catch (\Throwable $e) {
+                Log::error('Gagal kirim notif servis selesai (quickSelesai): ' . $e->getMessage());
+            }
+        }
+
+        // 4. GENERATE TAGIHAN PELUNASAN OTOMATIS
+        $cekPelunasan = Pembayaran::where('id_servis', $servis->id_servis)->where('jenis_pembayaran', 'pelunasan')->first();
+        if (!$cekPelunasan) {
+            // Hitung total DP sukses
+            $totalDP = Pembayaran::where('id_booking', $servis->id_booking)
+                ->where('jenis_pembayaran', 'dp')
+                ->where('status_pembayaran', 'sukses')
+                ->sum('nominal');
+
+            // Sisa Pelunasan = Total Biaya - DP
+            $nominalPelunasan = $servis->total_biaya - $totalDP;
+            if ($nominalPelunasan < 0) {
+                $nominalPelunasan = 0;
+            }
+
+            Pembayaran::create([
+                'id_booking'        => $servis->id_booking,
+                'id_servis'         => $servis->id_servis,
+                'jenis_pembayaran'  => 'pelunasan',
+                'metode_pembayaran' => 'transfer', 
+                'nominal'           => $nominalPelunasan,
+                'status_pembayaran' => 'pending'
+            ]);
+        }
+
+        // Redirect ke halaman servis selesai membawa pesan sukses
+        return redirect()->route('admin.servis_selesai.index')->with('success', 'Servis berhasil diselesaikan');
     }
 }

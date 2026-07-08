@@ -65,7 +65,7 @@ $stats = [
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-full">
             <div class="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-4 flex justify-between items-center">
                 <h5 class="font-bold uppercase text-xs text-white tracking-widest flex items-center">
-                    Tren Pendapatan Bulanan
+                    Pendapatan Bulanan
                 </h5>
                 <span class="text-[10px] text-gray-400 font-bold bg-gray-900 bg-opacity-30 px-2 py-1 rounded">Tahun {{ date('Y') }}</span>
             </div>

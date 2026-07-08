@@ -15,7 +15,7 @@ class RiwayatServisController extends Controller
         if (!$id_pelanggan) {abort(401, 'Silahkan login terlebih dahulu.');
         }
         $riwayat = Servis::with(['booking'])->whereHas('booking', function ($query) use ($id_pelanggan) {$query->where('id_pelanggan', $id_pelanggan);
-            })->where('status_servis', 'selesai') ->latest()->paginate(10);
+            })->whereIn('status_servis', ['selesai', 'bisa diambil', 'sudah diambil'])->latest()->paginate(10);
         return view('pelanggan.proses.riwayat_servis.index', compact('riwayat'));
     }
 

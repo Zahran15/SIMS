@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <span class="text-gray-400 block">Spesifikasi</span>
-                    <span class="text-gray-800">{{ $servis->booking->spesifikasi ?? '-' }}</span>
+                    <span class="text-gray-800">{{ $servis->booking->spesifikasi }}</span>
                 </div>
             </div>
         </div>

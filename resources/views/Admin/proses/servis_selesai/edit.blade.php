@@ -66,7 +66,6 @@
                 <div class="relative">
                     <select name="status_servis"
                         class="w-full border border-gray-300 rounded-2xl p-3 bg-white text-gray-800 focus:ring-4 focus:ring-green-500/10 focus:border-green-600 outline-none transition-all appearance-none cursor-pointer text-sm font-semibold shadow-sm">
-                        <option value="selesai" {{ $servis->status_servis == 'selesai' ? 'selected' : '' }}>Selesai</option>
                         <option value="bisa diambil" {{ $servis->status_servis == 'bisa diambil' ? 'selected' : '' }}>Bisa Diambil</option>
                         <option value="sudah diambil" {{ $servis->status_servis == 'sudah diambil' ? 'selected' : '' }}>Sudah Diambil</option>
                     </select>

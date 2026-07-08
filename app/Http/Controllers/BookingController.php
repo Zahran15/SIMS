@@ -7,10 +7,12 @@ use App\Models\Booking;
 use App\Models\Pelanggan;
 use App\Models\Servis;
 use App\Models\Pembayaran;
-use App\Models\PenugasanTeknisi;
 use App\Models\HistoriAktivitas;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Notifications\NotifBookingDiterima;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -18,10 +20,15 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         $query = Booking::query();
-        // 1. Filter Cari Nama Pelanggan (Melalui Relasi Pelanggan)
-        if ($request->has('search') && $request->search != '') {
-            $query->whereHas('pelanggan', function($q) use ($request) {
-                $q->where('nama', 'LIKE', $request->search . '%');
+        // Filter Kode Booking
+        if ($request->filled('kode_booking')) {
+            $query->where('kode_booking', 'LIKE', '%' . $request->kode_booking . '%');
+        }
+
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->whereHas('pelanggan', function ($q) use ($request) {
+                $q->where('nama', 'LIKE', $request->nama_pelanggan . '%');
             });
         }
         // 2. Filter Berdasarkan Kategori Servis
@@ -29,9 +36,13 @@ class BookingController extends Controller
             $query->where('kategori_servis', $request->kategori_servis);
         }
         // 3. Filter Berdasarkan Status Deposit
-        if ($request->has('status_dp') && $request->status_deposit != '') {
-            $query->where('status_dp', $request->status_deposit);
+        if ($request->has('status_dp') && $request->status_dp != '') {
+            $query->where('status_dp', $request->status_dp);
         }
+        if ($request->has('status_booking') && $request->status_booking != '') {
+            $query->where('status_booking', $request->status_booking);
+        }
+
         if (Auth::guard('web')->check() && Auth::user()->role == 'admin') { 
             $booking = $query->with('pelanggan')->latest()->paginate(10);
             return view('admin.proses.booking.index', compact('booking'));
@@ -242,14 +253,13 @@ class BookingController extends Controller
 
     public function terima($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('pelanggan')->findOrFail($id);
         // 1. Update status booking menjadi diterima
         $booking->update(['status_booking' => 'diterima']);
         // 2. Cek apakah data servis untuk booking ini sudah pernah dibuat/belum (biar gak double)
         $cekServis = Servis::where('id_booking', $booking->id_booking)->first();
         if (!$cekServis) {
             $kode_servis = 'SRV-' . date('Ymd') . '-' . str_pad(Servis::count() + 1, 3, '0', STR_PAD_LEFT);
-            // Buat data Servis Baru
             $newServis = Servis::create([
                 'id_booking'        => $booking->id_booking,
                 'kode_servis'       => $kode_servis,
@@ -258,16 +268,7 @@ class BookingController extends Controller
                 'status_servis'     => 'menunggu',                
                 'total_biaya'       => 0
             ]);
-
-            // 3. Buat Otomatis Penugasan Teknisi (Status: Belum Ditugaskan / Menunggu Plotting)
-            PenugasanTeknisi::create([
-                'id_servis'         => $newServis->id_servis,
-                'id_user'           => null,
-                'status_tugas'      => 'menunggu', 
-                'tanggal_tugas'     => Carbon::now(),
-            ]);
-
-            // 4. Catat ke Histori Aktivitas
+            // 3. Catat ke Histori Aktivitas
             HistoriAktivitas::create([
                 'id_user'    => Auth::id(), 
                 'id_servis'  => $newServis->id_servis,
@@ -277,6 +278,30 @@ class BookingController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil disetujui, data servis & penugasan telah dibuat!');
+        // 4. PROSES KIRIM NOTIFIKASI EMAIL KEPADA PELANGGAN
+        if ($booking->pelanggan) {
+            $emailPelanggan = $booking->pelanggan->email;
+            $namaPelanggan  = $booking->pelanggan->nama;
+            $kodeBooking    = $booking->kode_booking;
+            $merkTipe       = $booking->merk_tipe;
+
+            Log::info('Mencoba kirim notif terimaBooking', [
+                'email'     => $emailPelanggan,
+                'nama'      => $namaPelanggan,
+                'booking'   => $kodeBooking,
+                'perangkat' => $merkTipe,
+            ]);
+
+            try {
+                Notification::route('mail', $emailPelanggan)->notify(
+                    new NotifBookingDiterima($namaPelanggan, $kodeBooking, $merkTipe)
+                );
+                Log::info('Notif terimaBooking berhasil dikirim ke: ' . $emailPelanggan);
+            } catch (\Throwable $e) {
+                Log::error('Gagal kirim notif booking diterima: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil disetujui dan notif email telah dikirim.');
     }
 }

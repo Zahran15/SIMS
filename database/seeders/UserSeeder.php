@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'email' => 'admin@gmail.com',
                 'no_hp' => '081234567890',
-                'password' => Hash::make('admin'), // Password: admin
+                'password' => Hash::make('admin'),
                 'status' => 'aktif',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
                 'role' => 'owner',
                 'email' => 'owner@gmail.com',
                 'no_hp' => '081234567891',
-                'password' => Hash::make('owner'), // Password: owner
+                'password' => Hash::make('owner'),
                 'status' => 'aktif',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
                 'role' => 'teknisi',
                 'email' => 'teknisi@gmail.com',
                 'no_hp' => '081234567892',
-                'password' => Hash::make('teknisi'), // Password: teknisi
+                'password' => Hash::make('teknisi'), 
                 'status' => 'aktif',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -54,11 +54,10 @@ class UserSeeder extends Seeder
         // 2. Data Dummy Tambahan (Menggunakan Faker)
         $faker = Faker::create('id_ID'); 
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             DB::table('users')->insert([
                 'nama' => $faker->name,
-                // Dummy tetap mengacak ke tiga role yang tersedia
-                'role' => $faker->randomElement(['admin', 'owner', 'teknisi']),
+                'role' => $faker->randomElement(['admin', 'teknisi']),
                 'email' => $faker->unique()->safeEmail,
                 'no_hp' => $faker->phoneNumber,
                 'password' => Hash::make('password123'), 

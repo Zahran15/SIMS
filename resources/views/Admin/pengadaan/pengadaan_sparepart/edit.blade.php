@@ -45,6 +45,7 @@
                             <option value="dipesan" {{ $pengadaan->status_pengadaan == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
                             <option value="diterima" {{ $pengadaan->status_pengadaan == 'diterima' ? 'selected' : '' }}>Diterima</option>
                             <option value="dibatalkan" {{ $pengadaan->status_pengadaan == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                            <option value="diajukan" {{ $pengadaan->status_pengadaan == 'diajukan' ? 'selected' : ''}}>Diajukan</option>
                         </select>
                     </div>
                 </div>

@@ -4,9 +4,7 @@
 
 @section('content')
 
-<div class="p-4">
-
-    {{-- HEADER HALAMAN & TOMBOL --}}
+{{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
             <h2 class="text-2xl font-bold text-gray-800">Detail Pengerjaan Servis</h2>
@@ -14,6 +12,12 @@
         </div>
         
         <div class="flex items-center gap-2">
+            {{-- 🆕 TOMBOL EDIT PENUGASAN/STATUS --}}
+            <a href="{{ route('teknisi.servis_kerja.edit', $penugasan->id_penugasan) }}" 
+               class="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs shadow-sm transition-colors flex items-center gap-1">
+                Edit Pengerjaan
+            </a>
+
             <a href="{{ route('teknisi.servis_kerja.index') }}" 
                class="px-3 py-1.5 rounded bg-gray-500 hover:bg-gray-600 text-white font-medium text-xs shadow-sm transition-colors">
                 Kembali
@@ -24,13 +28,14 @@
     {{-- LAYOUT MENURUN --}}
     <div class="space-y-4">
 
-        {{-- BLOK 1: INFORMASI UTAMA SERVIS --}}
+        {{-- BLOK 1: INFORMASI UTAMA SERVIS & DETAIL DATA BOOKING --}}
         <div class="bg-white rounded border border-gray-200 shadow-sm">
             <div class="px-4 py-2 border-b bg-gray-50">
                 <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Informasi Perangkat & Status</h3>
             </div>
 
-            <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+            {{-- Info Utama --}}
+            <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs border-b border-gray-100">
                 <div>
                     <span class="text-gray-400 block">Kode Servis</span>
                     <strong class="text-blue-600 text-sm">{{ $servis->kode_servis }}</strong>
@@ -46,11 +51,9 @@
                 <div>
                     <span class="text-gray-400 block">Prioritas Tugas</span>
                     <span class="mt-0.5 inline-block px-2.5 py-0.5 text-[11px] rounded-full font-bold uppercase
-                        {{ $penugasan->prioritas == 'urgent' ? 'bg-purple-100 text-purple-700' : '' }}
-                        {{ $penugasan->prioritas == 'tinggi' ? 'bg-red-100 text-red-700' : '' }}
-                        {{ $penugasan->prioritas == 'normal' || $penugasan->prioritas == 'sedang' ? 'bg-yellow-100 text-yellow-700' : '' }}
-                        {{ $penugasan->prioritas == 'rendah' ? 'bg-green-100 text-green-700' : '' }}">
-                        {{ $penugasan->prioritas }}
+                        {{ $penugasan->prioritas == 'berat' ? 'bg-red-100 text-red-700' : '' }}
+                        {{ $penugasan->prioritas == 'sedang' ? 'bg-yellow-100 text-yellow-700' : '' }}
+                        {{ $penugasan->prioritas == 'ringan' ? 'bg-green-100 text-green-700' : '' }}">
                     </span>
                 </div>
                 <div>
@@ -60,12 +63,48 @@
                     </span>
                 </div>
             </div>
-            
-            {{-- TAMPILKAN KELUHAN DI SINI --}}
-            <div class="px-4 pb-4 text-xs">
-                <span class="text-gray-400 block mb-1">Keluhan / Kerusakan:</span>
-                <div class="bg-gray-50 border rounded p-2 text-gray-700">
-                    {{ $servis->keluhan ?? $servis->booking->keluhan ?? 'Tidak ada catatan keluhan khusus.' }}
+
+            {{-- 🆕 TAMBAHAN FIELD BARU DARI BOOKING (Grid Administratif & Fisik) --}}
+            <div class="px-4 py-3 bg-gray-50/50 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs border-b border-gray-100">
+                <div>
+                    <span class="text-gray-400 block">Kode Booking Asal</span>
+                    <span class="text-gray-700 font-medium">{{ $servis->booking->kode_booking }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block">Tanggal Booking Masuk</span>
+                    <span class="text-gray-700 font-medium">{{ date('d M Y', strtotime($servis->booking->tgl_booking)) }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block">Kategori Kendala (User)</span>
+                    <span class="text-indigo-700 font-bold uppercase text-[10px] bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 inline-block mt-0.5">
+                        {{ $servis->booking->kategori_servis }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block">Metode Pengembalian Unit</span>
+                    <span class="text-gray-700 font-medium capitalize">{{ $servis->booking->metode_pengembalian }}</span>
+                </div>
+            </div>
+
+            {{-- 🆕 TAMBAHAN FIELD BARU DARI BOOKING (Fisik Perangkat & Keluhan Lengkap) --}}
+            <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div>
+                    <span class="text-gray-400 block mb-1">Kelengkapan Unit Bawaan:</span>
+                    <div class="bg-white border rounded p-2 text-gray-700 font-medium">
+                        {{ $servis->booking->kelengkapan ?? 'Tidak ada kelengkapan tambahan.' }}
+                    </div>
+                </div>
+                <div>
+                    <span class="text-gray-400 block mb-1">Spesifikasi Detail Perangkat:</span>
+                    <div class="bg-white border rounded p-2 text-gray-600">
+                        {{ $servis->booking->spesifikasi ?? 'Tidak ada detail spesifikasi.' }}
+                    </div>
+                </div>
+                <div>
+                    <span class="text-red-400 font-bold block mb-1">Keluhan / Deskripsi Masalah Pelanggan:</span>
+                    <div class="bg-red-50/40 border border-red-100 rounded p-2 text-red-900 font-medium">
+                        {{ $servis->keluhan ?? $servis->booking->keluhan ?? 'Tidak ada catatan keluhan khusus.' }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,7 +177,7 @@
             </div>
         </div>
 
-{{-- BLOK 3: CATATAN TEKNISI --}}
+        {{-- BLOK 3: CATATAN TEKNISI --}}
         <div class="bg-white rounded border border-gray-200 shadow-sm">
             <div class="px-4 py-2 border-b bg-gray-50">
                 <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wide">Riwayat Catatan Pengerjaan</h3>
@@ -151,5 +190,4 @@
             </div>
         </div>
     </div>
-</div>
 @endsection

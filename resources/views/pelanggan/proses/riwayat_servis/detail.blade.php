@@ -6,7 +6,7 @@
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3 print:hidden">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Nota Digital Servis</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Detail Riwayat Servis</h2>
             <p class="text-gray-500 text-xs">Rincian resmi invoice penanganan dan perbaikan perangkat pelanggan</p>
         </div>
         
@@ -24,7 +24,7 @@
         {{-- BLOK HEADER NOTA --}}
         <div class="flex flex-col sm:flex-row sm:justify-between gap-2 border-b-2 border-gray-800 pb-3">
             <div>
-                <span class="text-xs uppercase font-bold tracking-wider text-gray-400 block">Invoice / Nota Transaksi</span>
+                <span class="text-xs uppercase font-bold tracking-wider text-gray-400 block">Kode Servis</span>
                 <strong class="text-xl font-black text-gray-900 tracking-wide">{{ $riwayat->kode_servis }}</strong>
             </div>
             <div class="sm:text-right">
@@ -38,7 +38,7 @@
         {{-- BLOK INFORMASI PIHAK & PERANGKAT --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs border-b border-gray-100 pb-4">
             <div>
-                <h4 class="font-bold text-gray-400 uppercase tracking-wide mb-1.5">Pelanggan / Pemilik:</h4>
+                <h4 class="font-bold text-gray-400 uppercase tracking-wide mb-1.5">Pelanggan:</h4>
                 <div class="space-y-0.5 text-gray-800">
                     <p class="font-bold text-sm">{{ $riwayat->booking->pelanggan->nama }}</p>
                     <p>No. HP: <span class="font-medium text-gray-700">{{ $riwayat->booking->pelanggan->no_hp }}</span></p>
@@ -50,7 +50,7 @@
                 <div class="space-y-1 text-gray-800">
                     <p>Perangkat: <span class="font-semibold">{{ $riwayat->booking->merk_tipe }}</span></p>
                     <p>Spesifikasi: <span class="text-gray-600">{{ $riwayat->booking->spesifikasi ?? '-' }}</span></p>
-                    <p>Ref. Booking: <span class="font-mono font-semibold text-gray-600">{{ $riwayat->booking->kode_booking }}</span></p>
+                    <p>Kode Booking: <span class="font-mono font-semibold text-gray-600">{{ $riwayat->booking->kode_booking }}</span></p>
                 </div>
             </div>
         </div>
@@ -88,7 +88,6 @@
                                     {{ $jasa->jasa->nama_jasa }}
                                 </td>
                                 <td class="px-4 py-2 text-center">1</td>
-                                {{-- FIX: Menggunakan $jasa->harga dan $jasa->subtotal --}}
                                 <td class="px-4 py-2 text-right">Rp {{ number_format($jasa->harga, 0, ',', '.') }}</td>
                                 <td class="px-4 py-2 text-right font-bold text-gray-800">Rp {{ number_format($jasa->subtotal, 0, ',', '.') }}</td>
                             </tr>
@@ -103,9 +102,7 @@
                                     <span class="text-[10px] font-bold bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded mr-1 uppercase">Part</span>
                                     {{ $sp->sparepart->nama_sparepart }}
                                 </td>
-                                {{-- FIX: Menggunakan $sp->qty --}}
                                 <td class="px-4 py-2 text-center">{{ $sp->qty }}</td>
-                                {{-- FIX: Menggunakan $sp->harga dan $sp->subtotal --}}
                                 <td class="px-4 py-2 text-right">Rp {{ number_format($sp->harga, 0, ',', '.') }}</td>
                                 <td class="px-4 py-2 text-right font-bold text-gray-800">Rp {{ number_format($sp->subtotal, 0, ',', '.') }}</td>
                             </tr>
@@ -125,24 +122,43 @@
         
             {{-- AKUMULASI BIAYA BAWAH --}}
             <div class="bg-gray-50 border-t border-gray-200 p-3 flex justify-end">
-                <div class="w-full sm:w-64 space-y-1.5 text-xs">
+                <div class="w-full sm:w-72 space-y-1.5 text-xs">
+                    {{-- 1. Total Akumulasi Jasa --}}
                     <div class="flex justify-between text-gray-500">
                         <span>Total Jasa:</span>
-                        {{-- FIX: Menggunakan sum('subtotal') --}}
                         <span class="font-medium text-gray-800">Rp {{ number_format($riwayat->detailJasa->sum('subtotal'), 0, ',', '.') }}</span>
                     </div>
+
+                    {{-- 2. Total Akumulasi Sparepart --}}
                     <div class="flex justify-between text-gray-500">
                         <span>Total Suku Cadang:</span>
-                        {{-- FIX: Menggunakan sum('subtotal') --}}
                         <span class="font-medium text-gray-800">Rp {{ number_format($riwayat->detailSparepart->sum('subtotal'), 0, ',', '.') }}</span>
                     </div>
-                    <div class="flex justify-between text-sm font-bold text-gray-900 pt-1.5 border-t border-gray-200">
-                        <span>Total Pembayaran:</span>
-                        <span class="text-base text-blue-600 font-extrabold">Rp {{ number_format($riwayat->total_biaya, 0, ',', '.') }}</span>
+
+                    {{-- 3. Subtotal Kotor Sebelum Potong DP --}}
+                    @php
+                        $subtotal_kotor = $riwayat->detailJasa->sum('subtotal') + $riwayat->detailSparepart->sum('subtotal');
+                        // Ambil nominal DP jika ada, jika tidak ada default ke 50000 sesuai case kamu
+                        $nominal_dp = $riwayat->booking->nominal_dp ?? 50000; 
+                    @endphp
+                    <div class="flex justify-between text-gray-500 pt-1 border-t border-dashed border-gray-200">
+                        <span>Subtotal Biaya:</span>
+                        <span class="font-semibold text-gray-800">Rp {{ number_format($subtotal_kotor, 0, ',', '.') }}</span>
+                    </div>
+
+                    {{-- 4. Baris Pengurang DP --}}
+                    <div class="flex justify-between text-red-600 bg-red-50 px-1.5 py-0.5 rounded font-medium">
+                        <span>Potongan DP (Sudah Bayar):</span>
+                        <span>- Rp {{ number_format($nominal_dp, 0, ',', '.') }}</span>
+                    </div>
+
+                    {{-- 5. Total Biaya Akhir yang Harus Dibayar Saat Ambil Laptop --}}
+                    <div class="flex justify-between text-sm font-bold text-gray-900 pt-1.5 border-t border-gray-300">
+                        <span>Sisa Pembayaran (Lunas):</span>
+                        <span class="text-base text-green-600 font-black">Rp {{ number_format($riwayat->total_biaya - $nominal_dp, 0, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 @endsection

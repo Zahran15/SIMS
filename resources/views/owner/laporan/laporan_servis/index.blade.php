@@ -76,11 +76,14 @@ $stats = [
                             <td class="px-6 py-4 text-center">{{ $ds->teknisi }}</td>
                             <td class="px-6 py-4 text-center font-medium text-gray-800">{{ $ds->perkiraan_selesai }}</td>
                             <td class="px-6 py-4 text-center font-bold text-gray-800">Rp {{ number_format($ds->total_biaya, 0, ',', '.') }}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold 
-                                    {{ $ds->status_servis == 'Selesai' ? 'bg-green-100 text-green-700' : '' }}
-                                    {{ $ds->status_servis == 'Proses' ? 'bg-yellow-100 text-yellow-700' : '' }}
-                                    {{ $ds->status_servis == 'Dibatalkan' ? 'bg-red-100 text-red-700' : '' }}">
+                            <td class="px-6 py-4 text-center justify-center align-middle">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
+                                    {{ $ds->status_servis == 'sudah diambil' ? 'bg-green-100 text-green-700' : '' }}
+                                    {{ $ds->status_servis == 'bisa diambil' ? 'bg-green-100 text-green-700' : '' }}
+                                    {{ $ds->status_servis == 'selesai' ? 'bg-green-100 text-green-700' : '' }}
+                                    {{ $ds->status_servis == 'menunggu' ? 'bg-yellow-100 text-yellow-700' : '' }}
+                                    {{ $ds->status_servis == 'proses' ? 'bg-yellow-100 text-yellow-700' : '' }}
+                                    {{ $ds->status_servis == 'dibatalkan' ? 'bg-red-100 text-red-700' : '' }}">
                                     {{ $ds->status_servis }}
                                 </span>
                             </td>

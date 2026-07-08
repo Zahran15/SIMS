@@ -26,10 +26,6 @@
     </style>
 </head>
 <body class="bg-reset flex items-center justify-center min-h-screen p-4 relative overflow-hidden">
-    
-    <a href="/login" class="absolute top-8 left-8 text-white/70 hover:text-white transition-all hidden md:flex items-center gap-2 font-bold text-xs uppercase tracking-widest z-20">
-        <i class="fas fa-arrow-left"></i> Kembali ke Login
-    </a>
 
     <div class="glass-card rounded-[2.5rem] shadow-2xl flex overflow-hidden w-full max-w-4xl min-h-[580px] z-10 border border-white/20"
          x-data="{ 
@@ -201,9 +197,10 @@
                 </div>
             </form>
 
-            <div class="text-xs text-center mt-6 md:hidden">
-                <a href="/login" class="text-blue-600 font-bold uppercase tracking-wider hover:underline">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Login
+            <div class="mt-6 text-center">
+                <a href="/login" class="text-blue-600 hover:text-green-700 font-semibold text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali ke Login
                 </a>
             </div>
         </div>

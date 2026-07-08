@@ -28,7 +28,7 @@ use App\Http\Controllers\PembayaranController;
 Route::get('/', [AuthController::class, 'showWelcome']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegister']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPelanggan']);
 Route::get('/logout', [AuthController::class, 'logout']);
 Route::get('/reset', [AuthController::class, 'showResetForm'])->name('password.request');
@@ -109,6 +109,7 @@ Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(functi
     Route::post('/servis/{id}/ajax-jasa',[ServisController::class, 'ajaxTambahJasa'])->name('admin.servis.ajaxJasa');
     Route::post('/servis/{id}/ajax-sparepart',[ServisController::class, 'ajaxTambahSparepart'])->name('admin.servis.ajaxSparepart');
     Route::get('/servis_proses/nota/{id}', [ServisController::class, 'nota'])->name('admin.servis_proses.nota');
+    Route::post('/servis_proses/{id}/quick-selesai', [ServisController::class, 'quickSelesai'])->name('admin.servis_proses.quick_selesai');
     // SERVIS SELESAI
     Route::get('/servis_selesai', [ServisController::class, 'selesaiindex'])->name('admin.servis_selesai.index');
     Route::get('/servis_selesai/detail/{id}', [ServisController::class, 'detailSelesai'])->name('admin.servis_selesai.detail');

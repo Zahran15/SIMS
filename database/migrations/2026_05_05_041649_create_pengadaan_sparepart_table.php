@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pengadaan_sparepart', function (Blueprint $table) {
-            $table->id('id_pengadaan');
-            $table->foreignId('id_sparepart')->constrained('sparepart', 'id_sparepart')->cascadeOnDelete();
+            $table->increments('id_pengadaan'); 
+            $table->unsignedInteger('id_sparepart');
+            $table->foreign('id_sparepart')->references('id_sparepart')->on('sparepart')->cascadeOnDelete();
             $table->date('tgl_pesan');
             $table->integer('jumlah');
             $table->decimal('harga_beli', 12, 2);
             $table->decimal('total', 12, 2);
-            $table->enum('status_pengadaan', ['dipesan', 'diterima', 'dibatalkan'])->default('dipesan'); 
+            $table->enum('status_pengadaan', ['dipesan', 'diterima', 'dibatalkan', 'diajukan'])->default('diajukan');
             $table->timestamps();
         });
     }

@@ -18,22 +18,62 @@
             @csrf
 
             <div class="p-8 space-y-6">
-                {{-- PILIH SPAREPART --}}
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Komponen / Sparepart</label>
-                    <select name="id_sparepart" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 appearance-none bg-no-repeat text-gray-700" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: right 0.75rem center; background-size: 1.2em;" required>
-                        <option value="" disabled selected>-- Pilih Sparepart --</option>
-                        @foreach($sparepart as $s)
-                            <option value="{{ $s->id_sparepart }}">{{ $s->nama_sparepart }} (Stok Saat Ini: {{ $s->stok }} Pcs)</option>
-                        @endforeach
-                    </select>
+            {{-- PILIH SPAREPART (Pencarian Berdasarkan Nama - Sederhana & Ramah Dosen) --}}
+            <div class="bg-white border rounded-xl p-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Pilih Komponen / Sparepart</label>
+                <div x-data="{
+                        open: false,
+                        searchNama: '',
+                        selectedText: '',
+                        spareparts: [
+                            @foreach($sparepart as $s)
+                            { id: '{{ $s->id_sparepart }}', nama: '{{ $s->nama_sparepart }}', stok: '{{ $s->stok }}' },
+                            @endforeach
+                        ],
+                        // Fungsi ketika sparepart dipilih dari list dropdown
+                        pilih(s) {
+                            this.selectedText = s.nama + ' (Stok: ' + s.stok + ' Pcs)';
+                            this.searchNama = s.nama; // Mengisi kolom input dengan nama yang dipilih
+                            this.open = false;
+                        }
+                     }"
+                     @click.away="open = false" class="relative">
+
+                    {{-- Hidden Input untuk mengirim ID Sparepart asli ke Controller Laravel --}}
+                    <input type="hidden" name="id_sparepart" :value="selectedText ? spareparts.find(s => s.nama === searchNama)?.id : ''" required>
+
+                    {{-- Kolom Input Pencarian sekaligus Tampilan Data --}}
+                    <input type="text" x-model="searchNama" @focus="open = true"@input="selectedText = ''"placeholder="Ketik nama sparepart (Contoh: RAM)..." 
+                           class="w-full border rounded-lg p-2.5 text-sm bg-white outline-none focus:border-blue-500">
+
+                    {{-- Dropdown Hasil Pencarian --}}
+                    <div x-show="open && searchNama" class="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-md max-h-40 overflow-y-auto p-1">
+                        <ul class="text-sm">
+                            {{-- Filter menggunakan .includes() agar pencarian nama bersifat bebas --}}
+                            <template x-for="s in spareparts.filter(s => s.nama.toLowerCase().includes(searchNama.toLowerCase()))">
+                                <li>
+                                    <button type="button" @click="pilih(s)" class="w-full text-left p-2 hover:bg-blue-50 rounded flex justify-between">
+                                        <span class="text-gray-700" x-text="s.nama"></span>
+                                        <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500" x-text="'Stok: ' + s.stok"></span>
+                                    </button>
+                                </li>
+                            </template>
+
+                            {{-- Jika Hasil Pencarian Kosong --}}
+                            <template x-if="spareparts.filter(s => s.nama.toLowerCase().includes(searchNama.toLowerCase())).length === 0">
+                                <li class="p-2 text-gray-400 text-xs text-center">Sparepart tidak ditemukan</li>
+                            </template>
+                        </ul>
+                    </div>
+
                 </div>
+            </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {{-- TANGGAL PESAN --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tanggal Pesan</label>
-                        <input type="date" name="tgl_pesan" value="{{ date('Y-m-d') }}" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-gray-700" required>
+                        <input type="date" name="tgl_pesan" value="{{ date('d M Y') }}" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-gray-700" required>
                     </div>
 
                     {{-- STATUS PENGADAAN --}}
@@ -44,6 +84,7 @@
                             <option value="dipesan">Dipesan</option>
                             <option value="diterima">Diterima</option>
                             <option value="dibatalkan">Dibatalkan</option>
+                            <option value="diajukan">Diajukan</option>
                         </select>
                     </div>
                 </div>

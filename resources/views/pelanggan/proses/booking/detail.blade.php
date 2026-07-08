@@ -3,8 +3,6 @@
 @section('title', 'Detail Booking Saya')
 
 @section('content')
-<div class="p-4">
-
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
@@ -45,7 +43,7 @@
                     <span class="text-gray-800 font-semibold">{{ $booking->merk_tipe }}</span>
                 </div>
                 <div>
-                    <span class="text-gray-400 block">Estimasi Kategori</span>
+                    <span class="text-gray-400 block">Kategori Servis</span>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase inline-block mt-0.5">
                         {{ $booking->kategori_servis }}
                     </span>
@@ -82,14 +80,14 @@
 
             <div class="p-4 grid grid-cols-3 gap-4 text-xs">
                 <div>
-                    <span class="text-gray-400 block">Metode Pengambilan</span>
+                    <span class="text-gray-400 block">Metode Pengembalian</span>
                     <span class="text-gray-800 font-bold uppercase tracking-wide mt-0.5 block">
-                        {{ $booking->metode_pengambilan == 'diantar' ? 'Diantar' : 'Ambil Sendiri' }}
+                        {{ $booking->metode_pengembalian == 'diantar' ? 'Diantar Kurir' : 'Ambil Sendiri' }}
                     </span>
                 </div>
                 <div>
-                    <span class="text-gray-400 block mb-1">Status Deposit</span>
-                    @if($booking->status_deposit == 'sudah lunas')
+                    <span class="text-gray-400 block mb-1">Status DP</span>
+                    @if($booking->status_dp == 'sudah lunas')
                         <span class="px-2 py-0.5 rounded font-bold bg-green-100 text-green-800 border border-green-200 uppercase">
                             Lunas
                         </span>
@@ -121,7 +119,6 @@
         {{-- ALERT INFORMASI DINAMIS --}}
         @if($booking->status_booking == 'pending')
             <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800 flex items-start gap-2 shadow-sm">
-                <span class="mt-0.5">⚠️</span>
                 <div>
                     <strong class="block mb-0.5">Menunggu Verifikasi Admin</strong>
                     <span>Booking Anda saat ini sedang dalam antrean pengecekan oleh pihak toko. Anda akan menerima pembaruan status pengerjaan setelah data dikonfirmasi.</span>
@@ -129,7 +126,6 @@
             </div>
         @elseif($booking->status_booking == 'diterima')
             <div class="p-3 bg-green-50 border border-green-200 rounded text-xs text-green-800 flex items-start gap-2 shadow-sm">
-                <span class="mt-0.5">✅</span>
                 <div>
                     <strong class="block mb-0.5">Pengajuan Booking Disetujui</strong>
                     <span>Silakan bawa unit laptop/perangkat Anda beserta kelengkapannya ke toko Seven Komputer untuk segera dilakukan pengerjaan atau pengecekan fisik oleh teknisi.</span>
@@ -137,14 +133,11 @@
             </div>
         @elseif($booking->status_booking == 'ditolak')
             <div class="p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800 flex items-start gap-2 shadow-sm">
-                <span class="mt-0.5">❌</span>
                 <div>
                     <strong class="block mb-0.5">Pengajuan Booking Ditolak</strong>
                     <span>Mohon maaf, pengajuan jadwal booking Anda belum dapat kami setujui saat ini. Anda dapat melakukan pengajuan ulang atau menghubungi kontak customer service kami.</span>
                 </div>
             </div>
         @endif
-
     </div>
-</div>
 @endsection

@@ -69,7 +69,7 @@ class SparepartSeeder extends Seeder
         $faker = Faker::create('id_ID');
         $kategoriList = ['Penyimpanan', 'Memori', 'Keyboard', 'Baterai', 'Layar LCD', 'Aksesoris', 'Mainboard'];
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             $stok = $faker->numberBetween(0, 20);
             
             // Logic agar status sinkron dengan jumlah stok

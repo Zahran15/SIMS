@@ -25,10 +25,6 @@
     </style>
 </head>
 <body class="bg-login flex items-center justify-center min-h-screen p-4 relative overflow-hidden">
-    
-    <a href="/" class="absolute top-8 left-8 text-white/70 hover:text-white transition-all hidden md:flex items-center gap-2 font-bold text-xs uppercase tracking-widest z-20">
-        <i class="fas fa-arrow-left"></i> Kembali ke Beranda
-    </a>
 
     <div class="glass-card rounded-[2.5rem] shadow-2xl flex overflow-hidden w-full max-w-4xl min-h-[580px] z-10 border border-white/20">
         
@@ -124,12 +120,13 @@
                         Masuk Sekarang <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
+                <div class="mt-6 text-center">
+                    <a href="/" class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali ke Beranda
+                    </a>
+                </div>
             </form>
-
-            <div class="text-xs text-center mt-10">
-                <span class="text-gray-400 font-medium">Belum punya akun?</span>
-                <a href="/register" class="text-blue-600 font-black uppercase tracking-tighter hover:text-amber-500 transition-colors ml-1">Daftar Akun Baru</a>
-            </div>
         </div>
     </div>
 

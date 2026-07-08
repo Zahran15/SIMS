@@ -54,7 +54,7 @@ class AuthController extends Controller
     {
         $tanggal = Carbon::now()->format('Ymd');
         $count = Pelanggan::whereDate('created_at', Carbon::today())->count();
-        $kode = 'PLG' . $tanggal . '' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+        $kode = 'PLG-' . $tanggal . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         return view('auth.register', compact('kode'));
     }
 

@@ -34,7 +34,7 @@ class RequestSparepartSeeder extends Seeder
         ];
 
         // 2. Buat beberapa data dummy request sparepart (misal 8 data)
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             // Ambil sparepart secara acak untuk tahu nama/kategorinya
             $sparepart = $faker->randomElement($sparepartList);
 

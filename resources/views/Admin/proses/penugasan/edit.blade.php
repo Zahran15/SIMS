@@ -61,11 +61,12 @@
                         {{-- PRIORITAS --}}
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Prioritas</label>
-                            <select name="prioritas" required
-                                class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-yellow-500 outline-none">
-                                <option value="ringan" {{ $penugasan->prioritas == 'ringan' }}>Ringan</option>
-                                <option value="sedang" {{ $penugasan->prioritas == 'sedang' }}>Sedang</option>
-                                <option value="berat" {{ $penugasan->prioritas == 'berat' }}>Berat</option>
+                            <select name="prioritas" disabled
+                                class="w-full border bg-gray-100 rounded-xl p-3 outline-none cursor-not-allowed">
+                                <option value="" {{ is_null($penugasan->prioritas) }} disabled>-- Pilih Prioritas --</option>
+                                <option value="ringan" {{ $penugasan->prioritas == 'ringan' ? 'selected' : '' }}>Ringan</option>
+                                <option value="sedang" {{ $penugasan->prioritas == 'sedang' ? 'selected' : '' }}>Sedang</option>
+                                <option value="berat" {{ $penugasan->prioritas == 'berat' ? 'selected' : '' }}>Berat</option>
                             </select>
                         </div>
 
@@ -80,11 +81,11 @@
                     <div class="mt-5">
                         <label class="text-xs font-bold text-gray-500 uppercase">Status Penugasan</label>
                         <select disabled class="w-full border bg-gray-100 rounded-xl p-3 outline-none cursor-not-allowed">
-                            <option value="belum dikerjakan" {{ $penugasan->status_penugasan == 'belum dikerjakan' }}>Belum Dikerjakan</option>
-                            <option value="sedang dikerjakan" {{ $penugasan->status_penugasan == 'sedang dikerjakan' }}>Sedang Dikerjakan</option>
-                            <option value="menunggu sparepart" {{ $penugasan->status_penugasan == 'menunggu sparepart' }}>Menunggu Sparepart</option>
-                            <option value="selesai" {{ $penugasan->status_penugasan == 'selesai' }}>Selesai</option>
-                            <option value="gagal" {{ $penugasan->status_penugasan == 'gagal' }}>Gagal</option>
+                            <option value="belum dikerjakan" {{ $penugasan->status_penugasan == 'belum dikerjakan' ? 'selected' : '' }}>Belum Dikerjakan</option>
+                            <option value="sedang dikerjakan" {{ $penugasan->status_penugasan == 'sedang dikerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+                            <option value="menunggu sparepart" {{ $penugasan->status_penugasan == 'menunggu sparepart' ? 'selected' : '' }}>Menunggu Sparepart</option>
+                            <option value="selesai" {{ $penugasan->status_penugasan == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="gagal" {{ $penugasan->status_penugasan == 'gagal' ? 'selected' : '' }}>Gagal</option>
                         </select>
                         <input type="hidden" name="status_penugasan" value="{{ $penugasan->status_penugasan }}">
                     </div>

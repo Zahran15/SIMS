@@ -58,7 +58,7 @@ class HistoriAktivitasSeeder extends Seeder
         ];
 
         // 2. Generate data histori dummy (misal kita buat 15 rekam aktivitas)
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             $user = $faker->randomElement($userList);
             $servis = $faker->randomElement($servisList);
             $template = $faker->randomElement($logTemplates);

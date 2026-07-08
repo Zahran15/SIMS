@@ -15,12 +15,18 @@
 <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
     <form action="{{ route('admin.penugasan.index') }}" method="GET">
         <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            {{-- Input Pencarian Kode Servis --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Servis</label>
+                <input type="text" name="kode_servis" value="{{ request('kode_servis') }}" placeholder="Masukkan kode servis..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
             {{-- Input Pencarian Nama Pelanggan --}}
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Nama pelanggan..."
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
 
             {{-- Filter Teknisi --}}
@@ -30,7 +36,7 @@
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px] text-sm">
                     <option value="">Semua Teknisi</option>
                     @foreach($list_teknisi as $teknisi)
-                        <option value="{{ $teknisi->id_user }}" {{ request('id_teknisi') == $teknisi->id_user ? 'selected' : '' }}>
+                        <option value="{{ $teknisi->id_user }}" {{ request('id_teknisi') == $teknisi->id_user }}>
                             {{ $teknisi->nama }}
                         </option>
                     @endforeach
@@ -65,24 +71,18 @@
 
             {{-- Tombol Aksi --}}
             <div class="flex gap-2">
-                <button type="submit"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm transition font-medium">
-                    Cari
-                </button>
-                <a href="{{ route('admin.penugasan.index') }}"
-                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">
-                    Reset
-                </a>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm transition font-medium">Cari</button>
+                <a href="{{ route('admin.penugasan.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">Reset</a>
             </div>
         </div>
     </form>
 </div>
 
     {{-- Info Badge Filter Aktif --}}
-    @if(request('search') || request('id_teknisi') || request('status_penugasan') || request('prioritas'))
-        <div class="mb-4 text-sm text-gray-600">
-            <span>Filter aktif:</span>
-            @if(request('search')) <span class="font-semibold text-gray-800">Pelanggan: "{{ request('search') }}"</span> @endif
+    @if(request('kode_Servis') || request('nama_pelanggan') || request('id_teknisi') || request('status_penugasan') || request('prioritas'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center"><span>Filter aktif:</span>
+            @if(request('kode_servis'))<span class="font-semibold text-gray-800">Kode Servis: "{{ request('kode_servis') }}"</span>@endif
+            @if(request('nama_pelanggan'))<span class="font-semibold text-gray-800">Pelanggan: "{{ request('nama_pelanggan') }}"</span>@endif            
             @if(request('id_teknisi')) <span class="font-semibold text-gray-800">Teknisi ID: {{ request('id_teknisi') }}</span> @endif
             @if(request('status_penugasan')) <span class="font-semibold text-gray-800">Status: {{ ucwords(request('status_penugasan')) }}</span> @endif
             @if(request('prioritas')) <span class="font-semibold text-gray-800">Prioritas: {{ ucfirst(request('prioritas')) }}</span> @endif
@@ -111,12 +111,14 @@
                             <td class="px-5 py-4 text-center">{{ $servis->firstItem() + $index }}</td>
                             <td class="px-5 py-4 text-center font-bold text-gray-800">{{ $s->kode_servis }}</td>
                             <td class="px-5 py-4 text-center">{{ $s->booking->pelanggan->nama ?? '-' }}</td>
-                            <td class="px-5 py-4 text-center">
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
                                 @php
                                     $statusClasses = [
                                         'menunggu' => 'bg-gray-100 text-gray-600',
                                         'proses'   => 'bg-blue-100 text-blue-600',
                                         'selesai'  => 'bg-green-100 text-green-600',
+                                        'bisa diambil'  => 'bg-green-100 text-green-600',
+                                        'sudah diambil'  => 'bg-green-100 text-green-600',
                                     ];
                                     $class = $statusClasses[$s->status_servis] ?? 'bg-red-100 text-red-600';
                                 @endphp
@@ -124,8 +126,9 @@
                                     {{ strtoupper($s->status_servis) }}
                                 </span>
                             </td>
+
                             {{-- STATUS PENUGASAN --}}
-                            <td class="px-5 py-4 text-center">
+                            <td class="px-5 py-4 text-center whitespace-nowrap"> 
                                 @if($s->penugasan)
                                     @php
                                         $penugasanClasses = [
@@ -135,18 +138,19 @@
                                             'selesai' => 'bg-green-100 text-green-600',
                                             'gagal' => 'bg-red-100 text-red-600',
                                         ];
-                                        $spClass = $penugasanClasses[$s->penugasan->status_penugasan]?? 'bg-gray-100 text-gray-600';
+                                        $spClass = $penugasanClasses[$s->penugasan->status_penugasan] ?? 'bg-gray-100 text-gray-600';
                                     @endphp
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $spClass }}">{{ strtoupper($s->penugasan->status_penugasan) }}</span>
+                                    {{-- Tambahkan inline-block agar badge membungkus teks satu baris utuh --}}
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold {{ $spClass }}">{{ strtoupper($s->penugasan->status_penugasan) }}</span>
                                 @else
-                                    <span class="text-red-500 italic text-xs">Belum Ditugaskan</span>
+                                    <span class="text-red-500 italic text-xs font-bold">Belum Ditugaskan</span>
                                 @endif
                             </td>
 
                             {{-- TEKNISI --}}
                             <td class="px-5 py-4 text-center">
                                 @if($s->penugasan)
-                                    {{ $s->penugasan->teknisi->nama ?? '-' }}
+                                    {{ $s->penugasan->teknisi->nama }}
                                 @else
                                     <span class="text-red-500 italic text-xs">Belum ditugaskan</span>
                                 @endif
@@ -154,13 +158,13 @@
 
                             {{-- PRIORITAS --}}
                             <td class="px-5 py-4 text-center">
-                                @if($s->penugasan)
+                                {{-- Cek apakah ada data penugasan DAN kolom prioritas TIDAK null --}}
+                                @if($s->penugasan && !is_null($s->penugasan->prioritas))
                                     @php
                                         $prioritasClasses = [
-                                            'rendah' => 'bg-gray-100 text-gray-600',
-                                            'normal' => 'bg-blue-100 text-blue-600',
-                                            'tinggi' => 'bg-orange-100 text-orange-600',
-                                            'urgent' => 'bg-red-100 text-red-600',
+                                            'ringan' => 'bg-green-100 text-green-600',
+                                            'sedang' => 'bg-yellow-100 text-yellow-600',
+                                            'berat'  => 'bg-red-100 text-red-600',
                                         ];
                                         $pClass = $prioritasClasses[$s->penugasan->prioritas] ?? 'bg-gray-100 text-gray-600';
                                     @endphp
@@ -168,7 +172,7 @@
                                         {{ strtoupper($s->penugasan->prioritas) }}
                                     </span>
                                 @else
-                                    -
+                                    <span class="text-gray-400 font-bold">-</span>
                                 @endif
                             </td>
 

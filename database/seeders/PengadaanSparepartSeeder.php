@@ -25,7 +25,7 @@ class PengadaanSparepartSeeder extends Seeder
         }
 
         // 2. Generate data pengadaan dummy (misal 8 data transaksi pengadaan)
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             // Ambil sparepart secara acak
             $sparepart = $faker->randomElement($sparepartList);
             
@@ -45,7 +45,7 @@ class PengadaanSparepartSeeder extends Seeder
                 'jumlah' => $jumlah,
                 'harga_beli' => $hargaBeli,
                 'total' => $total,
-                'status_pengadaan' => $faker->randomElement(['dipesan', 'diterima', 'dibatalkan']),
+                'status_pengadaan' => $faker->randomElement(['dipesan', 'diterima', 'dibatalkan', 'diajukan']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

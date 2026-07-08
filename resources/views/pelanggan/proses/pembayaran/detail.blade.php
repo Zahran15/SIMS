@@ -60,8 +60,7 @@
                     <strong class="text-gray-700 block text-sm mb-0.5">Selesaikan Pembayaran Anda</strong>
                     Gunakan payment gateway Midtrans untuk membayar secara instan dan aman melalui berbagai metode transfer.
                 </div>
-                <button type="button" id="btnBayar"
-                        class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-100 transition-all uppercase tracking-wider">
+                <button type="button" id="btnBayar" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-100 transition-all uppercase tracking-wider">
                     Bayar Sekarang
                 </button>
             </div>
@@ -98,10 +97,11 @@
 <script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', function () {
+
     let btnBayar = document.getElementById('btnBayar');
-    if(btnBayar){
-        btnBayar.addEventListener('click', function(){
+    if (btnBayar) {
+        btnBayar.addEventListener('click', function () {
             fetch(
                 "{{ route('pelanggan.pembayaran.bayar',$pembayaran->id_pembayaran) }}",
                 {
@@ -114,37 +114,73 @@ document.addEventListener('DOMContentLoaded', function(){
             )
             .then(response => response.json())
             .then(data => {
-                if(data.success){
+                if (data.success) {
                     snap.pay(data.token, {
-                        onSuccess: function(result){
+                        onSuccess: function(result) {
                             fetch(
                                 "{{ route('pelanggan.pembayaran.success',$pembayaran->id_pembayaran) }}",
                                 {
                                     method: 'POST',
-                                    headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN':'{{ csrf_token() }}'},
-                                    body: JSON.stringify({transaction_id: result.transaction_id})
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({
+                                        transaction_id: result.transaction_id
+                                    })
                                 }
                             )
                             .then(res => res.json())
                             .then(data => {
-                                alert('Pembayaran berhasil');
-                                location.reload();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Pembayaran Berhasil',
+                                    text: 'Terima kasih, pembayaran telah diterima.'
+                                }).then(() => {
+                                    location.reload();
+                                });
                             });
                         },
-                        onPending: function(result){
-                            alert('Menunggu pembayaran');
-                            location.reload();
+                        onPending: function(result) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Menunggu Pembayaran',
+                                text: 'Transaksi masih menunggu penyelesaian pembayaran.'
+                            }).then(() => {
+                                location.reload();
+                            });
+
                         },
-                        onError: function(result){
-                            alert('Pembayaran gagal');
+                        onError: function(result) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Pembayaran Gagal',
+                                text: 'Terjadi kesalahan saat memproses pembayaran.'
+                            });
                         },
-                        onClose: function(){
-                            console.log('Popup ditutup');
+                        onClose: function() {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pembayaran Dibatalkan',
+                                text: 'Anda menutup popup pembayaran sebelum menyelesaikan transaksi.'
+                            });
                         }
                     });
-                }else{
-                    alert(data.message);
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: data.message
+                    });
                 }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan pada sistem.'
+                });
+                console.error(error);
             });
         });
     }

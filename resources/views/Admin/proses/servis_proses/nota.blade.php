@@ -35,13 +35,13 @@
     {{-- Tombol Navigasi --}}
     <div class="mb-6 flex items-center justify-between no-print">
         <div>
-            <h2 class="text-3xl font-bold text-gray-800">Tanda Terima Unit Masuk</h2>
+            <h2 class="text-3xl font-bold text-gray-800">Nota Unit Masuk</h2>
             <p class="text-gray-500 mt-1">Cetak bukti penitipan unit untuk dibawa pulang oleh pelanggan</p>
         </div>
 
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.servis_proses.index') }}" class="px-5 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all">Kembali</a>
-            <button onclick="window.print()"class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition-all">Cetak Tanda Terima</button>
+            <button onclick="window.print()"class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition-all">Cetak Nota</button>
         </div>
     </div>
 
@@ -62,7 +62,7 @@
                 </div>
 
                 <div class="text-right">
-                    <h2 class="text-2xl font-bold text-gray-800 uppercase tracking-wider text-blue-600">Bukti Titip Servis</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 uppercase tracking-wider text-blue-600">Bukti Nota Servis</h2>
                     <p class="mt-3 text-sm text-gray-500">Kode Servis</p>
                     <h3 class="text-xl font-black text-gray-800">{{ $servis->kode_servis }}</h3>
                 </div>

@@ -16,11 +16,18 @@ class ServisKerjaController extends Controller
     {
     $query = PenugasanTeknisi::where('id_user', Auth::id())->with(['servis.booking.pelanggan']);
     // 1. Filter Pencarian Nama Pelanggan (Melalui nested relation)
-    if ($request->has('search') && $request->search != '') {
-        $query->whereHas('servis.booking.pelanggan', function($q) use ($request) {
-            $q->where('nama', 'LIKE', '%' . $request->search . '%');
-        });
-    }
+        if ($request->filled('kode_servis')) {
+            $query->whereHas('servis', function ($q) use ($request) {
+                $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+            });
+        }
+
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->whereHas('servis.booking.pelanggan', function ($q) use ($request) {
+                $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
+            });
+        }
     // 2. Filter Berdasarkan Tingkat Prioritas
     if ($request->has('prioritas') && $request->prioritas != '') {
         $query->where('prioritas', $request->prioritas);
@@ -60,13 +67,15 @@ class ServisKerjaController extends Controller
         $request->validate([
             'status_penugasan' => 'required', 
             'catatan_teknisi'  => 'required',
+            'prioritas'        => 'required',
             'estimasi_selesai' => 'required|date'
             ]);
         $penugasan = PenugasanTeknisi::where('id_user', Auth::id())->where('id_penugasan', $id) ->firstOrFail();
         $estimasi = $request->estimasi_selesai ? Carbon::parse($request->estimasi_selesai)->format('Y-m-d') : $penugasan->estimasi_selesai;
         $penugasan->update([
             'catatan_teknisi'  => $request->catatan_teknisi, 
-            'status_penugasan' => $request->status_penugasan, 
+            'status_penugasan' => $request->status_penugasan,
+            'prioritas'        => $request->prioritas, 
             'estimasi_selesai' => $estimasi
             ]);
         HistoriAktivitas::create([

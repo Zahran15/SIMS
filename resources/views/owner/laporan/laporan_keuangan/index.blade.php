@@ -73,7 +73,7 @@ $stats = [
                             <td class="px-6 py-4 text-center uppercase font-medium">{{ $dp->jenis_pembayaran }}</td>
                             <td class="px-6 py-4 text-center font-bold">Rp {{ number_format($dp->nominal, 0, ',', '.') }}</td>
                             <td class="px-6 py-4 text-center uppercase">
-                                <span class="px-2 py-0.5 rounded text-medium {{ $dp->metode_pembayaran == 'cash' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                                <span class="px-2 py-0.5 rounded font-medium {{ $dp->metode_pembayaran == 'cash' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
                                     {{ $dp->metode_pembayaran }}
                                 </span>
                             </td>
@@ -105,7 +105,7 @@ $stats = [
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200 mb-8">
         <div class="bg-orange-500 px-6 py-3">
             <h3 class="text-white text-md font-bold uppercase tracking-wider">
-                Detail Pengeluaran
+                Detail Pengeluaran Sparepart
             </h3>
         </div>
         <div class="overflow-x-auto">

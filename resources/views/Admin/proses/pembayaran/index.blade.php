@@ -37,8 +37,8 @@
                 <select name="jenis_pembayaran"
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px] text-sm">
                     <option value="">Semua Jenis</option>
-                    <option value="dp" {{ request('jenis_pembayaran') == 'dp' ? 'selected' : '' }}>Dp</option>
-                    <option value="pelunasan" {{ request('jenis_pembayaran') == 'pelunasan' ? 'selected' : '' }}>Pelunasan</option>
+                    <option value="dp" {{ request('jenis_pembayaran') == 'dp' }}>Dp</option>
+                    <option value="pelunasan" {{ request('jenis_pembayaran') == 'pelunasan' }}>Pelunasan</option>
                 </select>
             </div>
 
@@ -48,9 +48,9 @@
                 <select name="status_pembayaran"
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px] text-sm">
                     <option value="">Semua Status</option>
-                    <option value="sukses" {{ request('status_pembayaran') == 'sukses' ? 'selected' : '' }}>Lunas</option>
-                    <option value="pending" {{ request('status_pembayaran') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="gagal" {{ request('status_pembayaran') == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                    <option value="sukses" {{ request('status_pembayaran') == 'sukses' }}>Lunas</option>
+                    <option value="pending" {{ request('status_pembayaran') == 'pending' }}>Pending</option>
+                    <option value="gagal" {{ request('status_pembayaran') == 'gagal' }}>Gagal</option>
                 </select>
             </div>
 
@@ -68,13 +68,13 @@
     <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
         <span>Menampilkan data filter:</span> 
         @if(request('search')) 
-            <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-medium text-gray-800">Nama: "{{ request('search') }}"</span> 
+            <span class="px-2 py-0.5 rounded text-xs font-medium">Nama: "{{ request('search') }}"</span> 
         @endif
         @if(request('jenis_pembayaran')) 
-            <span class="bg-blue-50 px-2 py-0.5 rounded text-xs font-medium text-blue-800">Jenis: {{ ucfirst(request('jenis_pembayaran')) }}</span> 
+            <span class="px-2 py-0.5 rounded text-xs font-medium">Jenis: {{ ucfirst(request('jenis_pembayaran')) }}</span> 
         @endif
         @if(request('status_pembayaran')) 
-            <span class="bg-green-50 px-2 py-0.5 rounded text-xs font-medium text-green-800">Status: {{ request('status_pembayaran') == 'sukses' ? 'Lunas' : ucfirst(request('status_pembayaran')) }}</span> 
+            <span class="px-2 py-0.5 rounded text-xs font-medium">Status: {{ request('status_pembayaran') == 'sukses' ? 'Lunas' : ucfirst(request('status_pembayaran')) }}</span> 
         @endif
     </div>
 @endif

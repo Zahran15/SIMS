@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="mt-5">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Kategori Estimasi Kerusakan</label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Kategori Servis</label>
                         <select name="kategori_servis" required class="w-full border border-gray-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none bg-white">
                             <option value="">-- Pilih Estimasi Kategori --</option>
                             <option value="ringan">Ringan (Install OS, Ganti RAM, Ganti Keyboard, Kebersihan)</option>

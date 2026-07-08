@@ -3,8 +3,6 @@
 @section('title', 'Detail Booking')
 
 @section('content')
-<div class="p-4">
-
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
@@ -13,6 +11,24 @@
         </div>
         
         <div class="flex items-center gap-2">
+            {{-- Tombol Setuju (Hanya muncul jika pending DAN sudah lunas) --}}
+            @if($booking->status_booking == 'pending' && $booking->status_dp == 'sudah lunas')
+                <form action="{{ route('admin.booking.terima', $booking->id_booking) }}" 
+                      method="POST" 
+                      id="form-setuju-detail"
+                      class="inline-block m-0">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" 
+                            class="px-3 py-1.5 rounded bg-green-600 hover:bg-green-700 text-white font-medium text-xs shadow-sm transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Setujui Booking
+                    </button>
+                </form>
+            @endif
+
             <a href="{{ route('admin.booking.index') }}"
                class="px-3 py-1.5 rounded bg-gray-500 hover:bg-gray-600 text-white font-medium text-xs shadow-sm transition-colors">
                 Kembali
@@ -141,7 +157,31 @@
                 </div>
             </div>
         </div>
-
     </div>
-</div>
+
+    {{-- SWEETALERT2 SCRIPT UNTUK HALAMAN DETAIL --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const formSetujuDetail = document.getElementById('form-setuju-detail');
+            if (formSetujuDetail) {
+                formSetujuDetail.addEventListener('submit', function (e) {
+                    e.preventDefault(); 
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: "Status booking akan diubah menjadi 'Diterima'!",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2563eb',
+                        cancelButtonColor: '#6b7280',  
+                        confirmButtonText: 'Ya, Setujui!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formSetujuDetail.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 @endsection

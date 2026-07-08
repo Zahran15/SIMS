@@ -3,8 +3,6 @@
 @section('title', 'Detail Servis')
 
 @section('content')
-<div class="p-4">
-
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
@@ -13,7 +11,23 @@
         </div>
         
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.servis_proses.index', $servis->id_servis) }}"
+            {{-- BUTTON QUICK ACCEPT / SELESAI (Hanya Muncul Jika Status 'proses') --}}
+            @if($servis->status_servis == 'proses' && $servis->penugasan && $servis->penugasan->status_penugasan == 'selesai')
+                <form id="form-selesai-{{ $servis->id_servis }}" action="{{ route('admin.servis_proses.quick_selesai', $servis->id_servis) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="button" 
+                            onclick="konfirmasiSelesai('{{ $servis->id_servis }}', '{{ $servis->kode_servis }}')"
+                            class="px-3 py-1.5 rounded bg-green-600 hover:bg-green-700 text-white font-medium text-xs shadow-sm transition-colors flex items-center gap-1" 
+                            title="Selesaikan Servis">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Selesaikan Servis
+                    </button>
+                </form>
+            @endif
+
+            <a href="{{ route('admin.servis_proses.index') }}"
                class="px-3 py-1.5 rounded bg-gray-500 hover:bg-gray-600 text-white font-medium text-xs shadow-sm transition-colors">
                 Kembali
             </a>
@@ -59,6 +73,27 @@
                         <span class="ml-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold border border-green-200 uppercase">Selesai</span>
                     @endif
                 </div>
+                    {{-- PERUBAHAN DISINI: Menampilkan Status Kerja/Penugasan Teknisi Berdasarkan Enum --}}
+                    <div>
+                        <span class="text-gray-500">Status Kerja Teknisi:</span>
+                        @if($servis->penugasan)
+                            @if($servis->penugasan->status_penugasan == 'belum dikerjakan')
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-bold border border-gray-200 uppercase">Belum Dikerjakan</span>
+                            @elseif($servis->penugasan->status_penugasan == 'sedang dikerjakan')
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-800 font-bold border border-purple-200 uppercase">Sedang Dikerjakan</span>
+                            @elseif($servis->penugasan->status_penugasan == 'menunggu sparepart')
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-amber-100 text-amber-800 font-bold border border-amber-200 uppercase">Menunggu Sparepart</span>
+                            @elseif($servis->penugasan->status_penugasan == 'selesai')
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 uppercase">Selesai</span>
+                            @elseif($servis->penugasan->status_penugasan == 'gagal')
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-red-100 text-red-800 font-bold border border-red-200 uppercase">Gagal</span>
+                            @else
+                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 font-bold border border-gray-200 uppercase">{{ $servis->penugasan->status_penugasan }}</span>
+                            @endif
+                        @else
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-400 italic font-medium border border-gray-200">Belum Ditugaskan</span>
+                        @endif
+                    </div>
                 <div>
                     <span class="text-gray-500 font-semibold">Total Biaya Sementara:</span>
                     <strong class="ml-1 text-green-600 text-base">Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}</strong>
@@ -166,7 +201,27 @@
                 </strong>
             </div>
         </div>
-
     </div>
-</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function konfirmasiSelesai(id, kodeServis) {
+        Swal.fire({
+            title: 'Selesaikan Servis?',
+            text: "Apakah Anda yakin ingin menyelesaikan servis ini?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10B981', 
+            cancelButtonColor: '#6B7280',  
+            confirmButtonText: 'Ya, Selesai!',
+            cancelButtonText: 'Batal',
+            border: 'none',
+            borderRadius: '1rem'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-selesai-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

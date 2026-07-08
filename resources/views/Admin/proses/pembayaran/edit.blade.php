@@ -5,7 +5,7 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-{{-- HEADER HALAMAN & TOMBOL (Disamakan dengan Detail Pembayaran) --}}
+{{-- HEADER HALAMAN & TOMBOL --}}
 <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
     <div>
         <h2 class="text-2xl font-bold text-gray-800">Ubah Metode Pembayaran</h2>
@@ -48,7 +48,8 @@
 
                     <div>
                         <span class="text-gray-400 block mb-1">Metode Pembayaran</span>
-                        <select name="metode_pembayaran" 
+                        {{-- MENAMBAHKAN ID select-metode --}}
+                        <select name="metode_pembayaran" id="select-metode"
                                 class="w-full p-2 border border-gray-300 rounded font-semibold text-gray-800 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
                             <option value="transfer" {{ $pembayaran->metode_pembayaran == 'transfer' }}>
                                 TRANSFER (Online)
@@ -66,8 +67,9 @@
                        class="px-3 py-1.5 rounded bg-gray-500 hover:bg-gray-600 text-white font-medium text-xs transition-colors shadow-sm">
                         Batal
                     </a>
-                    <button type="submit" 
-                            class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-sm">
+                    {{-- MENAMBAHKAN ID btn-simpan DAN CLASS disabled: --}}
+                    <button type="submit" id="btn-simpan"
+                            class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-sm disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-300">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -75,7 +77,7 @@
         </div>
     </div>
 
-    {{-- ALERT INFORMASI STATIS (Menyesuaikan desain peringatan oranye) --}}
+    {{-- ALERT INFORMASI STATIS --}}
     <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800 flex items-start gap-2 shadow-sm">
         <div>
             <strong class="block mb-0.5">Peringatan Integrasi</strong>
@@ -84,17 +86,36 @@
     </div>
 </div>
 
-{{-- SCRIPT SWEETALERT2 UNTUK KONFIRMASI TENGAH LAYAR --}}
+{{-- SCRIPT MANAGEMENT VALIDASI TOMBOL DAN SWEETALERT2 --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let form = document.getElementById('form-pembayaran');
+    let selectMetode = document.getElementById('select-metode');
+    let btnSimpan = document.getElementById('btn-simpan');
+
+    // Fungsi untuk cek status metode pembayaran
+    function toggleSubmitButton() {
+        if (selectMetode.value === 'cash') {
+            btnSimpan.removeAttribute('disabled');
+        } else {
+            btnSimpan.setAttribute('disabled', 'true');
+        }
+    }
+
+    // Jalankan fungsi saat halaman pertama kali dimuat (antisipasi jika default-nya sudah cash)
+    toggleSubmitButton();
+
+    // Jalankan fungsi setiap kali pilihan select box berubah
+    selectMetode.addEventListener('change', toggleSubmitButton);
+    
+    // Handler SweetAlert saat Form Submit
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault(); 
             
             Swal.fire({
                 title: 'Apakah Anda yakin?',
-                text: "Mengubah ke Cash akan memotong jalur Midtrans dan menandai tagihan ini sebagai Lunas/Sukses.",
+                text: "Ubah ke Cash dan tagihan ini Lunas/Sukses.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#2563eb', 

@@ -43,6 +43,8 @@
                             <span class="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800 font-bold border border-yellow-200 uppercase">{{ $data->status_pengadaan }}</span>
                         @elseif($data->status_pengadaan == 'diterima')
                             <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold border border-green-200 uppercase">{{ $data->status_pengadaan }}</span>
+                        @elseif($data->status_pengadaan == 'diajukan')
+                            <span class="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800 font-bold border border-yellow-200 uppercase">{{ $data->status_pengadaan }}</span>
                         @else
                             <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800 font-bold border border-red-200 uppercase">{{ $data->status_pengadaan }}</span>
                         @endif

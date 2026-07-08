@@ -27,10 +27,7 @@
                     <a href="#features" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-blue-600 transition">Layanan</a>
                     <a href="#location" class="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-blue-600 transition">Lokasi</a>
                     @if (Route::has('login'))
-                        <a href="{{ route('login') }}" class="text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-blue-600 transition">Log In</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-200">Register</a>
-                        @endif
+                        <a href="{{ route('login') }}" class="text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-blue-600 transition">Login</a>
                     @endif
                 </div>
             </div>
@@ -49,8 +46,8 @@
             </p>
             
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-                <a href="{{ route('login') }}" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-blue-600 transition-all duration-300 shadow-xl">
-                    Masuk Sistem
+                <a href="{{ route('register') }}" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-blue-600 transition-all duration-300 shadow-xl">
+                    Regis Pelanggan
                 </a>
             </div>
 

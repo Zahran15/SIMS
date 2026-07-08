@@ -6,7 +6,7 @@
     {{-- HEADER --}}
     <div class="mb-6">
         <h2 class="text-3xl font-bold text-gray-800">Laporan Pengadaan Sparepart</h2>
-        <p class="text-gray-500 mt-1">Pantau rincian pengeluaran modal modal pembelanjaan stok masuk toko.</p>
+        <p class="text-gray-500 mt-1">Pantau rincian pengeluaran modal pembelanjaan stok masuk toko.</p>
     </div>
 
     {{-- KARTU STATISTIK FINANSIAL --}}
@@ -48,6 +48,7 @@
                         <option value="dipesan" {{ request('status_pengadaan') == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
                         <option value="diterima" {{ request('status_pengadaan') == 'diterima' ? 'selected' : '' }}>Diterima</option>
                         <option value="dibatalkan" {{ request('status_pengadaan') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                        <option value="diajukan" {{ request('status_pengadaan') == 'diajukan' ? 'selected' : ''}}>Diajukan</option>
                     </select>
                 </div>
                 {{-- Tombol Aksi --}}
@@ -105,8 +106,11 @@
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold
                                     @if($p->status_pengadaan == 'dipesan') bg-yellow-100 text-yellow-700 border border-yellow-200
                                     @elseif($p->status_pengadaan == 'diterima') bg-green-100 text-green-700 border border-green-200
-                                    @else bg-red-100 text-red-700 border border-red-200
-                                    @endif">
+                                    @elseif($p->status_pengadaan == 'diajukan') bg-yellow-100 text-yellow-700 border border-yellow-200
+                                    @else
+                                    bg-red-100 text-red-700 border border-red-200
+                                    @endif
+                                    ">
                                     {{ ucfirst($p->status_pengadaan) }}
                                 </span>
                             </td>

@@ -36,6 +36,7 @@
                         <option value="dipesan" {{ request('status_pengadaan') == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
                         <option value="diterima" {{ request('status_pengadaan') == 'diterima' ? 'selected' : '' }}>Diterima</option>
                         <option value="dibatalkan" {{ request('status_pengadaan') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                        <option value="diajukan" {{ request('status_pengadaan') == 'diajukan' ? 'selected' : ''}}>Diajukan</option>
                     </select>
                 </div>
                 {{-- Tombol Aksi --}}
@@ -84,8 +85,8 @@
                     @forelse ($pengadaan as $index => $p)
                         <tr class="hover:bg-gray-50/80 transition">
                             <td class="px-5 py-4 text-center text-gray-500">{{ $pengadaan->firstItem() + $index }}</td>
-                            <td class="px-5 py-4 text-center text-gray-900 font-bold">{{ $p->sparepart->nama_sparepart ?? '-' }}</td>
-                            <td class="px-5 py-4 text-center text-gray-500 font-normal">{{ \Carbon\Carbon::parse($p->tgl_pesan)->translatedFormat('d F Y') }}</td>
+                            <td class="px-5 py-4 text-center text-gray-900 font-medium">{{ $p->sparepart->nama_sparepart ?? '-' }}</td>
+                            <td class="px-5 py-4 text-center text-gray-500 font-medium">{{ \Carbon\Carbon::parse($p->tgl_pesan)->translatedFormat('d F Y') }}</td>
                             <td class="px-5 py-4 text-center font-medium text-gray-700">{{ $p->jumlah }} Pcs</td>
                             <td class="px-5 py-4 text-center text-blue-600 font-semibold">Rp {{ number_format($p->harga_beli, 0, ',', '.') }}</td>
                             <td class="px-5 py-4 text-center text-green-600 font-medium">Rp {{ number_format($p->total, 0, ',', '.') }}</td>
@@ -93,8 +94,11 @@
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold
                                     @if($p->status_pengadaan == 'dipesan') bg-yellow-100 text-yellow-700 border border-yellow-200
                                     @elseif($p->status_pengadaan == 'diterima') bg-green-100 text-green-700 border border-green-200
-                                    @else bg-red-100 text-red-700 border border-red-200
-                                    @endif">
+                                    @elseif($p->status_pengadaan == 'diajukan') bg-yellow-100 text-yellow-700 border border-yellow-200
+                                    @else
+                                    bg-red-100 text-red-700 border border-red-200
+                                    @endif
+                                    ">
                                     {{ ucfirst($p->status_pengadaan) }}
                                 </span>
                             </td>

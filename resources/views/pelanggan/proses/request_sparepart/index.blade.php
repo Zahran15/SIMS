@@ -21,27 +21,41 @@
         </div>
     @endif
 
-    {{-- FILTER --}}
+    {{-- FILTER DENGAN TOMBOL --}}
+{{-- FILTER DENGAN TOMBOL --}}
     <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
         <form action="{{ route('pelanggan.request_sparepart.index') }}" method="GET">
-            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
                 {{-- Filter Status --}}
-                <div>
+                <div class="flex-1 max-w-xs">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status_request" onchange="this.form.submit()"
-                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[250px] text-sm bg-white">
+                    <select name="status_request"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                         <option value="">Semua Riwayat</option>
-                        <option value="dikirim_ke_pelanggan" {{ request('status_request') == 'dikirim_ke_pelanggan' ? 'selected' : '' }}>Menunggu Persetujuan Anda</option>
-                        <option value="disetujui_pelanggan" {{ request('status_request') == 'disetujui_pelanggan' ? 'selected' : '' }}>Telah Anda Setujui</option>
-                        <option value="disetujui" {{ request('status_request') == 'disetujui' ? 'selected' : '' }}>Selesai / Diproses Admin</option>
-                        <option value="ditolak" {{ request('status_request') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        <option value="dikirim_ke_pelanggan" {{ request('status_request') == 'dikirim_ke_pelanggan' }}>Menunggu Persetujuan Anda</option>
+                        <option value="disetujui_pelanggan" {{ request('status_request') == 'disetujui_pelanggan' }}>Telah Anda Setujui</option>
+                        <option value="disetujui" {{ request('status_request') == 'disetujui' }}>Selesai / Diproses Admin</option>
+                        <option value="ditolak" {{ request('status_request') == 'ditolak' }}>Ditolak</option>
                     </select>
+                </div>
+
+                {{-- Grup Tombol Aksi --}}
+                <div class="flex items-center gap-2">
+                    <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                        Cari
+                    </button>
+                    
+                    <a href="{{ route('pelanggan.request_sparepart.index') }}" 
+                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg border border-gray-300 transition-colors flex items-center gap-1.5">
+                        Reset
+                    </a>
                 </div>
             </div>
         </form>
     </div>
 
-    {{-- Info Badge Filter Aktif --}}
+    {{-- Info Badge Filter Aktif (Juga disesuaikan agar tidak gampang kecolongan nilai kosong) --}}
     @if(request('status_request'))
         <div class="mb-4 text-sm text-gray-600">
             Menampilkan data filter: Status <span class="font-semibold text-gray-800">{{ ucfirst(str_replace('_', ' ', request('status_request'))) }}</span>
@@ -56,22 +70,21 @@
                 <thead class="bg-blue-600 text-white shadow-sm">
                     <tr>
                         <th class="px-5 py-4 text-center">No</th>
-                        <th class="px-5 py-4 text-center">Perangkat / Kode Servis</th>
+                        <th class="px-5 py-4 text-center">Kode Servis</th>
+                        <th class="px-5 py-4 text-center">Perangkat</th>
                         <th class="px-5 py-4 text-center">Sparepart</th>
                         <th class="px-5 py-4 text-center">Jumlah</th>
                         <th class="px-5 py-4 text-center">Alasan Pergantian</th>
                         <th class="px-5 py-4 text-center">Status</th>
-                        <th class="px-5 py-4 text-center">Aksi / Tindakan</th>
+                        <th class="px-5 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 font-medium">
                     @forelse($requestSparepart as $index => $r)
                     <tr class="hover:bg-gray-50/70 transition-all">
                         <td class="px-5 py-4 text-center text-gray-500">{{ $requestSparepart->firstItem() + $index }}</td>
-                        <td class="px-5 py-4 text-center font-bold text-blue-600">
-                            {{ $r->penugasan->servis->kode_servis ?? '-' }}
-                            <span class="block text-xs font-normal text-gray-400 mt-0.5">{{ $r->penugasan->servis->booking->nama_perangkat ?? 'Perangkat' }}</span>
-                        </td>
+                        <td class="px-5 py-4 text-center font-bold text-blue-600">{{ $r->penugasan->servis->kode_servis ?? '-' }}</td>
+                        <td class="px-5 py-4 text-center text-gray-800">{{ $r->penugasan->servis->booking->merk_tipe ?? '-' }}</td>
                         <td class="px-5 py-4 text-center text-gray-800">{{ $r->sparepart->nama_sparepart ?? '-' }}</td>
                         <td class="px-5 py-4 text-center text-gray-600 font-semibold">{{ $r->jumlah }} Pcs</td>
                         <td class="px-5 py-4 text-center text-gray-500 font-normal max-w-xs truncate" title="{{ $r->alasan }}">{{ $r->alasan }}</td>
@@ -98,15 +111,15 @@
                                     </svg>
                                 </a>
 
-                                {{-- AKSI PERSETUJUAN (Hanya muncul jika status dikirim_ke_pelanggan) --}}
+                                {{-- AKSI PERSETUJUAN --}}
                                 @if($r->status_request == 'dikirim_ke_pelanggan')
                                     {{-- FORM SETUJUI --}}
-                                    <form action="{{ route('pelanggan.request_sparepart.approve', $r->id_request) }}" method="POST" class="inline">
+                                    <form id="form-approve-{{ $r->id_request }}" action="{{ route('pelanggan.request_sparepart.approve', $r->id_request) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" 
+                                        <button type="button" 
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all shadow-sm" 
                                                 title="Setujui Penggantian Komponen"
-                                                onclick="return confirm('Apakah Anda menyetujui penggantian komponen ini?')">
+                                                onclick="confirmApprove('{{ $r->id_request }}')">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
@@ -114,12 +127,12 @@
                                     </form>
 
                                     {{-- FORM TOLAK --}}
-                                    <form action="{{ route('pelanggan.request_sparepart.reject', $r->id_request) }}" method="POST" class="inline">
+                                    <form id="form-reject-{{ $r->id_request }}" action="{{ route('pelanggan.request_sparepart.reject', $r->id_request) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" 
+                                        <button type="button" 
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm" 
                                                 title="Tolak Penggantian Komponen"
-                                                onclick="return confirm('Apakah Anda ingin menolak pergantian sparepart ini?')">
+                                                onclick="confirmReject('{{ $r->id_request }}')">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
@@ -131,7 +144,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-12 text-gray-400 font-medium">
+                        <td colspan="8" class="text-center py-12 text-gray-400 font-medium">
                             <div class="flex flex-col items-center justify-center space-y-2">
                                 <span>Belum ada pengajuan sparepart untuk perangkat Anda saat ini.</span>
                             </div>
@@ -149,4 +162,42 @@
             {{ $requestSparepart->appends(request()->query())->links() }}
         </div>
     @endif
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmApprove(id) {
+        Swal.fire({
+            title: 'Konfirmasi Persetujuan',
+            text: "Apakah Anda menyetujui penggantian komponen ini?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Setuju!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-approve-' + id).submit();
+            }
+        });
+    }
+
+    function confirmReject(id) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Anda akan menolak pergantian sparepart ini.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Tolak!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-reject-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

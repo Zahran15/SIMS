@@ -11,8 +11,13 @@ class PelangganController extends Controller
     public function index(Request $request)
     {
         $query = Pelanggan::query();
-        if ($request->has('search') && $request->search != '') {
-            $query->where('nama', 'LIKE', $request->search . '%');
+        if ($request->filled('kode_pelanggan')) {
+            $query->where('kode_pelanggan', 'LIKE', '%' . $request->kode_pelanggan . '%');
+        }
+
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->where('nama', 'LIKE', $request->nama_pelanggan . '%');
         }
 
         if ($request->has('status') && $request->status != '') {
@@ -50,7 +55,7 @@ class PelangganController extends Controller
             'password' => $request->password,
             'status' => 'aktif'
         ]);
-        return redirect()->route('admin.pelanggan')->with('success', 'Pelanggan baru berhasil ditambahkan dengan kode: '. $kode);
+        return redirect()->route('admin.pelanggan.index')->with('success', 'Pelanggan baru berhasil ditambahkan dengan kode: '. $kode);
     }
 
     // Ambil data untuk Edit/Detail

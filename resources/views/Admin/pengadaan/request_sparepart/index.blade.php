@@ -26,6 +26,20 @@
         <form action="{{ route('admin.request_sparepart.index') }}" method="GET">
             <div class="flex flex-col md:flex-row gap-4 md:items-end">
 
+                {{-- Input Pencarian Kode Servis --}}
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Servis</label>
+                    <input type="text" name="kode_servis" value="{{ request('kode_servis') }}" placeholder="Masukkan kode servis..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                {{-- Input Pencarian Nama Pelanggan --}}
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                    <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
                 {{-- Filter Status --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -57,9 +71,11 @@
     </div>
 
     {{-- Info Badge Filter Aktif --}}
-    @if(request('status_request'))
-        <div class="mb-4 text-sm text-gray-600">
-            Menampilkan data filter: Status <span class="font-semibold text-gray-800">{{ ucfirst(str_replace('_', ' ', request('status_request'))) }}</span>
+    @if(request('kode_servis') || request('nama_pelanggan') || request('status_request'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center"><span>Filter aktif:</span>
+            @if(request('kode_servis'))<span class="font-semibold text-gray-800">Kode Servis: "{{ request('kode_servis') }}"</span>@endif
+            @if(request('nama_pelanggan'))<span class="font-semibold text-gray-800">Pelanggan: "{{ request('nama_pelanggan') }}"</span>@endif
+            @if(request('status_request'))<span class="font-semibold text-gray-800">Status: {{ ucfirst(request('status_request')) }}</span>@endif
         </div>
     @endif
 
@@ -72,6 +88,7 @@
                     <tr>
                         <th class="px-5 py-4 text-center">No</th>
                         <th class="px-5 py-4 text-center">Kode Servis</th>
+                        <th class="px-5 py-4 text-center">Nama Pelan</th>
                         <th class="px-5 py-4 text-center">Sparepart</th>
                         <th class="px-5 py-4 text-center">Jumlah</th>
                         <th class="px-5 py-4 text-center">Status</th>
@@ -82,10 +99,8 @@
                     @forelse($requestSparepart as $index => $r)
                     <tr class="hover:bg-gray-50/70 transition-all">
                         <td class="px-5 py-4 text-center text-gray-500">{{ $requestSparepart->firstItem() + $index }}</td>
-                        <td class="px-5 py-4 text-center font-bold text-blue-600">
-                            {{ $r->penugasan->servis->kode_servis ?? '-' }}
-                            <span class="block text-xs font-normal text-gray-400 mt-0.5">{{ $r->penugasan->servis->booking->pelanggan->nama ?? '-' }}</span>
-                        </td>
+                        <td class="px-5 py-4 text-center font-bold text-blue-600">{{ $r->penugasan->servis->kode_servis ?? '-' }}</td>
+                        <td class="px-5 py-4 text-center text-gray-500">{{ $r->penugasan->servis->booking->pelanggan->nama ?? '-' }}</td>
                         <td class="px-5 py-4 text-center text-gray-800">{{ $r->sparepart->nama_sparepart ?? 'Komponen Terhapus' }}</td>
                         <td class="px-5 py-4 text-center text-gray-600 font-semibold">{{ $r->jumlah }} Pcs</td>
                         <td class="px-5 py-4 text-center">
@@ -115,11 +130,12 @@
 
                                 {{-- 1. JIKA STATUS PENDING ADMIN: TAMPILKAN TOMBOL TERUSKAN KE PELANGGAN --}}
                                 @if($r->status_request == 'pending_admin')
-                                    <form action="{{ route('admin.request_sparepart.kirim_pelanggan', $r->id_request) }}" method="POST" class="inline">
+                                    <form id="form-kirim-{{ $r->id_request }}" action="{{ route('admin.request_sparepart.kirim_pelanggan', $r->id_request) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" 
+                                        <button type="button" 
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white transition-all shadow-sm" 
-                                                title="Kirim ke Pelanggan untuk Persetujuan">
+                                                title="Kirim ke Pelanggan untuk Persetujuan"
+                                                onclick="confirmKirimPelanggan('{{ $r->id_request }}')">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                             </svg>
@@ -129,12 +145,12 @@
 
                                 {{-- 2. JIKA STATUS SUDAH DI-ACC PELANGGAN: TAMPILKAN TOMBOL APPROVE AKHIR (POTONG STOK) --}}
                                 @if($r->status_request == 'disetujui_pelanggan')
-                                    <form action="{{ route('admin.request_sparepart.approve_final', $r->id_request) }}" method="POST" class="inline">
+                                    <form id="form-approve-final-{{ $r->id_request }}" action="{{ route('admin.request_sparepart.approve_final', $r->id_request) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" 
+                                        <button type="button" 
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all shadow-sm" 
                                                 title="Setujui Akhir (Potong Stok)"
-                                                onclick="return confirm('Setujui permintaan ini dan potong stok gudang secara otomatis?')">
+                                                onclick="confirmApproveFinal('{{ $r->id_request }}')">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
@@ -144,13 +160,13 @@
 
                                 {{-- 3. TOMBOL REJECT / TOLAK ADMIN (Hanya muncul jika status pending_admin atau disetujui_pelanggan) --}}
                                 @if(in_array($r->status_request, ['pending_admin', 'disetujui_pelanggan']))
-                                    <form action="{{ route('admin.request_sparepart.reject', $r->id_request) }}" method="POST" class="inline">
+                                    <form id="form-reject-admin-{{ $r->id_request }}" action="{{ route('admin.request_sparepart.reject', $r->id_request) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" 
+                                        <button type="button" 
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm" 
                                                 title="Tolak Permintaan"
-                                                onclick="return confirm('Tolak permintaan sparepart ini?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                onclick="confirmRejectAdmin('{{ $r->id_request }}')">
+                                            <svg xmlns="http://www.w3.org/2000/xl" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
@@ -161,7 +177,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-12 text-gray-400 font-medium">
+                        <td colspan="7" class="text-center py-12 text-gray-400 font-medium">
                             <div class="flex flex-col items-center justify-center space-y-2">
                                 <span>Tidak ada riwayat pengajuan sparepart masuk.</span>
                             </div>
@@ -177,4 +193,62 @@
     <div class="mt-5">
         {{ $requestSparepart->appends(request()->query())->links() }}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    // 1. Konfirmasi Kirim ke Pelanggan
+    function confirmKirimPelanggan(id) {
+        Swal.fire({
+            title: 'Kirim ke Pelanggan?',
+            text: "Permintaan sparepart akan diteruskan ke pelanggan untuk mendapatkan persetujuan biaya.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ea580c', // Warna orange sesuai Tailwind bg-orange-600
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Kirim!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-kirim-' + id).submit();
+            }
+        });
+    }
+
+    // 2. Konfirmasi Setuju Akhir (Potong Stok)
+    function confirmApproveFinal(id) {
+        Swal.fire({
+            title: 'Setujui Permintaan Akhir?',
+            text: "Sistem akan menyetujui permintaan ini dan memotong stok gudang secara otomatis.",
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a', // Warna hijau sesuai Tailwind bg-green-600
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Setujui & Potong Stok',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-approve-final-' + id).submit();
+            }
+        });
+    }
+
+    // 3. Konfirmasi Tolak Admin
+    function confirmRejectAdmin(id) {
+        Swal.fire({
+            title: 'Tolak Permintaan?',
+            text: "Apakah Anda yakin ingin menolak permintaan sparepart ini?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Warna merah sesuai Tailwind bg-red-600
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Tolak!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-reject-admin-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

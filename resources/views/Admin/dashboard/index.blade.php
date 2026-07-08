@@ -91,7 +91,7 @@ $stats = [
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="flex items-center justify-center gap-2">
-                            <a href="{{ route('admin.booking.index', ['id' => $booking->id_booking]) }}" 
+                            <a href="{{ route('admin.booking.show', ['id' => $booking->id_booking]) }}" 
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all" 
                                 title="Detail">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

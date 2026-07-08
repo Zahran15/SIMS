@@ -7,7 +7,7 @@
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
         <div>
             <h2 class="text-2xl font-bold text-gray-800">Detail Laporan Penggunaan</h2>
-            <p class="text-gray-500 text-xs">Rincian data pengajuan komponen dan riwayat validasi sistem (ID Request: #{{ $requestSparepart->id_request ?? 'Sistem' }})</p>
+            <p class="text-gray-500 text-xs">Rincian data pengajuan komponen dan riwayat validasi sistem (ID Request: #{{ $requestSparepart->id_request }})</p>
         </div>
         
         <div class="flex items-center gap-2">
@@ -61,7 +61,7 @@
             <div class="px-4 pb-4 text-xs">
                 <span class="text-gray-400 block mb-1">Justifikasi / Keterangan Teknisi:</span>
                 <div class="bg-gray-50 border border-gray-200 rounded p-3 text-gray-700 italic">
-                    "{{ $requestSparepart->alasan ?? 'Tidak ada alasan tambahan.' }}"
+                    "{{ $requestSparepart->alasan }}"
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
                         <tr>
                             <td class="px-4 py-2 text-gray-800 font-medium">
                                 <span class="text-[10px] font-bold bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded mr-1 uppercase">Part</span>
-                                {{ $requestSparepart->sparepart->nama_sparepart ?? 'Komponen Terhapus' }}
+                                {{ $requestSparepart->sparepart->nama_sparepart }}
                             </td>
                             <td class="px-4 py-2 text-center font-bold text-gray-800">{{ $requestSparepart->jumlah }} Pcs</td>
                         </tr>
@@ -106,7 +106,7 @@
                     <div>
                         <span class="text-gray-400 block text-[10px]">TAHAP 1: PENGAJUAN TEKNISI</span>
                         <strong class="text-gray-800">Sistem merekam permintaan komponen oleh teknisi</strong>
-                        <p class="text-gray-500 mt-0.5">{{ $requestSparepart->created_at->translatedFormat('d M Y - H:i') }} WIB</p>
+                        <p class="text-gray-500 mt-0.5">{{ $requestSparepart->created_at->translatedFormat('d M Y') }}</p>
                     </div>
                 </div>
 
@@ -140,7 +140,7 @@
                         <div>
                             <span class="text-gray-400 block text-[10px]">TAHAP 3: KONFIRMASI KONSUMEN / INTERNAL</span>
                             <strong class="text-red-600">Request dibatalkan / ditolak di dalam sistem</strong>
-                            <p class="text-gray-500 mt-0.5">{{ $requestSparepart->updated_at->translatedFormat('d M Y - H:i') }} WIB</p>
+                            <p class="text-gray-500 mt-0.5">{{ $requestSparepart->updated_at->translatedFormat('d M Y') }}</p>
                         </div>
                     @else
                         <div class="w-2 h-2 rounded-full bg-gray-300 mt-1 ring-4 ring-gray-100 shrink-0"></div>
@@ -158,7 +158,7 @@
                         <div>
                             <span class="text-gray-400 block text-[10px]">TAHAP 4: VERIFIKASI FINAL GUDANG</span>
                             <strong class="text-green-700">Admin memberikan validasi akhir. Suku cadang keluar & stok gudang resmi dipotong</strong>
-                            <p class="text-gray-500 mt-0.5">{{ $requestSparepart->updated_at->translatedFormat('d M Y - H:i') }} WIB</p>
+                            <p class="text-gray-500 mt-0.5">{{ $requestSparepart->updated_at->translatedFormat('d M Y') }}</p>
                         </div>
                     @else
                         <div class="w-2 h-2 rounded-full bg-gray-300 mt-1 ring-4 ring-gray-100 shrink-0"></div>

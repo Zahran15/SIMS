@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('penugasan_teknisi', function (Blueprint $table) {
-            $table->id('id_penugasan');
-            $table->foreignId('id_servis')->constrained('servis', 'id_servis')->cascadeOnDelete();
-            $table->foreignId('id_user')->constrained('users', 'id_user')->cascadeOnDelete();
-            $table->enum('prioritas', ['ringan', 'sedang', 'berat']);
-            $table->date('estimasi_selesai')->nullable();            
-            $table->enum('status_penugasan', ['belum dikerjakan', 'sedang dikerjakan', 'menunggu sparepart', 'selesai', 'gagal']);
+            $table->increments('id_penugasan'); 
+            $table->unsignedInteger('id_servis');
+            $table->foreign('id_servis')->references('id_servis')->on('servis')->cascadeOnDelete();
+            $table->unsignedInteger('id_user');
+            $table->foreign('id_user')->references('id_user')->on('users')->cascadeOnDelete();
+            $table->enum('prioritas', ['ringan', 'sedang', 'berat'])->nullable();
+            $table->date('estimasi_selesai')->nullable();
+            $table->enum('status_penugasan', ['belum dikerjakan','sedang dikerjakan','menunggu sparepart','selesai','gagal']);
             $table->text('catatan_teknisi');
             $table->timestamps();
         });

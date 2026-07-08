@@ -13,9 +13,15 @@ class PenugasanTeknisiController extends Controller
 public function index(Request $request)
 {
     $query = Servis::query();
-    if ($request->has('search') && $request->search != '') {
-        $query->whereHas('booking.pelanggan', function($q) use ($request) {
-            $q->where('nama', 'LIKE', $request->search . '%');
+    if ($request->filled('kode_servis')) {
+        $query->whereHas('penugasan.servis', function ($q) use ($request) {
+            $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+        });
+    }
+    // Filter Nama Pelanggan
+    if ($request->filled('nama_pelanggan')) {
+        $query->whereHas('penugasan.servis.booking.pelanggan', function ($q) use ($request) {
+            $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
         });
     }
     if ($request->has('id_teknisi') && $request->id_teknisi != '') {
@@ -59,6 +65,7 @@ public function index(Request $request)
         PenugasanTeknisi::create([
             'id_servis' => $request->id_servis,
             'id_user' => $request->id_user,
+            'prioritas' => null,
             'estimasi_selesai' => $request->estimasi_selesai,
             'status_penugasan' => $request->status_penugasan,
             'catatan_teknisi' => $request->catatan_teknisi

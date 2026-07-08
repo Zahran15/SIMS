@@ -11,8 +11,6 @@
 
 {{-- KARTU STATISTIK SINGKAT --}}
 @php
-// Karena $requestSparepart adalah data paginasi, untuk statistik akurat idealnya dilempar dari controller.
-// Namun, ini penyesuaian fleksibel di view agar tetap menghitung kondisi status baru dari koleksi halaman aktif.
 $request_stats = [
     [
         'title' => 'Total Request', 

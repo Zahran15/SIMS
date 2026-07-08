@@ -8,7 +8,6 @@
         <div>
             <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Edit Servis</h2>
             <p class="text-gray-500 mt-1 flex items-center">
-                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                 Manajemen pembaruan status dan rincian servis pelanggan
             </p>
         </div>
@@ -64,9 +63,10 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Status Servis</label>
-                            <select name="status_servis"
-                                class="w-full border border-gray-200 rounded-2xl p-3 bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all appearance-none">
-                                <option value="menunggu" {{ $servis->status_servis == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                            <input type="hidden" name="status_servis" value="{{ $servis->status_servis }}">
+                            <select disabled
+                                class="w-full border border-gray-200 rounded-2xl p-3 bg-gray-50 text-gray-500 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all appearance-none cursor-not-allowed">
+                                <option value="menunggu" {{ $servis->status_servis == 'menunggu' }}>Menunggu</option>
                                 <option value="proses" {{ $servis->status_servis == 'proses' ? 'selected' : '' }}>Proses</option>
                                 <option value="selesai" {{ $servis->status_servis == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                 <option value="bisa diambil" {{ $servis->status_servis == 'bisa diambil' ? 'selected' : '' }}>Bisa Diambil</option>

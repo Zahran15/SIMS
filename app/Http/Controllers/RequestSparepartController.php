@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DetailServisSparepart;
 use App\Http\Controllers\ServisController;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NotifRequestSparepart;
 
 class RequestSparepartController extends Controller
 {
@@ -16,6 +18,19 @@ class RequestSparepartController extends Controller
     {
         $query = RequestSparepart::query();
         
+        if ($request->filled('kode_servis')) {
+            $query->whereHas('penugasan.servis', function ($q) use ($request) {
+                $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+            });
+        }
+
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->whereHas('penugasan.servis.booking.pelanggan', function ($q) use ($request) {
+                $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
+            });
+        }
+
         if ($request->has('status_request') && $request->status_request != '') {
             $query->where('status_request', $request->status_request);
         }
@@ -31,7 +46,6 @@ class RequestSparepartController extends Controller
                   });
 
             $requestSparepart = $query->with(['penugasan.servis.booking.pelanggan', 'sparepart'])->latest()->paginate(10);
-            
             return view('pelanggan.proses.request_sparepart.index', compact('requestSparepart'));
         }
 
@@ -53,7 +67,7 @@ class RequestSparepartController extends Controller
         }
     }
 
-    // 🔹 DETAIL REQUEST SPAREPART (Sesuaikan juga pengecekan Guard-nya)
+    // 🔹 DETAIL REQUEST SPAREPART
     public function detail($id)
     {
         $requestSparepart = RequestSparepart::with(['penugasan.servis.booking.pelanggan', 'sparepart'])->findOrFail($id);
@@ -73,7 +87,6 @@ class RequestSparepartController extends Controller
         // Jika staff internal (teknisi/admin/owner)
         $role = Auth::user()->role ?? null;
         if (!$role) abort(401);
-
         if ($role == 'teknisi') {
             return view('teknisi.proses.request_sparepart.detail', compact('requestSparepart'));
         } elseif ($role == 'admin') {
@@ -83,21 +96,20 @@ class RequestSparepartController extends Controller
         }
     }
 
-    // 🔹 AKSI APPROVE PELANGGAN (Gunakan guard pelanggan)
+    // 🔹 AKSI APPROVE PELANGGAN
     public function approvePelanggan($id)
     {
         if (!Auth::guard('pelanggan')->check()) abort(403);
-
         $requestSparepart = RequestSparepart::findOrFail($id);
         if ($requestSparepart->status_request != 'dikirim_ke_pelanggan') {
             return back()->with('error', 'Permintaan tidak butuh konfirmasi saat ini.');
         }
 
         $requestSparepart->update(['status_request' => 'disetujui_pelanggan']);
-        return back()->with('success', 'Anda menyetujui request ini. Menunggu Admin melakukan validasi akhir & pemotongan stok.');
+        return back()->with('success', 'Anda menyetujui request ini. Menunggu Admin melakukan validasi akhir dan pemotongan stok.');
     }
 
-    // 🔹 AKSI REJECT PELANGGAN (Gunakan guard pelanggan)
+    // 🔹 AKSI REJECT PELANGGAN
     public function rejectPelanggan($id)
     {
         if (!Auth::guard('pelanggan')->check()) abort(403);
@@ -111,7 +123,6 @@ class RequestSparepartController extends Controller
         return back()->with('success', 'Anda menolak pergantian sparepart ini.');
     }
 
-    // 🔹 SISA FUNGSI DIBAWAH TETAP SAMA (Milik Admin/Teknisi)
     public function create()
     {
         $penugasan = PenugasanTeknisi::all();
@@ -119,37 +130,62 @@ class RequestSparepartController extends Controller
         return view('teknisi.proses.request_sparepart.tambah', compact('penugasan', 'sparepart'));
     }
 
+    // 🔹 BAGIAN STORE DIUBAH MENJADI ARRAY LOOPING
     public function store(Request $request)
     {
         $request->validate([
-            'id_penugasan' => 'required',
-            'id_sparepart' => 'required|exists:sparepart,id_sparepart', 
-            'jumlah' => 'required|integer|min:1',
-            'alasan' => 'required|string'
+            'id_penugasan'   => 'required',
+            'id_sparepart'   => 'required|array',
+            'id_sparepart.*' => 'required|exists:sparepart,id_sparepart', 
+            'jumlah'         => 'required|array',
+            'jumlah.*'       => 'required|integer|min:1',
+            'alasan'         => 'required|string'
         ]);
 
-        RequestSparepart::create([
-            'id_penugasan' => $request->id_penugasan,
-            'id_sparepart' => $request->id_sparepart,
-            'jumlah' => $request->jumlah,
-            'alasan' => $request->alasan,
-            'status_request' => 'pending_admin'
-        ]);
+        // Melakukan looping berdasarkan array input sparepart yang dikirim oleh form
+        foreach ($request->id_sparepart as $index => $sparepartId) {
+            RequestSparepart::create([
+                'id_penugasan'   => $request->id_penugasan,
+                'id_sparepart'   => $sparepartId,
+                'jumlah'         => $request->jumlah[$index],
+                'alasan'         => $request->alasan,
+                'status_request' => 'pending_admin'
+            ]);
+        }
         
-        return redirect()->route('teknisi.request_sparepart.index')->with('success', 'Request sparepart berhasil diajukan ke Admin.');
+        return redirect()->route('teknisi.request_sparepart.index')->with('success', 'Semua request sparepart berhasil diajukan ke Admin.');
     }
 
+    // 🔹 AKSI KIRIM KE PELANGGAN
     public function kirimKePelanggan($id)
     {
-        $requestSparepart = RequestSparepart::findOrFail($id);
+        $requestSparepart = RequestSparepart::with(['penugasan.servis.booking.pelanggan', 'sparepart'])->findOrFail($id);
+        
         if ($requestSparepart->status_request != 'pending_admin') {
             return back()->with('error', 'Request tidak dapat dikirim ke pelanggan.');
         }
-
         $requestSparepart->update(['status_request' => 'dikirim_ke_pelanggan']);
-        return back()->with('success', 'Request sparepart berhasil diteruskan ke Pelanggan.');
+        if ($requestSparepart->penugasan->servis->booking->pelanggan) {
+            $pelanggan = $requestSparepart->penugasan->servis->booking->pelanggan;
+            
+            $emailPelanggan = $pelanggan->email;
+            $namaPelanggan  = $pelanggan->nama;
+            $namaLaptop     = $requestSparepart->penugasan->servis->booking->merk_tipe;
+            $namaSparepart  = $requestSparepart->sparepart->nama_sparepart ?? 'Komponen';
+            $jumlah         = $requestSparepart->jumlah;
+            $harga          = $requestSparepart->sparepart->harga_jual;
+
+            try {
+                Notification::route('mail', $emailPelanggan)
+                    ->notify(new NotifRequestSparepart($namaPelanggan, $namaLaptop, $namaSparepart, $jumlah, $harga));
+            } catch (\Exception $e) {
+                return redirect()->route('admin.request_sparepart.index')->with('success', 'Request berhasil diteruskan ke pelanggan, namun gagal mengirim notifikasi email.');
+            }
+        }
+        return redirect()->route('admin.request_sparepart.index')->with('success', 'Request sparepart berhasil diteruskan ke Pelanggan dan notifikasi email telah dikirim.');
     }
 
+    // 🔹 APPROVE FINAL DAN KONEKSI KE NOTA DETAIL SERVIS
     public function approveFinal($id)
     {
         $requestSparepart = RequestSparepart::with('penugasan.servis')->findOrFail($id);
@@ -172,7 +208,6 @@ class RequestSparepartController extends Controller
         $requestSparepart->update(['status_request' => 'disetujui']);
 
         // 3. OTOMATIS MASUKKAN KE DATA DETAIL SERVIS PELANGGAN
-        // Ambil id_servis melalui relasi request_spareparts -> penugasan -> servis
         $id_servis = $requestSparepart->penugasan->servis->id_servis;
         if ($id_servis) {
             DetailServisSparepart::create([
@@ -183,7 +218,7 @@ class RequestSparepartController extends Controller
                 'subtotal'     => $sparepart->harga_jual * $requestSparepart->jumlah,
             ]);
 
-            // 4. HITUNG ULANG TOTAL BIAYA SERVIS (Memanggil static helper di ServisController)
+            // 4. HITUNG ULANG TOTAL BIAYA SERVIS
             ServisController::updateTotalBiaya($id_servis);
         }
 

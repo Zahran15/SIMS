@@ -4,12 +4,12 @@
 
 @section('content')
     {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h2 class="text-3xl font-bold text-gray-800">Request Sparepart</h2>
             <p class="text-gray-500 mt-1">Daftar permintaan sparepart teknisi</p>
         </div>
-        <a href="{{ route('teknisi.request_sparepart.create') }}" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-md shadow-blue-200">
+        <a href="{{ route('teknisi.request_sparepart.create') }}" class="w-full sm:w-auto text-center px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-md shadow-blue-200">
             Buat Request
         </a>
     </div>
@@ -28,13 +28,27 @@
     @endif
 
     {{-- FILTER --}}
-    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    <div class="bg-white mb-4 rounded-xl shadow-sm border p-4">
         <form action="{{ route('teknisi.request_sparepart.index') }}" method="GET">
-            <div class="flex flex-col md:flex-row gap-4 md:items-end">
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
+                {{-- Input Pencarian Kode Servis --}}
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Servis</label>
+                    <input type="text" name="kode_servis" value="{{ request('kode_servis') }}" placeholder="Masukkan kode servis..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                {{-- Input Pencarian Nama Pelanggan --}}
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                    <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
                 {{-- Filter Status --}}
-                <div>
+                <div class="min-w-[200px]">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status_request" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[250px] text-sm">
+                    <select name="status_request" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <option value="">Semua Status</option>
                         <option value="pending_admin" {{ request('status_request') == 'pending_admin' ? 'selected' : '' }}>Pending Admin</option>
                         <option value="dikirim_ke_pelanggan" {{ request('status_request') == 'dikirim_ke_pelanggan' ? 'selected' : '' }}>Menunggu Konfirmasi Pelanggan</option>
@@ -43,19 +57,23 @@
                         <option value="ditolak" {{ request('status_request') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                 </div>
+
                 {{-- Tombol Aksi --}}
-                <div class="flex gap-2">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">Cari</button>
-                    <a href="{{ route('teknisi.request_sparepart.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition">Reset</a>
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <button type="submit" class="flex-1 lg:flex-none px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition">Cari</button>
+                    <a href="{{ route('teknisi.request_sparepart.index') }}" class="flex-1 lg:flex-none px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-medium text-center transition">Reset</a>
                 </div>
             </div>
         </form>
     </div>
 
     {{-- Info Badge Filter Aktif --}}
-    @if(request('status_request'))
-        <div class="mb-4 text-sm text-gray-600">
-            Menampilkan data filter: Status <span class="font-semibold text-gray-800">{{ ucfirst(str_replace('_', ' ', request('status_request'))) }}</span>
+    @if(request('kode_servis') || request('nama_pelanggan') || request('status_request'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
+            <span>Filter aktif:</span>
+            @if(request('kode_servis'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Kode Servis: "{{ request('kode_servis') }}"</span>@endif
+            @if(request('nama_pelanggan'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Pelanggan: "{{ request('nama_pelanggan') }}"</span>@endif
+            @if(request('status_request'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Status: {{ ucfirst(request('status_request')) }}</span>@endif
         </div>
     @endif
 
@@ -81,7 +99,10 @@
                     <tr class="hover:bg-gray-50/70 transition-all">
                         <td class="px-5 py-4 text-center text-gray-600">{{ $requestSparepart->firstItem() + $index }}</td>
                         <td class="px-5 py-4 text-center font-bold text-blue-600">{{ $r->penugasan->servis->kode_servis ?? '-' }}</td>
-                        <td class="px-5 py-4 text-center font-medium text-gray-800">{{ $r->sparepart->nama_sparepart ?? 'Terhapus' }}</td>
+                        <td class="px-5 py-4 text-center font-medium text-gray-800">
+                            {{ $r->sparepart->nama_sparepart ?? 'Terhapus' }}
+                            <span class="block text-xs text-gray-400 font-normal mt-0.5">Kategori: {{ $r->sparepart->kategori ?? '-' }}</span>
+                        </td>
                         <td class="px-5 py-4 text-center text-gray-600 font-semibold">{{ $r->jumlah }} Pcs</td>
                         <td class="px-5 py-4 text-center">
                             @if($r->status_request == 'pending_admin')
@@ -98,7 +119,7 @@
                         </td>
                         <td class="px-5 py-4 text-center">
                             <div class="flex justify-center">
-                                <a href="{{ route('teknisi.request_sparepart.detail', $r->id_request) }}" 
+                                <a href="{{ route('teknisi.request_sparepart.detail', $r->id_request_sparepart ?? $r->id_request) }}" 
                                     class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Detail">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -126,5 +147,4 @@
     <div class="mt-5">
         {{ $requestSparepart->appends(request()->query())->links() }}
     </div>
-</div>
 @endsection

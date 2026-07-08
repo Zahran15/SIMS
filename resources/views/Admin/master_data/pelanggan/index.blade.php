@@ -48,11 +48,17 @@ $user_stats = [
     <form action="{{ route('admin.pelanggan.index') }}" method="GET">
         <div class="flex flex-col md:flex-row gap-4 md:items-end">
             
-            {{-- Input Pencarian Nama --}}
+            {{-- Input Pencarian Kode Booking --}}
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cari Nama</label>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Masukkan nama..."
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kode Pelanggan</label>
+                <input type="text" name="kode_pelanggan" value="{{ request('kode_pelanggan') }}" placeholder="Masukkan kode pelanggan..."
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            {{-- Input Pencarian Nama Pelanggan --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
 
@@ -84,10 +90,11 @@ $user_stats = [
 </div>
 
 {{-- Info Badge Filter Aktif --}}
-@if(request('search') || request('status'))
+@if(request('kode_pelanggan') || request('nama_pelanggan') || request('status'))
     <div class="mb-4 text-sm text-gray-600">
         Menampilkan data filter: 
-        @if(request('search')) Nama <span class="font-semibold text-gray-800">{{ request('search') }}"</span> @endif
+        @if(request('kode_pelanggan'))Kode Pelanggan<span class="font-semibold text-gray-800">"{{ request('kode_pelanggan') }}"</span>@endif
+        @if(request('nama_pelanggan'))Nama Pelanggan<span class="font-semibold text-gray-800">"{{ request('nama_pelanggan') }}"</span>@endif             
         @if(request('status')) Status <span class="font-semibold text-gray-800">{{ ucfirst(request('status')) }}</span> @endif
     </div>
 @endif

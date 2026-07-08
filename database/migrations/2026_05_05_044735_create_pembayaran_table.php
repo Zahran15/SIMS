@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pembayaran', function (Blueprint $table) {
-            $table->id('id_pembayaran');
-            $table->foreignId('id_booking')->constrained('booking','id_booking')->cascadeOnDelete();
-            $table->foreignId('id_servis')->nullable()->constrained('servis', 'id_servis')->nullOnDelete();
+            $table->increments('id_pembayaran');
+            $table->unsignedInteger('id_booking');
+            $table->foreign('id_booking')->references('id_booking')->on('booking')->cascadeOnDelete();
+            $table->unsignedInteger('id_servis')->nullable();
+            $table->foreign('id_servis')->references('id_servis')->on('servis')->nullOnDelete();
             $table->enum('jenis_pembayaran', ['dp', 'pelunasan']);
             $table->enum('metode_pembayaran', ['cash', 'transfer']);
             $table->decimal('nominal', 12, 2);
@@ -22,7 +24,7 @@ return new class extends Migration
             $table->string('snap_token')->nullable();
             $table->string('midtrans_order_id')->nullable();
             $table->string('midtrans_transaction_id')->nullable();
-            $table->timestamp('tanggal_bayar')->nullable();            
+            $table->timestamp('tanggal_bayar')->nullable();
             $table->timestamps();
         });
     }

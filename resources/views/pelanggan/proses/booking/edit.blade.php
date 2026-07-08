@@ -3,7 +3,6 @@
 @section('title', 'Ubah Pengajuan Booking')
 
 @section('content')
-<div class="p-6">
     {{-- HEADER --}}
     <div class="mb-6">
         <h2 class="text-3xl font-bold text-gray-800">Ubah Pengajuan Booking</h2>
@@ -93,5 +92,4 @@
             </div>
         </form>
     </div>
-</div>
 @endsection

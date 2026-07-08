@@ -12,13 +12,12 @@ class LaporanServisController extends Controller
     {
         // 1. MENGAMBIL DATA UNTUK STATS CARDS
         $total_servis = Servis::count();
-        $servis_selesai = Servis::where('status_servis', 'Selesai')->count();
-        $servis_proses = Servis::where('status_servis', 'Proses')->count();
-        $servis_dibatalkan = Servis::where('status_servis', 'Dibatalkan')->count();
+        $servis_selesai = Servis::whereIn('status_servis', ['selesai', 'bisa diambil', 'sudah diambil'])->count();
+        $servis_proses = Servis::whereIn('status_servis', ['proses', 'menunggu'])->count();
+        $servis_dibatalkan = Servis::where('status_servis', 'dibatalkan')->count();
 
         // 2. MENGAMBIL DETAIL DATA SERVIS (Ubah ->get() menjadi ->paginate(5))
         $detail_servis_paginated = Servis::with(['penugasan.user', 'booking.pelanggan'])->orderBy('tgl_masuk', 'desc')->paginate(5, ['*'], 'page_servis');
-
         // Melakukan mapping data didalam collection paginator sekaligus memformat tanggal selesai
         $mapped_servis = $detail_servis_paginated->getCollection()->map(function ($item) {            
             $tanggal_selesai_raw = $item->penugasan->estimasi_selesai ?? $item->perkiraan_selesai;
