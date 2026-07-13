@@ -21,7 +21,6 @@ class NotifBookingDiterima extends Notification
         $this->merkTipe = $merkTipe;
     }
 
-    // 🔹 PERBAIKAN: Nama method harus 'via', bukan 'toRoute'
     public function via($notifiable)
     {
         return ['mail'];

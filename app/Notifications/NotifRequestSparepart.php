@@ -16,7 +16,6 @@ class NotifRequestSparepart extends Notification
     protected $jumlah;
     protected $harga;
 
-    // 🔹 TAMBAHKAN $harga ke dalam parameter construct
     public function __construct($namaPelanggan, $namaLaptop, $namaSparepart, $jumlah, $harga)
     {
         $this->namaPelanggan = $namaPelanggan;
