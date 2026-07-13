@@ -51,6 +51,6 @@ class Servis extends Model
     // PEMBAYARAN
     public function pembayaran()
     {
-        return $this->hasMany(Pembayaran::class,'id_servis');
+        return $this->hasOne(Pembayaran::class,'id_servis');
     }
 }

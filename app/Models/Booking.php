@@ -39,6 +39,6 @@ class Booking extends Model
     // RELASI KE PEMBAYARAN
     public function pembayaran()
     {
-        return $this->hasMany(Pembayaran::class,'id_booking');
+        return $this->hasOne(Pembayaran::class,'id_booking');
     }
 }

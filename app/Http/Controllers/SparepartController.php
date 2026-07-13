@@ -93,7 +93,6 @@ class SparepartController extends Controller
     return redirect()->route('admin.sparepart.index')->with('success', 'Data berhasil diupdate');    
     }
 
-    // 🔹 DELETE
     public function destroy($id)
     {
         Sparepart::where('id_sparepart', $id)->firstOrFail()->delete();

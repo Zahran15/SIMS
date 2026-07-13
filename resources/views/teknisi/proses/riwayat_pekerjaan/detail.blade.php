@@ -3,7 +3,6 @@
 @section('title', 'Detail Riwayat Pekerjaan')
 
 @section('content')
-<div class="p-4">
 
     {{-- HEADER HALAMAN & TOMBOL --}}
     <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3">
@@ -56,12 +55,26 @@
             </div>
 
             <div class="p-4 grid grid-cols-2 gap-4 text-xs">
-                <div>
-                    <span class="text-gray-400 block mb-1">Tingkat Prioritas</span>
+            <div>
+                <span class="text-gray-400 block mb-1">Tingkat Prioritas</span>
+                @if(($riwayat->prioritas) == 'ringan')
+                    <span class="px-2 py-0.5 rounded font-bold border bg-green-100 text-green-800 border-green-200 uppercase">
+                        {{ $riwayat->prioritas }}
+                    </span>
+                @elseif(($riwayat->prioritas) == 'sedang')
+                    <span class="px-2 py-0.5 rounded font-bold border bg-amber-100 text-amber-800 border-amber-200 uppercase">
+                        {{ $riwayat->prioritas }}
+                    </span>
+                @elseif(($riwayat->prioritas) == 'berat')
+                    <span class="px-2 py-0.5 rounded font-bold border bg-red-100 text-red-800 border-red-200 uppercase">
+                        {{ $riwayat->prioritas }}
+                    </span>
+                @else
                     <span class="px-2 py-0.5 rounded font-bold border bg-gray-100 text-gray-800 border-gray-200 uppercase">
                         {{ $riwayat->prioritas }}
                     </span>
-                </div>
+                @endif
+            </div>
                 <div>
                     <span class="text-gray-400 block mb-1">Status Penugasan</span>
                     <span class="px-2 py-0.5 rounded font-bold border bg-green-100 text-green-800 border-green-200 uppercase">
@@ -130,11 +143,22 @@
                 </table>
             </div>
 
-            {{-- TOTAL AKHIR BIAYA --}}
+            {{-- PEMBAGIAN RINCIAN POTONGAN DP & TOTAL AKHIR --}}
+            <div class="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs space-y-1.5 text-right flex flex-col items-end">
+                <div class="flex justify-between w-full md:w-1/3">
+                    <span class="text-gray-500">Subtotal Biaya:</span>
+                    <span class="font-semibold text-gray-700">Rp {{ number_format($riwayat->servis->total_biaya, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between w-full md:w-1/3 text-red-600">
+                    <span>Uang Muka (DP):</span>
+                    <span>- Rp 50.000</span>
+                </div>
+            </div>
+
             <div class="bg-gray-100 px-4 py-3 flex justify-between items-center border-t border-gray-200">
-                <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Total Biaya Keseluruhan:</span>
+                <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Sisa Pembayaran (Setelah DP):</span>
                 <strong class="text-xl font-bold text-green-600">
-                    Rp {{ number_format($riwayat->servis->total_biaya, 0, ',', '.') }}
+                    Rp {{ number_format(max(0, $riwayat->servis->total_biaya - 50000), 0, ',', '.') }}
                 </strong>
             </div>
         </div>
@@ -151,7 +175,5 @@
                 </div>
             </div>
         </div>
-
     </div>
-</div>
 @endsection

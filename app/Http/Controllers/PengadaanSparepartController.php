@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 class PengadaanSparepartController extends Controller
 {
     // 🔹 TAMPIL DATA 
-// 🔹 TAMPIL DATA 
     public function index(Request $request)
     {
         $query = PengadaanSparepart::query();
@@ -131,7 +130,6 @@ class PengadaanSparepartController extends Controller
         }
     }
 
-    // 🔹 HAPUS DATA
     public function destroy($id)
     {
         $role = Auth::user()->role;
@@ -144,6 +142,6 @@ class PengadaanSparepartController extends Controller
             $sparepart->save();
         }
         $pengadaan->delete();
-        return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dihapus dan penyesuaian stok telah dilakukan.');
+        return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dihapus');
     }
 }

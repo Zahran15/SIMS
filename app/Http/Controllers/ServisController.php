@@ -278,7 +278,6 @@ class ServisController extends Controller
         );
     }
 
-    // 🔹 TAMBAHAN HELPER STATIC METHOD UNTUK UPDATE TOTAL BIAYA DARI LUAR CONTROLLER
     public static function updateTotalBiaya($id_servis)
     {
         $servis = Servis::findOrFail($id_servis);

@@ -22,7 +22,7 @@
             <thead class="bg-blue-600 text-xs uppercase text-white">
                 <tr>
                     <th class="px-5 py-5 text-center">No</th>
-                    <th class="px-5 py-5 text-center">Nama Jasa</th>
+                    <th class="px-5 py-5 text-left">Nama Jasa</th>
                     <th class="px-5 py-5 text-center">Harga</th>
                     <th class="px-5 py-5 text-center">Aksi</th>
                 </tr>
@@ -31,7 +31,7 @@
                 @forelse ($jasa as $index => $j)
                     <tr class="border-b hover:bg-gray-50 transition-colors">
                         <td class="px-5 py-5 text-center">{{ $jasa->firstItem() + $index }}</td>
-                        <td class="px-5 py-5 text-center font-medium text-gray-900">{{ $j->nama_jasa }}</td>
+                        <td class="px-5 py-5 text-left font-medium text-gray-900">{{ $j->nama_jasa }}</td>
                         <td class="px-5 py-5 text-center text-green-600 font-semibold">Rp {{ number_format($j->harga, 0, ',', '.') }}</td>
                         <td class="px-5 py-5 text-center">
                             <div class="flex items-center justify-center gap-2">

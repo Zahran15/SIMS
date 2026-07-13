@@ -233,7 +233,6 @@ class BookingController extends Controller
         return view('admin.proses.booking.detail', compact('booking'));
     }
 
-    // 🔹 DELETE
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);

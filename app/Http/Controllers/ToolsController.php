@@ -40,7 +40,7 @@ class ToolsController extends Controller
             'id_user'    => 'required|exists:users,id_user', 
             'nama_tools' => 'required',
             'jumlah'     => 'required|integer|min:0',
-            'simpan'     => 'required|in:tersedia,tidak tersedia',
+            'status'     => 'required|in:tersedia,tidak tersedia',
         ]);
 
         Tools::create([
@@ -50,7 +50,7 @@ class ToolsController extends Controller
             'status'     => $request->status,
         ]);
 
-        return redirect()->route('admin.tools.index')->with('success', 'Data tools berhasil ditambahkan');
+        return redirect()->route('admin.pengadaan_tools.index')->with('success', 'Data tools berhasil ditambahkan');
     }
 
     // 🔹 EDIT DATA 
@@ -81,7 +81,6 @@ class ToolsController extends Controller
         return redirect()->route('admin.pengadaan_tools.index')->with('success', 'Data tools berhasil diupdate');
     }
 
-    // 🔹 DELETE 
     public function destroy($id)
     {
         Tools::where('id_tools', $id)->firstOrFail()->delete();

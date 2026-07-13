@@ -17,11 +17,6 @@
     <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         {{-- Form Header with Gradient --}}
         <div class="px-8 py-5 bg-gradient-to-r from-amber-500 to-orange-600 flex items-center gap-3">
-            <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-            </div>
             <div>
                 <h3 class="text-xl font-bold text-white">Form Edit Pengguna</h3>
             </div>

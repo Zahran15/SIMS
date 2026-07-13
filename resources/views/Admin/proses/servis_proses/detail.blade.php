@@ -73,30 +73,29 @@
                         <span class="ml-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold border border-green-200 uppercase">Selesai</span>
                     @endif
                 </div>
-                    {{-- PERUBAHAN DISINI: Menampilkan Status Kerja/Penugasan Teknisi Berdasarkan Enum --}}
-                    <div>
-                        <span class="text-gray-500">Status Kerja Teknisi:</span>
-                        @if($servis->penugasan)
-                            @if($servis->penugasan->status_penugasan == 'belum dikerjakan')
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-bold border border-gray-200 uppercase">Belum Dikerjakan</span>
-                            @elseif($servis->penugasan->status_penugasan == 'sedang dikerjakan')
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-800 font-bold border border-purple-200 uppercase">Sedang Dikerjakan</span>
-                            @elseif($servis->penugasan->status_penugasan == 'menunggu sparepart')
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-amber-100 text-amber-800 font-bold border border-amber-200 uppercase">Menunggu Sparepart</span>
-                            @elseif($servis->penugasan->status_penugasan == 'selesai')
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 uppercase">Selesai</span>
-                            @elseif($servis->penugasan->status_penugasan == 'gagal')
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-red-100 text-red-800 font-bold border border-red-200 uppercase">Gagal</span>
-                            @else
-                                <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 font-bold border border-gray-200 uppercase">{{ $servis->penugasan->status_penugasan }}</span>
-                            @endif
-                        @else
-                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-400 italic font-medium border border-gray-200">Belum Ditugaskan</span>
-                        @endif
-                    </div>
                 <div>
-                    <span class="text-gray-500 font-semibold">Total Biaya Sementara:</span>
-                    <strong class="ml-1 text-green-600 text-base">Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}</strong>
+                    <span class="text-gray-500">Status Kerja Teknisi:</span>
+                    @if($servis->penugasan)
+                        @if($servis->penugasan->status_penugasan == 'belum dikerjakan')
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-700 font-bold border border-gray-200 uppercase">Belum Dikerjakan</span>
+                        @elseif($servis->penugasan->status_penugasan == 'sedang dikerjakan')
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-800 font-bold border border-purple-200 uppercase">Sedang Dikerjakan</span>
+                        @elseif($servis->penugasan->status_penugasan == 'menunggu sparepart')
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-amber-100 text-amber-800 font-bold border border-amber-200 uppercase">Menunggu Sparepart</span>
+                        @elseif($servis->penugasan->status_penugasan == 'selesai')
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 uppercase">Selesai</span>
+                        @elseif($servis->penugasan->status_penugasan == 'gagal')
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-red-100 text-red-800 font-bold border border-red-200 uppercase">Gagal</span>
+                        @else
+                            <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 font-bold border border-gray-200 uppercase">{{ $servis->penugasan->status_penugasan }}</span>
+                        @endif
+                    @else
+                        <span class="ml-1 px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-400 italic font-medium border border-gray-200">Belum Ditugaskan</span>
+                    @endif
+                </div>
+                <div>
+                    <span class="text-gray-500 font-semibold">Sisa Tagihan Sementara:</span>
+                    <strong class="ml-1 text-blue-600 text-base">Rp {{ number_format(max(0, $servis->total_biaya - 50000), 0, ',', '.') }}</strong>
                 </div>
             </div>
         </div>
@@ -193,12 +192,24 @@
                 </table>
             </div>
 
-            {{-- FOOTER TOTAL --}}
-            <div class="bg-gray-100 px-4 py-3 flex justify-between items-center border-t border-gray-200">
-                <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Total Pembayaran Bill:</span>
-                <strong class="text-xl font-bold text-blue-600">
-                    Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}
-                </strong>
+            {{-- FOOTER TOTAL DENGAN BREAKDOWN DP --}}
+            <div class="bg-gray-50 px-4 py-3 flex justify-end border-t border-gray-200">
+                <div class="w-full sm:w-64 space-y-1.5 text-xs text-gray-600">
+                    <div class="flex justify-between">
+                        <span>Total Biaya Sementara:</span>
+                        <span class="font-semibold text-gray-800">Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-red-600">
+                        <span>Potongan DP (Booking):</span>
+                        <span>- Rp 50.000</span>
+                    </div>
+                    <div class="border-t pt-1.5 flex justify-between items-center text-gray-800">
+                        <span class="font-bold uppercase tracking-wide">Sisa Pembayaran:</span>
+                        <strong class="text-xl font-bold text-blue-600">
+                            Rp {{ number_format(max(0, $servis->total_biaya - 50000), 0, ',', '.') }}
+                        </strong>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

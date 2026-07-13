@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
         // 2. Data Dummy Tambahan (Menggunakan Faker)
         $faker = Faker::create('id_ID'); 
 
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             DB::table('users')->insert([
                 'nama' => $faker->name,
                 'role' => $faker->randomElement(['admin', 'teknisi']),

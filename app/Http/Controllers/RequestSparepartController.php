@@ -17,57 +17,67 @@ class RequestSparepartController extends Controller
     public function index(Request $request)
     {
         $query = RequestSparepart::query();
-        
+
+        // 🔹 1. FILTER PENCARIAN & STATUS (Berlaku global untuk user yang berhak mencari)
         if ($request->filled('kode_servis')) {
             $query->whereHas('penugasan.servis', function ($q) use ($request) {
                 $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
             });
         }
 
-        // Filter Nama Pelanggan
         if ($request->filled('nama_pelanggan')) {
             $query->whereHas('penugasan.servis.booking.pelanggan', function ($q) use ($request) {
                 $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
             });
         }
 
-        if ($request->has('status_request') && $request->status_request != '') {
+        if ($request->filled('status_request')) {
             $query->where('status_request', $request->status_request);
         }
 
-        // 1. CEK GUARD PELANGGAN TERLEBIH DAHULU
+        // 🔹 2. CEK GUARD PELANGGAN TERLEBIH DAHULU
         if (Auth::guard('pelanggan')->check()) {
             $id_pelanggan = Auth::guard('pelanggan')->id();
-
-            // Pelanggan hanya melihat data miliknya yang statusnya dikirim oleh admin, disetujui, atau ditolak
             $query->whereIn('status_request', ['dikirim_ke_pelanggan', 'disetujui_pelanggan', 'disetujui', 'ditolak'])
                   ->whereHas('penugasan.servis.booking', function ($q) use ($id_pelanggan) {
                       $q->where('id_pelanggan', $id_pelanggan); 
                   });
-
+            $totalRequest = (clone $query)->count();
+            $totalDisetujui = (clone $query)->where('status_request', 'disetujui')->count();
+            $totalAntrean = (clone $query)->whereIn('status_request', ['dikirim_ke_pelanggan', 'disetujui_pelanggan'])->count();
             $requestSparepart = $query->with(['penugasan.servis.booking.pelanggan', 'sparepart'])->latest()->paginate(10);
-            return view('pelanggan.proses.request_sparepart.index', compact('requestSparepart'));
+            return view('pelanggan.proses.request_sparepart.index', compact('requestSparepart', 'totalRequest', 'totalDisetujui', 'totalAntrean'));
         }
 
-        // 2. JIKA BUKAN PELANGGAN, GUNAKAN GUARD DEFAULT (ADMIN, TEKNISI, OWNER)
+        // 🔹 3. JIKA BUKAN PELANGGAN, GUNAKAN GUARD DEFAULT (ADMIN, TEKNISI, OWNER)
         $role = Auth::user()->role ?? null;
-
         if (!$role) {
             abort(401, 'Silahkan login terlebih dahulu.');
         }
 
+        if ($role == 'teknisi') {
+            $query->whereHas('penugasan', function($q) {
+                $q->where('id_user', Auth::id()); 
+            });
+        }
+
+        // 🔹 4. HITUNG STATISTIK KESELURUHAN (Menggunakan `clone` agar tidak merusak query utama)
+        $statsQuery = clone $query;
+        $totalRequest = $statsQuery->count();
+        $totalDisetujui = (clone $statsQuery)->where('status_request', 'disetujui')->count();
+        $totalAntrean = (clone $statsQuery)->whereIn('status_request', ['pending_admin', 'dikirim_ke_pelanggan', 'disetujui_pelanggan'])->count();
         $requestSparepart = $query->with(['penugasan.servis.booking.pelanggan', 'sparepart'])->latest()->paginate(10);
 
         if ($role == 'teknisi') {
-            return view('teknisi.proses.request_sparepart.index', compact('requestSparepart'));
+            return view('teknisi.proses.request_sparepart.index', compact('requestSparepart', 'totalRequest', 'totalDisetujui', 'totalAntrean'));
         } elseif ($role == 'admin') {
-            return view('admin.pengadaan.request_sparepart.index', compact('requestSparepart'));
+            return view('admin.pengadaan.request_sparepart.index', compact('requestSparepart', 'totalRequest', 'totalDisetujui', 'totalAntrean'));
         } else {
-            return view('owner.pengadaan.request_sparepart.index', compact('requestSparepart'));
+            // Halaman Owner yang tadi Anda tanyakan
+            return view('owner.pengadaan.request_sparepart.index', compact('requestSparepart', 'totalRequest', 'totalDisetujui', 'totalAntrean'));
         }
     }
 
-    // 🔹 DETAIL REQUEST SPAREPART
     public function detail($id)
     {
         $requestSparepart = RequestSparepart::with(['penugasan.servis.booking.pelanggan', 'sparepart'])->findOrFail($id);

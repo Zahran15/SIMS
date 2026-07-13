@@ -16,35 +16,52 @@
         </div>
     @endif
 
-{{-- FILTER & SEARCH RIWAYAT PEKERJAAN --}}
-    <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
+    {{-- FILTER --}}
+    <div class="bg-white mb-4 rounded-xl shadow-sm border p-4">
         <form action="{{ route('teknisi.riwayat_pekerjaan.index') }}" method="GET">
-            <div class="flex flex-col md:flex-row gap-4 md:items-end">
-                {{-- Input Pencarian Nama Pelanggan --}}
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari Pelanggan</label>
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                        placeholder="Nama pelanggan..."
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
+                {{-- Input Pencarian Kode Servis --}}
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Servis</label>
+                    <input type="text" name="kode_servis" value="{{ request('kode_servis') }}" placeholder="Masukkan kode servis..."
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
-                {{-- Filter Status Penugasan --}}
-                <div>
+
+                {{-- Input Pencarian Nama Pelanggan --}}
+                <div class="flex-1 min-w-[180px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                    <input type="text" name="nama_pelanggan" value="{{ request('nama_pelanggan') }}" placeholder="Masukkan nama pelanggan..."
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                {{-- Filter Status --}}
+                <div class="min-w-[200px]">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status_penugasan"
-                        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[180px] text-sm">
+                    <select name="status_penugasan" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <option value="">Semua Status</option>
                         <option value="selesai" {{ request('status_penugasan') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                         <option value="gagal" {{ request('status_penugasan') == 'gagal' ? 'selected' : '' }}>Gagal</option>
                     </select>
                 </div>
+
                 {{-- Tombol Aksi --}}
-                <div class="flex gap-2">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition font-medium">Cari</button>
-                    <a href="{{ route('teknisi.riwayat_pekerjaan.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm transition font-medium">Reset</a>
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <button type="submit" class="flex-1 lg:flex-none px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition">Cari</button>
+                    <a href="{{ route('teknisi.riwayat_pekerjaan.index') }}" class="flex-1 lg:flex-none px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-medium text-center transition">Reset</a>
                 </div>
             </div>
         </form>
     </div>
+
+    {{-- Info Badge Filter Aktif --}}
+    @if(request('kode_servis') || request('nama_pelanggan') || request('status_penugasan'))
+        <div class="mb-4 text-sm text-gray-600 flex flex-wrap gap-1 items-center">
+            <span>Filter aktif:</span>
+            @if(request('kode_servis'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Kode Servis: "{{ request('kode_servis') }}"</span>@endif
+            @if(request('nama_pelanggan'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Pelanggan: "{{ request('nama_pelanggan') }}"</span>@endif
+            @if(request('status_penugasan'))<span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold text-gray-800">Status: {{ ucfirst(request('status_penugasan')) }}</span>@endif
+        </div>
+    @endif
 
     {{-- TABLE --}}
     <div class="bg-white rounded-2xl shadow border overflow-hidden">

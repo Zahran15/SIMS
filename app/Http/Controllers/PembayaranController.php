@@ -54,6 +54,7 @@ class PembayaranController extends Controller
 
         try {
             $orderId = 'PAY-' . $pembayaran->id_pembayaran . '-' . time();
+            $desc = $pembayaran->jenis_pembayaran == 'dp' ? 'DP Booking Servis' : 'Pelunasan Servis Laptop';
             $payload = [
                 'transaction_details' => [
                     'order_id'     => $orderId,
@@ -64,6 +65,7 @@ class PembayaranController extends Controller
                     'email'      => $pembayaran->booking->pelanggan->email,
                     'phone'      => $pembayaran->booking->pelanggan->no_hp,
                 ],
+                'custom_field1' => $desc,
                 'callbacks' => [
                     'finish' => route('pelanggan.pembayaran.detail', $pembayaran->id_pembayaran),
                 ],
@@ -74,7 +76,7 @@ class PembayaranController extends Controller
                 'item_details' => [
                     [
                         'id'       => $pembayaran->id_pembayaran,
-                        'name'     => $pembayaran->jenis_pembayaran == 'dp' ? 'Dp Booking Servis' : 'Pelunasan Servis Laptop',
+                        'name'     => $desc,
                         'price'    => (int) $pembayaran->nominal,
                         'quantity' => 1
                     ]

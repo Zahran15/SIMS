@@ -9,8 +9,7 @@ use App\Models\User;
 
 class PenugasanTeknisiController extends Controller
 {
-    // 🔹 LIST SERVIS YANG BELUM ADA TEKNISI
-public function index(Request $request)
+    public function index(Request $request)
 {
     $query = Servis::query();
     if ($request->filled('kode_servis')) {
@@ -42,9 +41,8 @@ public function index(Request $request)
     $servis = $query->with(['booking.pelanggan', 'penugasan.teknisi'])->latest()->paginate(10);
     $list_teknisi = User::where('role', 'teknisi')->get();
     return view('admin.proses.penugasan.index', compact('servis', 'list_teknisi'));
-}
+    }
 
-    // 🔹 FORM PILIH TEKNISI
     public function create($id_servis)
     {
         $servis = Servis::findOrFail($id_servis);
@@ -52,7 +50,6 @@ public function index(Request $request)
         return view('admin.proses.penugasan.tambah', compact('servis', 'teknisi'));
     }
 
-    // 🔹 SIMPAN PENUGASAN
     public function store(Request $request)
     {
         $request->validate([
@@ -75,7 +72,6 @@ public function index(Request $request)
         return redirect()->route('admin.penugasan.index')->with('success', 'Teknisi berhasil ditugaskan');
     }
 
-    // 🔹 EDIT PENUGASAN
     public function edit($id)
     {
         $penugasan = PenugasanTeknisi::findOrFail($id);
@@ -83,7 +79,6 @@ public function index(Request $request)
         return view('admin.proses.penugasan.edit', compact('penugasan', 'teknisi'));
     }
 
-    // 🔹 UPDATE
     public function update(Request $request, $id)
     {
         $penugasan = PenugasanTeknisi::findOrFail($id);
@@ -94,9 +89,9 @@ public function index(Request $request)
             'status_penugasan' => $request->status_penugasan,
             'catatan_teknisi' => $request->catatan_teknisi
         ]);
-        return redirect()->route('admin.penugasan.index')->with('success', 'Penugasan berhasil diupdate');    }
+        return redirect()->route('admin.penugasan.index')->with('success', 'Penugasan berhasil diupdate');    
+    }
 
-    // 🔹 DETAIL
     public function show($id)
     {
         $penugasan = PenugasanTeknisi::with('servis.booking', 'teknisi')->findOrFail($id);

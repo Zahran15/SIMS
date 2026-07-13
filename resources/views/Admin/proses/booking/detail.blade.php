@@ -123,9 +123,15 @@
             <div class="p-4 grid grid-cols-3 gap-4 text-xs">
                 <div>
                     <span class="text-gray-400 block">Metode Pengembalian Unit</span>
+                    @if($booking->metode_pengembalian == 'diantar')
                     <span class="text-gray-800 font-bold uppercase tracking-wide text-sm block mt-0.5">
-                        {{ $booking->metode_pengembalian }}
+                        Diantar Kurir
                     </span>
+                    @else
+                    <span class="text-gray-800 font-bold uppercase tracking-wide text-sm block mt-0.5">
+                        Ambil Sendiri
+                    </span>
+                    @endif
                 </div>
                 <div>
                     <span class="text-gray-400 block mb-1">Status Dp</span>

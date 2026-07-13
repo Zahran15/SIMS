@@ -84,9 +84,6 @@ class UsersController extends Controller
         return redirect()->route('owner.users.index')->with('success', 'Data berhasil diperbarui');
     }
 
-    /**
-     * Menghapus data user
-     */
     public function destroy($id)
     {
         $user = User::findOrFail($id);

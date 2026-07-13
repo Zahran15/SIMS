@@ -91,9 +91,22 @@
                     </div>
                 </div>
                 <div class="md:col-span-2">
-                    <span class="text-gray-400 block mb-1">Total Biaya Servis:</span>
-                    <div class="bg-white border border-gray-200 rounded p-3 text-xl font-bold text-green-600 min-h-[50px] flex items-center">
-                        Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}
+                    <span class="text-gray-400 block mb-1">Rincian Pembayaran (Sisa Tagihan Setelah Potong DP):</span>
+                    <div class="bg-white border border-gray-200 rounded p-3 min-h-[50px] space-y-1.5">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Total Biaya Servis:</span>
+                            <span>Rp {{ number_format($servis->total_biaya, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-red-600">
+                            <span>Potongan DP (Booking):</span>
+                            <span>- Rp 50.000</span>
+                        </div>
+                        <div class="border-t pt-1.5 flex justify-between items-center">
+                            <span class="font-bold text-gray-700">Sisa Pembayaran Akhir:</span>
+                            <span class="text-xl font-bold text-green-600">
+                                Rp {{ number_format(max(0, $servis->total_biaya - 50000), 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,5 +193,4 @@
 
         </div>
     </div>
-</div>
 @endsection

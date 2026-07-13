@@ -58,7 +58,6 @@ class PelangganController extends Controller
         return redirect()->route('admin.pelanggan.index')->with('success', 'Pelanggan baru berhasil ditambahkan dengan kode: '. $kode);
     }
 
-    // Ambil data untuk Edit/Detail
     public function show($id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
@@ -86,7 +85,7 @@ class PelangganController extends Controller
             $data['password'] = $request->password;
         }
         $pelanggan->update($data);
-        return redirect()->route('admin.pelanggan')->with('success', 'Data pelanggan berhasil diperbarui');    
+        return redirect()->route('admin.pelanggan.index')->with('success', 'Data pelanggan berhasil diperbarui');    
     }
 
     // Hapus Data

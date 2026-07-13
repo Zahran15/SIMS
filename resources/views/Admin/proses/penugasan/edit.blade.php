@@ -63,11 +63,12 @@
                             <label class="text-xs font-bold text-gray-500 uppercase">Prioritas</label>
                             <select name="prioritas" disabled
                                 class="w-full border bg-gray-100 rounded-xl p-3 outline-none cursor-not-allowed">
-                                <option value="" {{ is_null($penugasan->prioritas) }} disabled>-- Pilih Prioritas --</option>
-                                <option value="ringan" {{ $penugasan->prioritas == 'ringan' ? 'selected' : '' }}>Ringan</option>
-                                <option value="sedang" {{ $penugasan->prioritas == 'sedang' ? 'selected' : '' }}>Sedang</option>
-                                <option value="berat" {{ $penugasan->prioritas == 'berat' ? 'selected' : '' }}>Berat</option>
+                                <option value="" {{ is_null($penugasan->prioritas) || $penugasan->prioritas == '' ? 'selected' : '' }} disabled>-- Pilih Prioritas --</option>
+                                <option value="ringan" {{ $penugasan->prioritas === 'ringan' ? 'selected' : '' }}>Ringan</option>
+                                <option value="sedang" {{ $penugasan->prioritas === 'sedang' ? 'selected' : '' }}>Sedang</option>
+                                <option value="berat" {{ $penugasan->prioritas === 'berat' ? 'selected' : '' }}>Berat</option>
                             </select>
+                            <input type="hidden" name="prioritas" value="{{ $penugasan->prioritas }}">
                         </div>
 
                         {{-- ESTIMASI --}}

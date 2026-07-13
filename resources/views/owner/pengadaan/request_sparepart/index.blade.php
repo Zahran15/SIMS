@@ -14,21 +14,21 @@
 $request_stats = [
     [
         'title' => 'Total Request', 
-        'total' => $requestSparepart->total() . ' Pengajuan', 
+        'total' => $totalRequest . ' Pengajuan', 
         'icon'  => 'fa-clipboard-list', 
         'color' => 'blue', 
         'label' => 'Semua Permintaan'
     ],
     [
         'title' => 'Selesai / Keluar', 
-        'total' => $requestSparepart->where('status_request', 'disetujui')->count() . ' Selesai', 
+        'total' => $totalDisetujui . ' Selesai', 
         'icon'  => 'fa-check-circle', 
         'color' => 'emerald', 
         'label' => 'Stok Telah Dipotong'
     ],
     [
         'title' => 'Menunggu Proses', 
-        'total' => $requestSparepart->whereIn('status_request', ['pending_admin', 'dikirim_ke_pelanggan', 'disetujui_pelanggan'])->count() . ' Antrean', 
+        'total' => $totalAntrean . ' Antrean', 
         'icon'  => 'fa-hourglass-half', 
         'color' => 'amber', 
         'label' => 'Tahap Validasi Bertingkat'
