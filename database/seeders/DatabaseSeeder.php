@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             ToolsSeeder::class,
             BookingSeeder::class,
             ServisSeeder::class,
+            DetailServisJasaSeeder::class,
+            DetailServisSparepartSeeder::class,
             PenugasanTeknisiSeeder::class,
             RequestSparepartSeeder::class,
             PengadaanSparepartSeeder::class,

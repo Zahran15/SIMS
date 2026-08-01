@@ -49,23 +49,17 @@ class UsersController extends Controller
         return redirect()->route('owner.users.index')->with('success', 'User berhasil ditambahkan');
     }
 
-    /**
-     * Mengambil data satu user untuk Edit/Detail (Response JSON)
-     */
     public function edit($id)
     {
         $user = User::findOrFail($id);
         return view('owner.master_data.users.edit', compact('user'));    
     }
 
-    /**
-     * Memperbarui data user
-     */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
         $request->validate([
-            'nama'     => 'required|string|max:255',
+            'nama'     => 'required',
             'email'    => 'required|email|unique:users,email,' . $id . ',id_user',
             'no_hp'    => 'required',
             'status'   => 'required',
@@ -91,9 +85,6 @@ class UsersController extends Controller
         return back()->with('success', 'User berhasil dihapus');
     }
 
-    /**
-     * Menampilkan detail user
-     */
     public function show($id)
     {
         $user = User::findOrFail($id);

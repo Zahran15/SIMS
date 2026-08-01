@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('sparepart', function (Blueprint $table) {
             $table->increments('id_sparepart');
-            $table->string('nama_sparepart');
-            $table->string('kategori');
+            $table->string('nama_sparepart', 50);
+            $table->string('kategori', 30);
             $table->integer('stok')->default(0);
             $table->decimal('harga_jual', 12, 2);
             $table->enum('status', ['tersedia', 'tidak tersedia']);

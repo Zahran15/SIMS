@@ -15,8 +15,8 @@ public function up(): void
         $table->increments('id_tools'); 
         $table->unsignedInteger('id_user');
         $table->foreign('id_user')->references('id_user')->on('users')->cascadeOnDelete();
-        $table->string('nama_tools');
-        $table->integer('jumlah')->default(0);
+        $table->string('nama_tools', 50);
+        $table->integer('jumlah');
         $table->enum('status', ['tersedia', 'tidak tersedia']);
         $table->timestamps();
     });

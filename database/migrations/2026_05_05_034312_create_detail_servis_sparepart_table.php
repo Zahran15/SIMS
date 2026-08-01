@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('id_servis')->references('id_servis')->on('servis')->cascadeOnDelete();
             $table->unsignedInteger('id_sparepart');
             $table->foreign('id_sparepart')->references('id_sparepart')->on('sparepart')->cascadeOnDelete();
-            $table->integer('qty')->default(1);
+            $table->integer('qty');
             $table->decimal('harga', 12, 2);
             $table->decimal('subtotal', 12, 2);
             $table->timestamps();

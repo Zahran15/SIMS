@@ -145,11 +145,11 @@ class RequestSparepartController extends Controller
     {
         $request->validate([
             'id_penugasan'   => 'required',
-            'id_sparepart'   => 'required|array',
-            'id_sparepart.*' => 'required|exists:sparepart,id_sparepart', 
-            'jumlah'         => 'required|array',
-            'jumlah.*'       => 'required|integer|min:1',
-            'alasan'         => 'required|string'
+            'id_sparepart'   => 'required',
+            'id_sparepart.*' => 'required', 
+            'jumlah'         => 'required',
+            'jumlah.*'       => 'required',
+            'alasan'         => 'required'
         ]);
 
         // Melakukan looping berdasarkan array input sparepart yang dikirim oleh form

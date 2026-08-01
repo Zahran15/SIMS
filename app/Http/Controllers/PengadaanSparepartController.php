@@ -45,11 +45,11 @@ class PengadaanSparepartController extends Controller
         $role = Auth::user()->role;
         if ($role !== 'admin') {abort(403, 'Tindakan ini tidak diizinkan.');}
         $request->validate([
-            'id_sparepart' => 'required|exists:sparepart,id_sparepart',
-            'tgl_pesan' => 'required|date',
-            'jumlah' => 'required|integer|min:1',
-            'harga_beli' => 'required|numeric|min:0',
-            'status_pengadaan' => 'required|in:dipesan,diterima,dibatalkan,diajukan',
+            'id_sparepart' => 'required',
+            'tgl_pesan' => 'required',
+            'jumlah' => 'required',
+            'harga_beli' => 'required',
+            'status_pengadaan' => 'required',
         ]);
         $total = $request->jumlah * $request->harga_beli;
         PengadaanSparepart::create([
@@ -84,11 +84,11 @@ class PengadaanSparepartController extends Controller
     {
         $role = Auth::user()->role; if ($role !== 'admin') {abort(403, 'Tindakan ini tidak diizinkan.');}
         $request->validate([
-            'id_sparepart' => 'required|exists:sparepart,id_sparepart',
-            'tgl_pesan' => 'required|date',
-            'jumlah' => 'required|integer|min:1',
-            'harga_beli' => 'required|numeric|min:0',
-            'status_pengadaan' => 'required|in:dipesan,diterima,dibatalkan,diajukan',
+            'id_sparepart' => 'required',
+            'tgl_pesan' => 'required',
+            'jumlah' => 'required',
+            'harga_beli' => 'required',
+            'status_pengadaan' => 'required',
         ]);
         $pengadaan = PengadaanSparepart::where('id_pengadaan', $id)->firstOrFail();
         // KONDISI A: Jika status LAMA adalah 'diterima', kita harus tarik kembali (kurangi) stok lamanya dulu

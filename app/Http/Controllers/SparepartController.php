@@ -41,10 +41,10 @@ class SparepartController extends Controller
         abort(403, 'Anda tidak memiliki hak akses untuk halaman ini.');
         }
         $request->validate([
-            'nama_sparepart' => 'required|string|max:255',
-            'kategori' => 'required|string',
-            'stok' => 'required|integer|min:0',
-            'harga_jual' => 'required|numeric|min:0',
+            'nama_sparepart' => 'required',
+            'kategori' => 'required',
+            'stok' => 'required',
+            'harga_jual' => 'required',
         ]);
 
         Sparepart::create([
@@ -77,10 +77,10 @@ class SparepartController extends Controller
         }
         $data = Sparepart::where('id_sparepart', $id)->firstOrFail();
         $request->validate([
-            'nama_sparepart' => 'required|string|max:255',
-            'kategori' => 'required|string',
-            'stok' => 'required|integer|min:0',
-            'harga_jual' => 'required|numeric|min:0',
+            'nama_sparepart' => 'required',
+            'kategori' => 'required',
+            'stok' => 'required',
+            'harga_jual' => 'required',
         ]);
 
         $data->update([

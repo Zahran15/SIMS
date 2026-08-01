@@ -15,7 +15,7 @@ public function up(): void
         $table->increments('id_servis'); 
         $table->unsignedInteger('id_booking');
         $table->foreign('id_booking')->references('id_booking')->on('booking')->cascadeOnDelete();
-        $table->string('kode_servis')->unique();
+        $table->string('kode_servis', 20)->unique();
         $table->date('tgl_masuk');
         $table->date('perkiraan_selesai');
         $table->enum('status_servis', ['menunggu', 'proses', 'selesai', 'bisa diambil', 'sudah diambil', 'dibatalkan'])->default('menunggu');

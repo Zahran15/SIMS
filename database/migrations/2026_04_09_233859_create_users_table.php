@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id_user'); 
-            $table->string('nama');
+            $table->string('nama', 50);
             $table->enum('role', ['admin', 'owner', 'teknisi']);
-            $table->string('email');
-            $table->string('no_hp');
+            $table->string('email', 100);
+            $table->string('no_hp', 20);
             $table->string('password');
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();

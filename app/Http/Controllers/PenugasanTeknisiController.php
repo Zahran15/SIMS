@@ -56,7 +56,7 @@ class PenugasanTeknisiController extends Controller
             'id_servis' => 'required',
             'id_user' => 'required',
             'status_penugasan' => 'required',
-            'estimasi_selesai' => 'nullable|date',
+            'estimasi_selesai' => 'nullable',
         ]);
 
         PenugasanTeknisi::create([

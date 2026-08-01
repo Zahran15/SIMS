@@ -37,10 +37,10 @@ class ToolsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_user'    => 'required|exists:users,id_user', 
+            'id_user'    => 'required', 
             'nama_tools' => 'required',
-            'jumlah'     => 'required|integer|min:0',
-            'status'     => 'required|in:tersedia,tidak tersedia',
+            'jumlah'     => 'required',
+            'status'     => 'required',
         ]);
 
         Tools::create([
@@ -67,10 +67,10 @@ class ToolsController extends Controller
     {
         $data = Tools::where('id_tools', $id)->firstOrFail();
         $request->validate([
-            'id_user'    => 'required|exists:users,id_user', 
+            'id_user'    => 'required', 
             'nama_tools' => 'required',
-            'jumlah'     => 'required|integer|min:0',
-            'status'     => 'required|in:tersedia,tidak tersedia',
+            'jumlah'     => 'required',
+            'status'     => 'required',
         ]);
         $data->update([
             'id_user'    => $request->id_user,

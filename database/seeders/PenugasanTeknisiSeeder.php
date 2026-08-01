@@ -2,85 +2,109 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
-use Carbon\Carbon;
 
 class PenugasanTeknisiSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $faker = Faker::create('id_ID');
 
-        // 1. Ambil semua id_user yang memiliki role 'teknisi'
-        $idTeknisiList = DB::table('users')->where('role', 'teknisi')->pluck('id_user')->toArray();
 
-        // Antisipasi jika belum ada user role teknisi (fallback keamanan)
-        if (empty($idTeknisiList)) {
-            $idTeknisiBaru = DB::table('users')->insertGetId([
-                'nama' => 'Teknisi Utama',
-                'role' => 'teknisi',
-                'email' => 'teknisi@gmail.com',
-                'no_hp' => '085712345678',
-                'password' => bcrypt('password123'),
-                'status' => 'aktif',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $idTeknisiList[] = $idTeknisiBaru;
+        $teknisi = DB::table('users')
+            ->where('role','teknisi')
+            ->where('status','aktif')
+            ->pluck('id_user')
+            ->toArray();
+
+
+
+        if(empty($teknisi))
+        {
+            return;
         }
 
-        // 2. Ambil semua data servis yang ada untuk dipasangkan ke penugasan
-        $servisList = DB::table('servis')->get();
+        $servisList = DB::table('servis')
+            ->join(
+                'booking',
+                'booking.id_booking',
+                '=',
+                'servis.id_booking'
+            )
+            ->select(
+                'servis.*',
+                'booking.kategori_servis',
+                'booking.keluhan'
+            )
+            ->get();
 
-        // Kumpulan catatan dummy khas teknisi laptop biar kelihatan riil
-        $catatanDummy = [
-            'Proses pengecekan jalur power pada motherboard, dicurigai IC short.',
-            'Keyboard short sebagian, sedang dilakukan pembongkaran untuk penggantian unit baru.',
-            'Selesai melakukan re-pasta thermal dan pembersihan fan, suhu kembali normal.',
-            'Menunggu konfirmasi owner/pelanggan terkait biaya penggantian LCD panel.',
-            'IC Bios corup, sedang proses flashing ulang menggunakan alat programmer.',
-            'Kondisi mati total parah setelah kena air, korosi meluas di area chipset. Gagal diperbaiki.',
-            'Instalasi ulang Windows 11 Pro beserta driver dasar selesai dilakukan.'
-        ];
+        foreach($servisList as $index=>$servis)
+        {
+            switch($servis->status_servis)
+            {
+                case 'menunggu':
+                    $status='belum dikerjakan';
+                    $catatan=
+                    'Unit masuk dan menunggu pemeriksaan teknisi.';
+                break;
+                case 'proses':
 
-        // 3. Loop data servis dan buat penugasannya
-        foreach ($servisList as $servis) {
-            // Tentukan status penugasan secara acak
-            $statusPenugasan = $faker->randomElement([
-                'belum dikerjakan', 
-                'sedang dikerjakan', 
-                'menunggu sparepart', 
-                'selesai', 
-                'gagal'
-            ]);
+                    if(
+                        str_contains(
+                            strtolower($servis->keluhan),
+                            'keyboard'
+                        )
+                        ||
+                        str_contains(
+                            strtolower($servis->keluhan),
+                            'lcd'
+                        )
+                    )
+                    {
+                        $status='menunggu sparepart';
+                        $catatan=
+                        'Menunggu ketersediaan sparepart pengganti.';
+                    }
+                    else
+                    {
+                        $status='sedang dikerjakan';
+                        $catatan=
+                        'Teknisi sedang melakukan proses perbaikan unit.';
+                    }
+                break;
 
-            // Sinkronisasi catatan berdasarkan status pengerjaan
-            if ($statusPenugasan === 'gagal') {
-                $catatan = 'Kerusakan terlalu parah pada core komponen, ' . $faker->randomElement($catatanDummy);
-            } elseif ($statusPenugasan === 'selesai') {
-                $catatan = 'Pengerjaan rampung tanpa kendala. ' . $faker->randomElement($catatanDummy);
-            } else {
-                $catatan = $faker->randomElement($catatanDummy);
+                case 'selesai':
+                case 'bisa diambil':
+                case 'sudah diambil':
+                    $status='selesai';
+                    $catatan=
+                    'Servis selesai dan unit sudah melalui pengujian.';
+                break;
+
+                default:
+                    $status='gagal';
+                    $catatan=
+                    'Perbaikan tidak dapat dilanjutkan.';
+                break;
             }
 
             DB::table('penugasan_teknisi')->insert([
-                'id_servis' => $servis->id_servis,
-                // Mengambil teknisi secara acak dari daftar teknisi yang ada
-                'id_user' => $faker->randomElement($idTeknisiList),
-                'prioritas' => $faker->randomElement(['ringan', 'sedang', 'berat']),
-                // Ambil estimasi selesai disamakan dengan perkiraan_selesai dari tabel servis
-                'estimasi_selesai' => $servis->perkiraan_selesai,
-                'status_penugasan' => $statusPenugasan,
-                'catatan_teknisi' => $catatan,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'id_servis'=>$servis->id_servis,
+                'id_user'=>
+                    $teknisi[
+                        $index % count($teknisi)
+                    ],
+                'prioritas'=>$servis->kategori_servis,
+                'estimasi_selesai'=>$servis->perkiraan_selesai,
+                'status_penugasan'=>$status,
+                'catatan_teknisi'=>$catatan,
+                'created_at'=>$servis->created_at,
+                'updated_at'=>now()
+
+
             ]);
+
         }
+
     }
 }

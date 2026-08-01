@@ -143,6 +143,7 @@ class ServisController extends Controller
         $servis->update(['total_biaya' => $total]);
         return response()->json(['success' => true,'total' => number_format($total, 0, ',', '.')]);
     }
+    
     // DETAIL SERVIS PROSES
     public function detailProses($id)
     {

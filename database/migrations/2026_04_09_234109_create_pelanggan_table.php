@@ -10,11 +10,11 @@ return new class extends Migration
     {
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->increments('id_pelanggan');
-            $table->string('kode_pelanggan')->unique();
-            $table->string('nama');
+            $table->string('kode_pelanggan', 20)->unique();
+            $table->string('nama', 50);
             $table->text('alamat');
-            $table->string('no_hp');
-            $table->string('email');
+            $table->string('no_hp', 20);
+            $table->string('email', 100);
             $table->string('password');
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();

@@ -130,9 +130,9 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required',
             'token' => 'required',
-            'password' => 'required|min:8|confirmed',
+            'password' => 'required',
         ], [
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'password.min' => 'Kata sandi minimal berisi 8 karakter.'

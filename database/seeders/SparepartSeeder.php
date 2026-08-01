@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
 
 class SparepartSeeder extends Seeder
 {
@@ -14,76 +12,137 @@ class SparepartSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Data Sparepart Riil/Umum untuk Komputer & Laptop
-        $sparepartUtama = [
+        $now = now();
+
+        DB::table('sparepart')->insert([
             [
-                'nama_sparepart' => 'SSD NVMe Kingmax 512GB',
+                'nama_sparepart' => 'SSD SATA 512GB',
                 'kategori' => 'Penyimpanan',
                 'stok' => 10,
-                'harga_jual' => 550000.00,
+                'harga_jual' => 550000,
                 'status' => 'tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'nama_sparepart' => 'RAM DDR4 V-Gen SODIMM 8GB',
+                'nama_sparepart' => 'RAM DDR4 SODIMM 8GB',
                 'kategori' => 'Memori',
-                'stok' => 15,
-                'harga_jual' => 320000.00,
+                'stok' => 12,
+                'harga_jual' => 320000,
                 'status' => 'tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'nama_sparepart' => 'Keyboard Laptop Universal ASUS X441',
+                'nama_sparepart' => 'Keyboard Laptop ASUS X441',
                 'kategori' => 'Keyboard',
                 'stok' => 5,
-                'harga_jual' => 125000.00,
+                'harga_jual' => 150000,
                 'status' => 'tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'nama_sparepart' => 'Baterai Laptop Lenovo ThinkPad L470',
+                'nama_sparepart' => 'LCD Laptop 14 Inch',
+                'kategori' => 'Layar',
+                'stok' => 4,
+                'harga_jual' => 850000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Baterai Laptop ASUS A416',
                 'kategori' => 'Baterai',
-                'stok' => 0, // Contoh stok habis
-                'harga_jual' => 450000.00,
-                'status' => 'tidak tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'stok' => 2,
+                'harga_jual' => 450000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'nama_sparepart' => 'Thermal Paste Noctua NT-H1',
+                'nama_sparepart' => 'Thermal Paste',
                 'kategori' => 'Aksesoris',
-                'stok' => 8,
-                'harga_jual' => 110000.00,
+                'stok' => 15,
+                'harga_jual' => 50000,
                 'status' => 'tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
-        ];
+            [
+                'nama_sparepart' => 'Kipas Pendingin Laptop',
+                'kategori' => 'Pendingin',
+                'stok' => 3,
+                'harga_jual' => 180000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Port Charger DC Jack',
+                'kategori' => 'Power',
+                'stok' => 6,
+                'harga_jual' => 75000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Port USB Laptop',
+                'kategori' => 'I/O',
+                'stok' => 5,
+                'harga_jual' => 60000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Engsel Laptop',
+                'kategori' => 'Casing',
+                'stok' => 2,
+                'harga_jual' => 120000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Adaptor Charger 65W',
+                'kategori' => 'Power',
+                'stok' => 6,
+                'harga_jual' => 250000,
+                'status' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
 
-        DB::table('sparepart')->insert($sparepartUtama);
-
-        // 2. Tambahan Data Dummy Acak menggunakan Faker
-        $faker = Faker::create('id_ID');
-        $kategoriList = ['Penyimpanan', 'Memori', 'Keyboard', 'Baterai', 'Layar LCD', 'Aksesoris', 'Mainboard'];
-
-        for ($i = 0; $i < 25; $i++) {
-            $stok = $faker->numberBetween(0, 20);
-            
-            // Logic agar status sinkron dengan jumlah stok
-            $status = ($stok > 0) ? 'tersedia' : 'tidak tersedia';
-
-            DB::table('sparepart')->insert([
-                'nama_sparepart' => $faker->randomElement(['LCD Screen', 'Charger Adaptor', 'Fan Cooling', 'SSD Sata', 'RAM DDR5']) . ' ' . $faker->word() . ' ' . $faker->bothify('##??'),
-                'kategori' => $faker->randomElement($kategoriList),
-                'stok' => $stok,
-                'harga_jual' => $faker->numberBetween(15, 150) * 10000, // Range harga 150rb s.d 1.5jt kelipatan 10rb
-                'status' => $status,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+            // Sengaja stok habis agar nanti muncul di Pengadaan Sparepart
+            [
+                'nama_sparepart' => 'Motherboard Laptop',
+                'kategori' => 'Mainboard',
+                'stok' => 0,
+                'harga_jual' => 1800000,
+                'status' => 'tidak tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Touchpad Laptop',
+                'kategori' => 'Input',
+                'stok' => 0,
+                'harga_jual' => 250000,
+                'status' => 'tidak tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nama_sparepart' => 'Webcam Laptop',
+                'kategori' => 'Kamera',
+                'stok' => 0,
+                'harga_jual' => 150000,
+                'status' => 'tidak tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
     }
 }

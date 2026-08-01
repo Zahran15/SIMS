@@ -68,7 +68,7 @@ class ServisKerjaController extends Controller
             'status_penugasan' => 'required', 
             'catatan_teknisi'  => 'required',
             'prioritas'        => 'required',
-            'estimasi_selesai' => 'required|date'
+            'estimasi_selesai' => 'required'
             ]);
         $penugasan = PenugasanTeknisi::where('id_user', Auth::id())->where('id_penugasan', $id) ->firstOrFail();
         $estimasi = $request->estimasi_selesai ? Carbon::parse($request->estimasi_selesai)->format('Y-m-d') : $penugasan->estimasi_selesai;

@@ -20,7 +20,11 @@ class JasaServisController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate(['nama_jasa' => 'required', 'harga' => 'required|numeric']);
+        $data = $request->validate
+        ([
+            'nama_jasa' => 'required', 
+            'harga' => 'required'
+        ]);
         JasaServis::create($data);
         return redirect()->route('admin.jasa_servis.index')->with('success', 'Data jasa berhasil ditambahkan');
     }

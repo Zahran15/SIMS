@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Carbon\Carbon;
 
 class PengadaanSparepartSeeder extends Seeder
 {
@@ -16,38 +16,52 @@ class PengadaanSparepartSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        // 1. Ambil semua data master sparepart yang tersedia
-        $sparepartList = DB::table('sparepart')->get();
+        // Ambil sparepart yang stoknya sedikit atau habis
+        $sparepartList = DB::table('sparepart')
+            ->where('stok', '<=', 10)
+            ->get();
 
-        // Fallback keamanan jika data master sparepart kosong
         if ($sparepartList->isEmpty()) {
             return;
         }
 
-        // 2. Generate data pengadaan dummy (misal 8 data transaksi pengadaan)
-        for ($i = 0; $i < 25; $i++) {
-            // Ambil sparepart secara acak
-            $sparepart = $faker->randomElement($sparepartList);
-            
-            // Set jumlah restock barang antara 5 sampai 20 pcs
+        foreach ($sparepartList as $sparepart) {
+
+            // Tidak semua sparepart dilakukan pengadaan
+            if (!$faker->boolean(70)) {
+                continue;
+            }
+
+            $tglPesan = Carbon::instance(
+                $faker->dateTimeBetween('-30 days', '-3 days')
+            );
+
+            $status = $faker->randomElement([
+                'diterima',
+                'diterima',
+                'diterima',
+                'dipesan',
+                'diajukan',
+                'dibatalkan',
+            ]);
+
             $jumlah = $faker->numberBetween(5, 20);
 
-            // Logic bisnis: harga_beli diset lebih murah (~20% lebih rendah) dari harga_jual di master
-            $hargaBeli = round(($sparepart->harga_jual * 0.8), -3); // Dibulatkan ke ribuan terdekat
-            
-            // Hitung total harga pengadaan
-            $total = $jumlah * $hargaBeli;
+            // Harga beli sekitar 70-85% dari harga jual
+            $hargaBeli = round(
+                $sparepart->harga_jual * $faker->randomFloat(2, 0.70, 0.85),
+                -3
+            );
 
             DB::table('pengadaan_sparepart')->insert([
                 'id_sparepart' => $sparepart->id_sparepart,
-                // Tanggal pengadaan acak dalam 30 hari ke belakang
-                'tgl_pesan' => $faker->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
+                'tgl_pesan' => $tglPesan->format('Y-m-d'),
                 'jumlah' => $jumlah,
                 'harga_beli' => $hargaBeli,
-                'total' => $total,
-                'status_pengadaan' => $faker->randomElement(['dipesan', 'diterima', 'dibatalkan', 'diajukan']),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'total' => $jumlah * $hargaBeli,
+                'status_pengadaan' => $status,
+                'created_at' => $tglPesan,
+                'updated_at' => $tglPesan,
             ]);
         }
     }

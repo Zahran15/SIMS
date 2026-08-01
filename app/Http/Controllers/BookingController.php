@@ -74,18 +74,18 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'tgl_booking' => 'required|date',
-            'merk_tipe' => 'required|string',
-            'spesifikasi' => 'required|string',
-            'keluhan' => 'required|string',
-            'metode_pengembalian' => 'required|in:diantar,ambil sendiri',
-            'kategori_servis' => 'required|in:ringan,sedang,berat',
+            'tgl_booking' => 'required',
+            'merk_tipe' => 'required',
+            'spesifikasi' => 'required',
+            'keluhan' => 'required',
+            'metode_pengembalian' => 'required',
+            'kategori_servis' => 'required',
         ];
         $isAdmin = Auth::guard('web')->check() && Auth::user() && Auth::user()->role == 'admin';
         if ($isAdmin) {
             $rules['id_pelanggan']   = 'required';
-            $rules['status_dp']      = 'required|in:belum lunas,sudah lunas';
-            $rules['status_booking'] = 'required|in:pending,diterima,ditolak';
+            $rules['status_dp']      = 'required';
+            $rules['status_booking'] = 'required';
         }
 
         $request->validate($rules);

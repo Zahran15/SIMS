@@ -27,13 +27,21 @@
                         selectedText: '',
                         spareparts: [
                             @foreach($sparepart as $s)
-                            { id: '{{ $s->id_sparepart }}', nama: '{{ $s->nama_sparepart }}', stok: '{{ $s->stok }}' },
+                            {
+                                id: '{{ $s->id_sparepart }}',
+                                nama: '{{ $s->nama_sparepart }}',
+                                stok: '{{ $s->stok }}',
+                                harga: '{{ $s->harga_jual }}'
+                            },
                             @endforeach
                         ],
-                        // Fungsi ketika sparepart dipilih dari list dropdown
                         pilih(s) {
-                            this.selectedText = s.nama + ' (Stok: ' + s.stok + ' Pcs)';
-                            this.searchNama = s.nama; // Mengisi kolom input dengan nama yang dipilih
+                            this.selectedText =
+                                s.nama +
+                                ' | Stok: ' + s.stok + ' Pcs' +
+                                ' | Harga: Rp ' + Number(s.harga).toLocaleString('id-ID');
+
+                            this.searchNama = s.nama;
                             this.open = false;
                         }
                      }"
@@ -52,10 +60,21 @@
                             {{-- Filter menggunakan .includes() agar pencarian nama bersifat bebas --}}
                             <template x-for="s in spareparts.filter(s => s.nama.toLowerCase().includes(searchNama.toLowerCase()))">
                                 <li>
-                                    <button type="button" @click="pilih(s)" class="w-full text-left p-2 hover:bg-blue-50 rounded flex justify-between">
-                                        <span class="text-gray-700" x-text="s.nama"></span>
-                                        <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500" x-text="'Stok: ' + s.stok"></span>
-                                    </button>
+                                <button type="button" @click="pilih(s)" class="w-full text-left p-2 hover:bg-blue-50 rounded">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium text-gray-700" x-text="s.nama"></p>
+                                            <p class="text-xs text-gray-500"
+                                               x-text="'Harga: Rp ' + Number(s.harga).toLocaleString('id-ID')">
+                                            </p>
+                                        </div>
+
+                                        <span
+                                            class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500"
+                                            x-text="'Stok: ' + s.stok + ' Pcs'">
+                                        </span>
+                                    </div>
+                                </button>
                                 </li>
                             </template>
 

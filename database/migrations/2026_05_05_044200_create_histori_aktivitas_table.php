@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('id_user')->references('id_user')->on('users')->cascadeOnDelete();
             $table->unsignedInteger('id_servis');
             $table->foreign('id_servis')->references('id_servis')->on('servis')->cascadeOnDelete();
-            $table->string('aktivitas');
+            $table->string('aktivitas', 100);
             $table->text('keterangan');
             $table->timestamp('tanggal')->useCurrent();
         });

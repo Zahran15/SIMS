@@ -15,11 +15,11 @@ public function up(): void
         $table->increments('id_booking'); 
         $table->unsignedInteger('id_pelanggan');
         $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')->cascadeOnDelete();
-        $table->string('kode_booking')->unique();
+        $table->string('kode_booking', 20)->unique();
         $table->date('tgl_booking');
-        $table->string('merk_tipe');
-        $table->string('spesifikasi');
-        $table->string('keluhan');
+        $table->string('merk_tipe', 30);
+        $table->string('spesifikasi', 100);
+        $table->text('keluhan');
         $table->enum('metode_pengembalian', ['diantar', 'ambil sendiri']);
         $table->text('kelengkapan');
         $table->enum('kategori_servis', ['ringan', 'sedang', 'berat']);
