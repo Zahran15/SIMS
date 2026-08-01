@@ -64,12 +64,12 @@ class PengaturanController extends Controller
                     $filePath = $file->getRealPath();
                     $relativePath = substr($filePath, strlen(base_path()) + 1);
                     // Filter agar tidak terlalu berat
-                    // if (str_contains($relativePath, 'vendor/') || 
-                    //     str_contains($relativePath, 'node_modules/') ||
-                    //     str_contains($relativePath, 'storage/logs/') ||
-                    //     str_contains($relativePath, '.git/')) {
-                    //     continue;
-                    // }
+                     if (str_contains($relativePath, 'vendor/') || 
+                         str_contains($relativePath, 'node_modules/') ||
+                         str_contains($relativePath, 'storage/logs/') ||
+                         str_contains($relativePath, '.git/')) {
+                         continue;
+                     }
                     $zip->addFile($filePath, $relativePath);
                 }
             }

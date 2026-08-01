@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Http;
 
 class PembayaranController extends Controller
 {
-    /**
-     * DAFTAR PEMBAYARAN PELANGGAN
-     */
+     //  DAFTAR PEMBAYARAN PELANGGAN //
     public function index()
     {
         $idPelanggan = Auth::guard('pelanggan')->id();
@@ -24,9 +22,7 @@ class PembayaranController extends Controller
         return view('pelanggan.proses.pembayaran.index', compact('pembayaran'));
     }
 
-    /**
-     * DETAIL PEMBAYARAN
-     */
+    // DETAIL PEMBAYARAN //
     public function detail($id)
     {
         $idPelanggan = Auth::guard('pelanggan')->id();
@@ -37,9 +33,7 @@ class PembayaranController extends Controller
         return view('pelanggan.proses.pembayaran.detail', compact('pembayaran'));
     }
 
-    /**
-     * GENERATE SNAP TOKEN ()
-     */
+    // GENERATE SNAP TOKEN () //
     public function bayar($id)
     {
         $idPelanggan = Auth::guard('pelanggan')->id();
@@ -156,7 +150,7 @@ class PembayaranController extends Controller
             });
         }
         if ($request->has('jenis_pembayaran') && $request->jenis_pembayaran != '') {
-        $query->where('jenis_pembayaran', $request->jenis_pembayaran);
+            $query->where('jenis_pembayaran', $request->jenis_pembayaran);
         }
         if ($request->has('status_pembayaran') && $request->status_pembayaran != '') {
             $query->where('status_pembayaran', $request->status_pembayaran);
