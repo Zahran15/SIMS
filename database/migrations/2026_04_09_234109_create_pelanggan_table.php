@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->increments('id_pelanggan');
-            $table->string('kode_pelanggan', 20)->unique();
+            $table->string('kode_pelanggan', 20);
             $table->string('nama', 50);
             $table->text('alamat');
             $table->string('no_hp', 20);
