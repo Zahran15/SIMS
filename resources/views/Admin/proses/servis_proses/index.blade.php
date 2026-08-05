@@ -3,6 +3,9 @@
 @section('title', 'Servis Proses')
 
 @section('content')
+
+@include('admin.proses.components.tab_nav')
+
     {{-- HEADER --}}
     <div class="mb-6 flex items-center justify-between">
         <div>

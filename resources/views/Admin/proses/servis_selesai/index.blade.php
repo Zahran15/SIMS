@@ -4,6 +4,9 @@
 
 @section('content')
 
+@include('admin.proses.components.tab_nav')
+
+
     {{-- HEADER --}}
     <div class="mb-6 flex items-center justify-between">
         <div>
@@ -21,7 +24,7 @@
         </div>
     @endif
 
-{{-- FILTER & SEARCH SERVIS SELESAI --}}
+    {{-- FILTER & SEARCH SERVIS SELESAI --}}
     <div class="bg-white mb-4 rounded-lg shadow-sm border p-4">
         <form action="{{ route('admin.servis_selesai.index') }}" method="GET">
             <div class="flex flex-col md:flex-row gap-4 md:items-end">

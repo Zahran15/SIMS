@@ -3,6 +3,9 @@
 @section('title', 'Penugasan Teknisi')
 
 @section('content')
+
+@include('admin.proses.components.tab_nav')
+
     {{-- HEADER --}}
     <div class="mb-6 flex justify-between items-end">
         <div>

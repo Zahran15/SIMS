@@ -95,10 +95,7 @@
                     <i x-show="open" class="fas fa-chevron-right text-[10px] transition-transform duration-300" :class="{ 'rotate-90 text-blue-1000': activeMenu === 'proses' }"></i>
                 </button>
                 <div x-show="activeMenu === 'proses' && open" x-transition class="pl-11 space-y-2 pb-2">                
-                    <a href="/admin/booking" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Booking</a>
-                    <a href="/admin/penugasan" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Penugasan Teknisi</a>
-                    <a href="/admin/servis_proses" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Servis Proses</a>
-                    <a href="/admin/servis_selesai" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Servis Selesai</a>
+                    <a href="/admin/booking" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Kelola Servis</a>
                     <a href="/admin/pembayaran" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Pembayaran</a>
                     <a href="/admin/histori" class="block text-xs text-white hover:text-emerald-500 transition font-bold uppercase tracking-widest whitespace-nowrap">Histori</a>
                 </div>
