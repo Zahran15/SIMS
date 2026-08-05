@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Notifications\Notifiable; // <-- 1. Import Notifiable
+use Illuminate\Notifications\Notifiable; 
 
 class Pelanggan extends Authenticatable
 {
-    use Notifiable; // <-- 2. Pakai Trait Notifiable
+    use Notifiable;
 
     protected $table = 'pelanggan';
     protected $primaryKey = 'id_pelanggan';
@@ -39,9 +39,14 @@ class Pelanggan extends Authenticatable
     }
 
     // Override relasi notification karena primaryKey kustom (id_pelanggan)
-    public function notifications()
+public function notifications()
     {
-        return $this->morphMany(\Illuminate\Notifications\DatabaseNotification::class, 'notifiable', null, 'notifiable_id', 'id_pelanggan')
-                    ->orderBy('created_at', 'desc');
+        return $this->morphMany(
+            \Illuminate\Notifications\DatabaseNotification::class, 
+            'notifiable', 
+            'notifiable_type', 
+            'notifiable_id', 
+            'id_pelanggan'
+        )->orderBy('created_at', 'desc');
     }
 }

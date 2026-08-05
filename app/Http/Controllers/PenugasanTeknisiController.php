@@ -7,42 +7,43 @@ use App\Models\PenugasanTeknisi;
 use App\Models\Servis;
 use App\Models\User;
 use Carbon\Carbon;
-use App\Notifications\NotifPenugasanTeknisi; // <-- 1. Import Class Notification
+use App\Notifications\NotifInternal;  // <-- Menggunakan NotifInternal
+use App\Notifications\NotifPelanggan; // <-- Menggunakan NotifPelanggan
 
 class PenugasanTeknisiController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Servis::query();
-    if ($request->filled('kode_servis')) {
-        $query->whereHas('penugasan.servis', function ($q) use ($request) {
-            $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
-        });
-    }
-    // Filter Nama Pelanggan
-    if ($request->filled('nama_pelanggan')) {
-        $query->whereHas('penugasan.servis.booking.pelanggan', function ($q) use ($request) {
-            $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
-        });
-    }
-    if ($request->has('id_teknisi') && $request->id_teknisi != '') {
-        $query->whereHas('penugasan', function($q) use ($request) {
-            $q->where('id_user', $request->id_teknisi); 
-        });
-    }
-    if ($request->has('status_penugasan') && $request->status_penugasan != '') {
-        $query->whereHas('penugasan', function($q) use ($request) {
-            $q->where('status_penugasan', $request->status_penugasan);
-        });
-    }
-    if ($request->has('prioritas') && $request->prioritas != '') {
-        $query->whereHas('penugasan', function($q) use ($request) {
-            $q->where('prioritas', $request->prioritas);
-        });
-    }
-    $servis = $query->with(['booking.pelanggan', 'penugasan.teknisi'])->latest()->paginate(10);
-    $list_teknisi = User::where('role', 'teknisi')->get();
-    return view('admin.proses.penugasan.index', compact('servis', 'list_teknisi'));
+    {
+        $query = Servis::query();
+        if ($request->filled('kode_servis')) {
+            $query->whereHas('penugasan.servis', function ($q) use ($request) {
+                $q->where('kode_servis', 'LIKE', '%' . $request->kode_servis . '%');
+            });
+        }
+        // Filter Nama Pelanggan
+        if ($request->filled('nama_pelanggan')) {
+            $query->whereHas('penugasan.servis.booking.pelanggan', function ($q) use ($request) {
+                $q->where('nama', 'LIKE', '%' . $request->nama_pelanggan . '%');
+            });
+        }
+        if ($request->has('id_teknisi') && $request->id_teknisi != '') {
+            $query->whereHas('penugasan', function($q) use ($request) {
+                $q->where('id_user', $request->id_teknisi); 
+            });
+        }
+        if ($request->has('status_penugasan') && $request->status_penugasan != '') {
+            $query->whereHas('penugasan', function($q) use ($request) {
+                $q->where('status_penugasan', $request->status_penugasan);
+            });
+        }
+        if ($request->has('prioritas') && $request->prioritas != '') {
+            $query->whereHas('penugasan', function($q) use ($request) {
+                $q->where('prioritas', $request->prioritas);
+            });
+        }
+        $servis = $query->with(['booking.pelanggan', 'penugasan.teknisi'])->latest()->paginate(10);
+        $list_teknisi = User::where('role', 'teknisi')->get();
+        return view('admin.proses.penugasan.index', compact('servis', 'list_teknisi'));
     }
 
     public function create($id_servis)
@@ -77,22 +78,22 @@ class PenugasanTeknisiController extends Controller
         $servis = Servis::with('booking.pelanggan')->find($request->id_servis);
         $teknisi = User::find($request->id_user);
 
-        // 1. Kirim Notifikasi ke Teknisi yang ditunjuk
+        // 1. Kirim Notifikasi Lonceng ke Teknisi yang ditunjuk
         if ($teknisi) {
-            $teknisi->notify(new NotifPenugasanTeknisi(
+            $teknisi->notify(new NotifInternal(
                 'Tugas Servis Baru',
-                'Kamu dapat tugas servis baru (Kode: ' . ($servis->kode_servis ?? 'Servis #' . $servis->id_servis) . ')',
-                'fa-solid fa-toolbox'
+                'Kamu mendapat tugas servis baru untuk kode: ' . ($servis->kode_servis ?? 'Servis #' . $servis->id_servis),
+                'fa-solid fa-screwdriver-wrench'
             ));
         }
 
-        // 2. Kirim Notifikasi ke Pelanggan (jika ada relasi ke pelanggan)
+        // 2. Kirim Notifikasi Lonceng ke Pelanggan
         $pelanggan = $servis->booking->pelanggan ?? null;
         if ($pelanggan) {
-            $pelanggan->notify(new NotifPenugasanTeknisi(
+            $pelanggan->notify(new NotifPelanggan(
                 'Servis Sedang Diproses',
-                'Perangkat kamu telah diserahkan ke teknisi (' . ($teknisi->nama ?? 'Teknisi') . ') dan sedang dikerjakan.',
-                'fa-solid fa-laptop-medical'
+                'Laptop/perangkat kamu telah ditugaskan ke teknisi (' . ($teknisi->nama ?? 'Teknisi') . ') dan sedang dikerjakan.',
+                'fa-solid fa-laptop-code'
             ));
         }
 
@@ -121,10 +122,10 @@ class PenugasanTeknisiController extends Controller
         // 🔹 NOTIFIKASI SAAT STATUS PENUGASAN DIUPDATE
         $pelanggan = $penugasan->servis->booking->pelanggan ?? null;
         if ($pelanggan) {
-            $pelanggan->notify(new NotifPenugasanTeknisi(
+            $pelanggan->notify(new NotifPelanggan(
                 'Update Status Servis',
                 'Status pengerjaan servis kamu diperbarui menjadi: ' . strtoupper($request->status_penugasan),
-                'fa-solid fa-info-circle'
+                'fa-solid fa-circle-info'
             ));
         }
 
