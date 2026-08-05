@@ -40,9 +40,9 @@ class PengadaanSparepartSeeder extends Seeder
                 'diterima',
                 'diterima',
                 'diterima',
-                'dipesan',
+                'disetujui',
                 'diajukan',
-                'dibatalkan',
+                'ditolak',
             ]);
 
             $jumlah = $faker->numberBetween(5, 20);

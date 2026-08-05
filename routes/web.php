@@ -69,6 +69,7 @@ Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(functi
     Route::put('/pengadaan_sparepart/update/{id}', [PengadaanSparepartController::class, 'update'])->name('admin.pengadaan_sparepart.update');
     Route::get('/pengadaan_sparepart/detail/{id}', [PengadaanSparepartController::class, 'detail'])->name('admin.pengadaan_sparepart.detail');
     Route::delete('/pengadaan_sparepart/delete/{id}', [PengadaanSparepartController::class, 'destroy'])->name('admin.pengadaan_sparepart.delete');
+    Route::put('/pengadaan_sparepart/terima/{id}', [PengadaanSparepartController::class, 'terima'])->name('admin.pengadaan_sparepart.terima');
     // DATA PENGADAAN TOOLS ADMIN
     Route::get('/pengadaan_tools', [ToolsController::class, 'index'])->name('admin.pengadaan_tools.index');
     Route::get('/pengadaan_tools/create', [ToolsController::class, 'create'])->name('admin.pengadaan_tools.create');
@@ -151,6 +152,8 @@ Route::middleware(['auth:web', 'cek_role:owner'])->prefix('owner')->group(functi
     // DATA PENGADAAN SPAREPART OWNER
     Route::get('/pengadaan_sparepart', [PengadaanSparepartController::class, 'index'])->name('owner.pengadaan_sparepart.index');
     Route::get('/pengadaan_sparepart/detail/{id}', [PengadaanSparepartController::class, 'detail'])->name('owner.pengadaan_sparepart.detail');
+    Route::put('/pengadaan_sparepart/approve/{id}', [PengadaanSparepartController::class, 'approve'])->name('owner.pengadaan_sparepart.approve');
+    Route::put('/pengadaan_sparepart/reject/{id}', [PengadaanSparepartController::class, 'reject'])->name('owner.pengadaan_sparepart.reject');
     // DATA PENGADAAN TOOLS OWNER
     Route::get('/pengadaan_tools', [ToolsController::class, 'index'])->name('owner.pengadaan_tools.index');
     // DATA REQUEST SPAREPART OWNER

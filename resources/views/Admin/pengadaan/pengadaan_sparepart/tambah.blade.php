@@ -25,13 +25,14 @@
                         open: false,
                         searchNama: '',
                         selectedText: '',
+                        hargaBeli: '',
                         spareparts: [
                             @foreach($sparepart as $s)
                             {
                                 id: '{{ $s->id_sparepart }}',
                                 nama: '{{ $s->nama_sparepart }}',
                                 stok: '{{ $s->stok }}',
-                                harga: '{{ $s->harga_jual }}'
+                                harga: {{ $s->harga_jual ?? 0 }}
                             },
                             @endforeach
                         ],
@@ -42,7 +43,11 @@
                                 ' | Harga: Rp ' + Number(s.harga).toLocaleString('id-ID');
 
                             this.searchNama = s.nama;
+                            this.hargaBeli = s.harga > 0 ? s.harga : '';
                             this.open = false;
+                                this.$nextTick(() => {
+                                hitungTotal();
+                            });
                         }
                      }"
                      @click.away="open = false" class="relative">
@@ -97,12 +102,9 @@
 
                     {{-- STATUS PENGADAAN --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Transaksi</label>
-                        <select name="status_pengadaan" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 appearance-none bg-no-repeat text-gray-700" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-position: right 0.75rem center; background-size: 1.2em;" required>
-                            <option value="" disabled selected>-- Pilih Status --</option>
-                            <option value="dipesan">Dipesan</option>
-                            <option value="diajukan">Diajukan</option>
-                        </select>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Pengadaan</label>
+                        <input type="text" value="Diajukan" readonly class="w-full border border-gray-200 rounded-xl p-3 bg-gray-100 text-gray-600 cursor-not-allowed">
+                        <input type="hidden" name="status_pengadaan" value="diajukan">
                     </div>
                 </div>
 
@@ -118,7 +120,7 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Harga Beli Satuan</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 font-semibold border-r pr-3 border-gray-100">Rp</span>
-                            <input type="number" id="harga_beli" name="harga_beli" min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl p-3 pl-16 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" required>
+                            <input type="number" id="harga_beli" name="harga_beli" x-model="hargaBeli" min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl p-3 pl-16 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" required>
                         </div>
                     </div>
                 </div>

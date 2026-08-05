@@ -24,31 +24,16 @@
                     <input type="text" name="nama_sparepart" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="Masukkan Nama" required>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {{-- KATEGORI --}}
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kategori</label>
                         <input type="text" name="kategori" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="Masukkan Kategori" required>
                     </div>
-                    
-                    {{-- STOK AWAL --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stok Awal Fisik</label>
-                        <input type="number" name="stok" min="0" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="0" required>
-                    </div>
-                </div>
-
-                {{-- HARGA JUAL --}}
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Harga Jual Konsumen</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 font-semibold border-r pr-3 border-gray-100">Rp</span>
-                        <input type="number" name="harga_jual" min="0" class="w-full border border-gray-200 rounded-xl p-3 pl-16 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="0" required>
-                    </div>
-                </div>
 
                 {{-- HIDDEN STATUS DEFAULT --}}
-                <input type="hidden" name="status" value="tersedia">
+                <input type="hidden" name="stok" value="0">
+                <input type="hidden" name="harga_jual" value="0">
+                <input type="hidden" name="status" value="tidak tersedia">
             </div>
 
             {{-- TOMBOL AKSI --}}

@@ -39,14 +39,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Transaksi</label>
-                        <select name="status_pengadaan" required class="w-full border border-gray-200 rounded-xl p-3 bg-white outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 cursor-pointer">
-                            <option value="" disabled>-- Pilih Status --</option>
-                            <option value="dipesan" {{ $pengadaan->status_pengadaan == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
-                            <option value="diterima" {{ $pengadaan->status_pengadaan == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                            <option value="dibatalkan" {{ $pengadaan->status_pengadaan == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                            <option value="diajukan" {{ $pengadaan->status_pengadaan == 'diajukan' ? 'selected' : ''}}>Diajukan</option>
-                        </select>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Pengadaan</label>
+                        <input type="text" value="Diajukan" readonly class="w-full border border-gray-200 rounded-xl p-3 bg-gray-100 text-gray-600 cursor-not-allowed">
+                        <input type="hidden" name="status_pengadaan" value="diajukan">
                     </div>
                 </div>
 

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->decimal('harga_beli', 12, 2);
             $table->decimal('total', 12, 2);
-            $table->enum('status_pengadaan', ['dipesan', 'diterima', 'dibatalkan', 'diajukan'])->default('diajukan');
+            $table->enum('status_pengadaan', ['diajukan', 'disetujui', 'ditolak', 'diterima'])->default('diajukan');
             $table->timestamps();
         });
     }

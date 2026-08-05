@@ -42,7 +42,7 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kuantitas Stok Gudang</label>
-                        <input type="number" name="stok" value="{{ $sparepart->stok }}" min="0" required placeholder="0" class="w-full border border-gray-200 rounded-xl p-3 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100">
+                        <input type="number" value="{{ $sparepart->stok }}" readonly class="w-full border border-gray-200 rounded-xl p-3 bg-gray-100 text-gray-600 cursor-not-allowed">
                     </div>
                 </div>
 
@@ -58,10 +58,7 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Ketersediaan</label>
-                        <select name="status" required class="w-full border border-gray-200 rounded-xl p-3 bg-white outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 cursor-pointer">
-                            <option value="tersedia" {{ $sparepart->status == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="tidak tersedia" {{ $sparepart->status == 'tidak tersedia' ? 'selected' : '' }}>Habis/Kosong</option>
-                        </select>
+                        <input type="text" value="{{ $sparepart->stok > 0 ? 'Tersedia' : 'Habis/Kosong' }}" readonly class="w-full border border-gray-200 rounded-xl p-3 pl-3 outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-100 bg-gray-100 text-gray-600 cursor-not-allowed">
                     </div>
                 </div>
             </div>

@@ -49,7 +49,6 @@ class PengadaanSparepartController extends Controller
             'tgl_pesan' => 'required',
             'jumlah' => 'required',
             'harga_beli' => 'required',
-            'status_pengadaan' => 'required',
         ]);
         $total = $request->jumlah * $request->harga_beli;
         PengadaanSparepart::create([
@@ -58,14 +57,8 @@ class PengadaanSparepartController extends Controller
             'jumlah' => $request->jumlah,
             'harga_beli' => $request->harga_beli,
             'total' => $total,
-            'status_pengadaan' => $request->status_pengadaan,
+            'status_pengadaan' => 'diajukan',
         ]);
-        if ($request->status_pengadaan === 'diterima') {
-            $sparepart = Sparepart::where('id_sparepart', $request->id_sparepart)->firstOrFail();
-            $sparepart->stok += $request->jumlah;
-            $sparepart->status = $sparepart->stok > 0 ? 'tersedia' : 'tidak tersedia';
-            $sparepart->save();
-        }
         return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dicatat.');
     }
 
@@ -82,40 +75,34 @@ class PengadaanSparepartController extends Controller
     // UPDATE DATA
     public function update(Request $request, $id)
     {
-        $role = Auth::user()->role; if ($role !== 'admin') {abort(403, 'Tindakan ini tidak diizinkan.');}
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Tindakan ini tidak diizinkan.');
+        }
+
+        $pengadaan = PengadaanSparepart::where('id_pengadaan', $id)->firstOrFail();
+        // Hanya boleh diedit jika masih diajukan
+        if ($pengadaan->status_pengadaan !== 'diajukan') {
+            return redirect()->route('admin.pengadaan_sparepart.index')->with('error', 'Pengadaan yang sudah diproses tidak dapat diedit.');
+        }
+
         $request->validate([
             'id_sparepart' => 'required',
             'tgl_pesan' => 'required',
             'jumlah' => 'required',
             'harga_beli' => 'required',
-            'status_pengadaan' => 'required',
-        ]);
-        $pengadaan = PengadaanSparepart::where('id_pengadaan', $id)->firstOrFail();
-        // KONDISI A: Jika status LAMA adalah 'diterima', kita harus tarik kembali (kurangi) stok lamanya dulu
-        if ($pengadaan->status_pengadaan === 'diterima') {
-            $sparepartLama = Sparepart::where('id_sparepart', $pengadaan->id_sparepart)->firstOrFail();
-            $sparepartLama->stok -= $pengadaan->jumlah;
-            $sparepartLama->status = $sparepartLama->stok > 0 ? 'tersedia' : 'tidak tersedia';
-            $sparepartLama->save();
-        }
-        $totalBaru = $request->jumlah * $request->harga_beli;
-        $pengadaan->update([
-            'id_sparepart' => $request->id_sparepart,
-            'tgl_pesan' => $request->tgl_pesan,
-            'jumlah' => $request->jumlah,
-            'harga_beli' => $request->harga_beli,
-            'total' => $totalBaru,
-            'status_pengadaan' => $request->status_pengadaan,
         ]);
 
-        // KONDISI B: Jika status BARU yang dipilih adalah 'diterima', tambahkan stok ke sparepart baru
-        if ($request->status_pengadaan === 'diterima') {
-            $sparepartBaru = Sparepart::where('id_sparepart', $request->id_sparepart)->firstOrFail();
-            $sparepartBaru->stok += $request->jumlah;
-            $sparepartBaru->status = $sparepartBaru->stok > 0 ? 'tersedia' : 'tidak tersedia';
-            $sparepartBaru->save();
-        }
-        return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil diperbarui dan stok telah disesuaikan.');
+        $pengadaan->update([
+            'id_sparepart'      => $request->id_sparepart,
+            'tgl_pesan'         => $request->tgl_pesan,
+            'jumlah'            => $request->jumlah,
+            'harga_beli'        => $request->harga_beli,
+            'total'             => $request->jumlah * $request->harga_beli,
+            'status_pengadaan'  => 'diajukan',
+        ]);
+
+        return redirect()->route('admin.pengadaan_sparepart.index')
+            ->with('success', 'Data pengadaan berhasil diperbarui.');
     }
 
     // 🔹 DETAIL DATA
@@ -143,5 +130,49 @@ class PengadaanSparepartController extends Controller
         }
         $pengadaan->delete();
         return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dihapus');
+    }
+
+    public function approve($id)
+    {
+        if (Auth::user()->role !== 'owner') {
+            abort(403, 'Anda tidak memiliki hak akses.');
+        }
+        $pengadaan = PengadaanSparepart::findOrFail($id);
+        if ($pengadaan->status_pengadaan != 'diajukan') {
+            return back()->with('error', 'Pengadaan tidak dapat disetujui.');
+        }
+        $pengadaan->update(['status_pengadaan' => 'disetujui']);
+        return back()->with('success', 'Pengadaan berhasil disetujui.');
+    }
+
+    public function reject($id)
+    {
+        if (Auth::user()->role !== 'owner') {
+            abort(403, 'Anda tidak memiliki hak akses.');
+        }
+        $pengadaan = PengadaanSparepart::findOrFail($id);
+        if ($pengadaan->status_pengadaan != 'diajukan') {
+            return back()->with('error', 'Pengadaan tidak dapat ditolak.');
+        }
+        $pengadaan->update(['status_pengadaan' => 'ditolak']);
+        return back()->with('success', 'Pengadaan berhasil ditolak.');
+    }
+
+    public function terima($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Anda tidak memiliki hak akses.');
+        }
+        $pengadaan = PengadaanSparepart::findOrFail($id);
+        if ($pengadaan->status_pengadaan != 'disetujui') {
+            return back()->with('error', 'Barang belum dapat diterima.');
+        }
+        $sparepart = Sparepart::findOrFail($pengadaan->id_sparepart);
+        $sparepart->stok += $pengadaan->jumlah;
+        $sparepart->harga_jual = $pengadaan->harga_beli;
+        $sparepart->status = $sparepart->stok > 0 ? 'tersedia' : 'tidak tersedia';
+        $sparepart->save();
+        $pengadaan->update(['status_pengadaan' => 'diterima']);
+        return back()->with('success', 'Barang berhasil diterima dan stok telah diperbarui.');
     }
 }

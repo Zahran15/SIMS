@@ -103,8 +103,7 @@
                         {{-- ESTIMASI --}}
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Estimasi Selesai Pengerjaan</label>
-                            <input type="date" name="estimasi_selesai"
-                                class="w-full border border-gray-200 rounded-xl p-3 mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                            <input type="date" name="estimasi_selesai" value="{{ $estimasi->format('Y-m-d') }}" readonly class="w-full border border-gray-200 rounded-xl p-3 mt-1 bg-gray-100 cursor-not-allowed">
                         </div>
 
                         {{-- STATUS --}}

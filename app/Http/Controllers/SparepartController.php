@@ -43,16 +43,14 @@ class SparepartController extends Controller
         $request->validate([
             'nama_sparepart' => 'required',
             'kategori' => 'required',
-            'stok' => 'required',
-            'harga_jual' => 'required',
         ]);
 
         Sparepart::create([
             'nama_sparepart' => $request->nama_sparepart,
             'kategori' => $request->kategori,
-            'stok' => $request->stok,
-            'harga_jual' => $request->harga_jual,
-            'status' => $request->stok > 0 ? 'tersedia' : 'tidak tersedia',
+            'stok' => 0,
+            'harga_jual' => 0,
+            'status' => 'tidak tersedia',
         ]);
 
         return redirect()->route('admin.sparepart.index')->with('success', 'Data berhasil ditambahkan');
@@ -79,18 +77,15 @@ class SparepartController extends Controller
         $request->validate([
             'nama_sparepart' => 'required',
             'kategori' => 'required',
-            'stok' => 'required',
-            'harga_jual' => 'required',
+            'harga_jual' => 'required|numeric|min:0',
         ]);
-
         $data->update([
             'nama_sparepart' => $request->nama_sparepart,
             'kategori' => $request->kategori,
-            'stok' => $request->stok,
             'harga_jual' => $request->harga_jual,
-            'status' => $request->stok > 0 ? 'tersedia' : 'tidak tersedia',
+            'status' => $data->stok > 0 ? 'tersedia' : 'tidak tersedia',
         ]);
-    return redirect()->route('admin.sparepart.index')->with('success', 'Data berhasil diupdate');    
+        return redirect()->route('admin.sparepart.index')->with('success', 'Data berhasil diupdate');
     }
 
     public function destroy($id)

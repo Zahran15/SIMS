@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\PenugasanTeknisi;
 use App\Models\Servis;
 use App\Models\User;
+use Carbon\Carbon;
 
 class PenugasanTeknisiController extends Controller
 {
@@ -47,7 +48,8 @@ class PenugasanTeknisiController extends Controller
     {
         $servis = Servis::findOrFail($id_servis);
         $teknisi = User::where('role', 'teknisi')->get();
-        return view('admin.proses.penugasan.tambah', compact('servis', 'teknisi'));
+        $estimasi = Carbon::now()->addDays(3);
+        return view('admin.proses.penugasan.tambah', compact('servis', 'teknisi', 'estimasi'));
     }
 
     public function store(Request $request)

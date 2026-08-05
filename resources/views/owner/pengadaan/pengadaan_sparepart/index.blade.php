@@ -45,10 +45,10 @@
                     <select name="status_pengadaan"
                         class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px] text-sm">
                         <option value="">Semua Status</option>
-                        <option value="dipesan" {{ request('status_pengadaan') == 'dipesan' ? 'selected' : '' }}>Dipesan</option>
+                        <option value="diajukan" {{ request('status_pengadaan') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
+                        <option value="disetujui" {{ request('status_pengadaan') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="ditolak" {{ request('status_pengadaan') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                         <option value="diterima" {{ request('status_pengadaan') == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                        <option value="dibatalkan" {{ request('status_pengadaan') == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                        <option value="diajukan" {{ request('status_pengadaan') == 'diajukan' ? 'selected' : ''}}>Diajukan</option>
                     </select>
                 </div>
                 {{-- Tombol Aksi --}}
@@ -104,11 +104,14 @@
                             <td class="px-5 py-4 text-center text-green-600 font-medium">Rp {{ number_format($p->total, 0, ',', '.') }}</td>
                             <td class="px-5 py-4 text-center">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                    @if($p->status_pengadaan == 'dipesan') bg-yellow-100 text-yellow-700 border border-yellow-200
-                                    @elseif($p->status_pengadaan == 'diterima') bg-green-100 text-green-700 border border-green-200
-                                    @elseif($p->status_pengadaan == 'diajukan') bg-yellow-100 text-yellow-700 border border-yellow-200
-                                    @else
-                                    bg-red-100 text-red-700 border border-red-200
+                                    @if($p->status_pengadaan == 'diajukan')
+                                        bg-yellow-100 text-yellow-700 border-yellow-200
+                                    @elseif($p->status_pengadaan == 'disetujui')
+                                        bg-blue-100 text-blue-700 border-blue-200
+                                    @elseif($p->status_pengadaan == 'diterima')
+                                        bg-green-100 text-green-700 border-green-200
+                                    @elseif($p->status_pengadaan == 'ditolak')
+                                        bg-red-100 text-red-700 border-red-200
                                     @endif
                                     ">
                                     {{ ucfirst($p->status_pengadaan) }}
@@ -118,7 +121,6 @@
                             {{-- AKSI --}}
                             <td class="px-5 py-4 text-center">
                                 <div class="flex justify-center">
-                                    {{-- OWNER HANYA BISA LIHAT DETAIL NOTA --}}
                                     <a href="{{ route('owner.pengadaan_sparepart.detail', $p->id_pengadaan) }}"
                                         class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all" 
                                         title="Lihat Detail Pengadaan">
@@ -127,6 +129,36 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                     </a>
+                                     @if($p->status_pengadaan == 'diajukan')
+
+                                    <form action="{{ route('owner.pengadaan_sparepart.approve', $p->id_pengadaan) }}"
+                                        method="POST"
+                                        class="form-approve">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit"
+                                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all"
+                                            title="Setujui Pengadaan">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    
+                                    <form action="{{ route('owner.pengadaan_sparepart.reject', $p->id_pengadaan) }}"
+                                        method="POST"
+                                        class="form-reject">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit"
+                                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
+                                            title="Tolak Pengadaan">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -147,4 +179,50 @@
     <div class="mt-5">
         {{ $pengadaan->appends(request()->query())->links() }}
     </div>
+
+    <script>
+    // APPROVE
+    document.querySelectorAll('.form-approve').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Setujui pengadaan?',
+                text: 'Pengadaan sparepart akan disetujui.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Setujui',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // REJECT
+    document.querySelectorAll('.form-reject').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Tolak pengadaan?',
+                text: 'Pengadaan sparepart akan ditolak.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Tolak',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 @endsection
