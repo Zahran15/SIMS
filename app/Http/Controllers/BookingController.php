@@ -13,6 +13,9 @@ use Carbon\Carbon;
 use App\Notifications\NotifBookingDiterima;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
+use App\Models\User; 
+use App\Notifications\NotifInternal;  
+use App\Notifications\NotifPelanggan; 
 
 class BookingController extends Controller
 {
@@ -113,7 +116,7 @@ class BookingController extends Controller
             'merk_tipe'          => $request->merk_tipe,
             'spesifikasi'        => $request->spesifikasi,
             'keluhan'            => $request->keluhan,
-            'metode_pengambilan' => $request->metode_pengambilan,
+            'metode_pengembalian' => $request->metode_pengembalian,
             'kelengkapan'        => $request->kelengkapan,
             'kategori_servis'    => $request->kategori_servis,
             'status_dp'          => $status_dp,
@@ -128,6 +131,20 @@ class BookingController extends Controller
             'nominal'           => 50000,
             'status_pembayaran' => 'pending'
         ]);
+
+        // 🔔 LONCENG: Jika dibuat oleh Pelanggan -> Kirim Notif ke Admin & Owner
+        if (!$isAdmin) {
+            $namaPelanggan = Auth::guard('pelanggan')->user()->nama ?? 'Pelanggan';
+            $adminsAndOwners = User::whereIn('role', ['admin', 'owner'])->get();
+
+            foreach ($adminsAndOwners as $user) {
+                $user->notify(new NotifInternal(
+                    'Booking Servis Baru',
+                    'Booking ' . $kode_booking . ' baru dibuat oleh ' . $namaPelanggan . ' (' . $request->merk_tipe . ')',
+                    'fa-solid fa-calendar-plus'
+                ));
+            }
+        }
 
         if ($isAdmin) {
             return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil ditambahkan');
@@ -165,7 +182,7 @@ class BookingController extends Controller
                 'merk_tipe' => $request->merk_tipe,
                 'spesifikasi' => $request->spesifikasi,
                 'keluhan' => $request->keluhan,
-                'metode_pengambilan' => $request->metode_pengambilan,
+                'metode_pengembalian' => $request->metode_pengembalian,
                 'kelengkapan' => $request->kelengkapan,
                 'kategori_servis' => $request->kategori_servis,
                 'status_dp' => $request->status_dp,
@@ -209,7 +226,7 @@ class BookingController extends Controller
             'merk_tipe' => $request->merk_tipe,
             'spesifikasi' => $request->spesifikasi,
             'keluhan' => $request->keluhan,
-            'metode_pengambilan' => $request->metode_pengambilan,
+            'metode_pengembalian' => $request->metode_pengembalian,
             'kelengkapan' => $request->kelengkapan,
             'kategori_servis' => $request->kategori_servis,
         ]);
@@ -255,6 +272,7 @@ class BookingController extends Controller
         $booking = Booking::with('pelanggan')->findOrFail($id);
         // 1. Update status booking menjadi diterima
         $booking->update(['status_booking' => 'diterima']);
+        
         // 2. Cek apakah data servis untuk booking ini sudah pernah dibuat/belum (biar gak double)
         $cekServis = Servis::where('id_booking', $booking->id_booking)->first();
         if (!$cekServis) {
@@ -267,6 +285,7 @@ class BookingController extends Controller
                 'status_servis'     => 'menunggu',                
                 'total_biaya'       => 0
             ]);
+            
             // 3. Catat ke Histori Aktivitas
             HistoriAktivitas::create([
                 'id_user'    => Auth::id(), 
@@ -275,6 +294,15 @@ class BookingController extends Controller
                 'keterangan' => 'Booking disetujui langsung oleh Admin. Unit masuk antrean servis dan penugasan dibuat.',
                 'tanggal'    => Carbon::now()
             ]);
+        }
+
+        // 🔔 LONCENG: Kirim Notifikasi Lonceng Ke Pelanggan
+        if ($booking->pelanggan) {
+            $booking->pelanggan->notify(new NotifPelanggan(
+                'Booking Disetujui',
+                'Booking ' . $booking->kode_booking . ' untuk ' . $booking->merk_tipe . ' telah disetujui Admin dan masuk antrean.',
+                'fa-solid fa-circle-check'
+            ));
         }
 
         // 4. PROSES KIRIM NOTIFIKASI EMAIL KEPADA PELANGGAN
@@ -301,6 +329,6 @@ class BookingController extends Controller
             }
         }
 
-        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil disetujui dan notif email telah dikirim.');
+        return redirect()->route('admin.booking.index')->with('success', 'Booking berhasil disetujui dan notifikasi telah dikirim.');
     }
 }
