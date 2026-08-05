@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PengadaanSparepart;
 use App\Models\Sparepart;
+use App\Models\User; // <-- Import Model User
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\NotifInternal; // <-- Import NotifInternal
 
 class PengadaanSparepartController extends Controller
 {
@@ -43,22 +45,38 @@ class PengadaanSparepartController extends Controller
     public function store(Request $request)
     {
         $role = Auth::user()->role;
-        if ($role !== 'admin') {abort(403, 'Tindakan ini tidak diizinkan.');}
+        if ($role !== 'admin') { abort(403, 'Tindakan ini tidak diizinkan.'); }
+        
         $request->validate([
             'id_sparepart' => 'required',
-            'tgl_pesan' => 'required',
-            'jumlah' => 'required',
-            'harga_beli' => 'required',
+            'tgl_pesan'     => 'required',
+            'jumlah'        => 'required',
+            'harga_beli'    => 'required',
         ]);
+
         $total = $request->jumlah * $request->harga_beli;
-        PengadaanSparepart::create([
-            'id_sparepart' => $request->id_sparepart,
-            'tgl_pesan' => $request->tgl_pesan,
-            'jumlah' => $request->jumlah,
-            'harga_beli' => $request->harga_beli,
-            'total' => $total,
+        $pengadaan = PengadaanSparepart::create([
+            'id_sparepart'     => $request->id_sparepart,
+            'tgl_pesan'        => $request->tgl_pesan,
+            'jumlah'           => $request->jumlah,
+            'harga_beli'       => $request->harga_beli,
+            'total'            => $total,
             'status_pengadaan' => 'diajukan',
         ]);
+
+        // 🔔 NOTIFIKASI LONCENG KE OWNER
+        $sparepartItem = Sparepart::find($request->id_sparepart);
+        $namaSparepart = $sparepartItem->nama_sparepart ?? 'Sparepart';
+
+        $owners = User::where('role', 'owner')->get();
+        foreach ($owners as $owner) {
+            $owner->notify(new NotifInternal(
+                'Pengajuan Pengadaan Sparepart',
+                'Admin mengajukan pengadaan ' . $namaSparepart . ' sejumlah ' . $request->jumlah . ' unit (Total: Rp ' . number_format($total, 0, ',', '.') . ').',
+                'fa-solid fa-cart-flatbed'
+            ));
+        }
+
         return redirect()->route('admin.pengadaan_sparepart.index')->with('success', 'Data pengadaan berhasil dicatat.');
     }
 
@@ -137,11 +155,23 @@ class PengadaanSparepartController extends Controller
         if (Auth::user()->role !== 'owner') {
             abort(403, 'Anda tidak memiliki hak akses.');
         }
-        $pengadaan = PengadaanSparepart::findOrFail($id);
+        $pengadaan = PengadaanSparepart::with('sparepart')->findOrFail($id);
         if ($pengadaan->status_pengadaan != 'diajukan') {
             return back()->with('error', 'Pengadaan tidak dapat disetujui.');
         }
         $pengadaan->update(['status_pengadaan' => 'disetujui']);
+
+        // 🔔 NOTIFIKASI LONCENG KE ADMIN
+        $namaSparepart = $pengadaan->sparepart->nama_sparepart ?? 'Sparepart';
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NotifInternal(
+                'Pengadaan Disetujui Owner',
+                'Pengadaan ' . $namaSparepart . ' (' . $pengadaan->jumlah . ' unit) telah disetujui Owner.',
+                'fa-solid fa-square-check'
+            ));
+        }
+
         return back()->with('success', 'Pengadaan berhasil disetujui.');
     }
 
@@ -150,11 +180,23 @@ class PengadaanSparepartController extends Controller
         if (Auth::user()->role !== 'owner') {
             abort(403, 'Anda tidak memiliki hak akses.');
         }
-        $pengadaan = PengadaanSparepart::findOrFail($id);
+        $pengadaan = PengadaanSparepart::with('sparepart')->findOrFail($id);
         if ($pengadaan->status_pengadaan != 'diajukan') {
             return back()->with('error', 'Pengadaan tidak dapat ditolak.');
         }
         $pengadaan->update(['status_pengadaan' => 'ditolak']);
+
+        // 🔔 NOTIFIKASI LONCENG KE ADMIN
+        $namaSparepart = $pengadaan->sparepart->nama_sparepart ?? 'Sparepart';
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NotifInternal(
+                'Pengadaan Ditolak Owner',
+                'Pengajuan pengadaan ' . $namaSparepart . ' ditolak oleh Owner.',
+                'fa-solid fa-rectangle-xmark'
+            ));
+        }
+
         return back()->with('success', 'Pengadaan berhasil ditolak.');
     }
 
@@ -163,16 +205,29 @@ class PengadaanSparepartController extends Controller
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Anda tidak memiliki hak akses.');
         }
-        $pengadaan = PengadaanSparepart::findOrFail($id);
+        $pengadaan = PengadaanSparepart::with('sparepart')->findOrFail($id);
         if ($pengadaan->status_pengadaan != 'disetujui') {
             return back()->with('error', 'Barang belum dapat diterima.');
         }
+
         $sparepart = Sparepart::findOrFail($pengadaan->id_sparepart);
         $sparepart->stok += $pengadaan->jumlah;
         $sparepart->harga_jual = $pengadaan->harga_beli;
         $sparepart->status = $sparepart->stok > 0 ? 'tersedia' : 'tidak tersedia';
         $sparepart->save();
+
         $pengadaan->update(['status_pengadaan' => 'diterima']);
+
+        // 🔔 NOTIFIKASI LONCENG KE OWNER (Konfirmasi Stok Masuk)
+        $owners = User::where('role', 'owner')->get();
+        foreach ($owners as $owner) {
+            $owner->notify(new NotifInternal(
+                'Barang Pengadaan Diterima',
+                'Fisik barang ' . $sparepart->nama_sparepart . ' (' . $pengadaan->jumlah . ' unit) telah diterima Admin dan stok gudang otomatis bertambah.',
+                'fa-solid fa-boxes-stacked'
+            ));
+        }
+
         return back()->with('success', 'Barang berhasil diterima dan stok telah diperbarui.');
     }
 }
