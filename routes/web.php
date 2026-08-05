@@ -36,21 +36,23 @@ Route::get('/reset', [AuthController::class, 'showResetForm'])->name('password.r
 Route::post('/send-reset-code', [AuthController::class, 'sendResetCode'])->name('password.send_code');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 Route::post('/notifications/mark-all-read', function (Request $request) {
-    if (auth()->guard('web')->check()) {
-        auth()->guard('web')->user()->unreadNotifications->markAsRead();
-    } elseif (auth()->guard('pelanggan')->check()) {
-        auth()->guard('pelanggan')->user()->unreadNotifications->markAsRead();
-    }
-    
-    return back()->with('success', 'Semua notifikasi ditandai sudah dibaca.');
-})->name('notifications.markAllRead');
-// Route untuk melihat semua notifikasi
-Route::get('/notifications', function () {
+    /** @var \App\Models\User|\App\Models\Pelanggan|null $user */
     $user = auth()->guard('web')->user() ?? auth()->guard('pelanggan')->user();
-    
-    // Ambil semua notifikasi dengan pagination
-    $notifications = $user ? $user->notifications()->paginate(10) : collect();
+    if ($user && method_exists($user, 'unreadNotifications')) {
+        $user->unreadNotifications()->update(['read_at' => now()]);
+    }
+    return back()->with('success', 'Semua notifikasi ditandai sudah dibaca.');
+})->middleware('auth:web,pelanggan')->name('notifications.markAllRead');
 
+// 2. Route Halaman Daftar Notifikasi
+Route::get('/notifications', function () {
+    /** @var \App\Models\User|\App\Models\Pelanggan|null $user */
+    $user = auth()->guard('web')->user() ?? auth()->guard('pelanggan')->user();
+    if ($user) {
+        $notifications = $user->notifications()->paginate(10);
+    } else {
+        $notifications = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+    }
     return view('notifications.index', compact('notifications'));
 })->middleware('auth:web,pelanggan')->name('notifications.index');
 
