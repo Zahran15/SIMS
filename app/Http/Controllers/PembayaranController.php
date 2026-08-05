@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pembayaran;
+use App\Models\User; // <-- Import User
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Http;
+use App\Notifications\NotifInternal;  // <-- Import NotifInternal
+use App\Notifications\NotifPelanggan; // <-- Import NotifPelanggan
 
 class PembayaranController extends Controller
 {
@@ -116,16 +119,16 @@ class PembayaranController extends Controller
 
     public function success(Request $request, $id)
     {
-        $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran = Pembayaran::with('booking.pelanggan', 'servis')->findOrFail($id);
     
         if ($pembayaran->status_pembayaran == 'sukses') {
             return response()->json(['success' => true]);
         }
     
         $pembayaran->update([
-            'status_pembayaran' => 'sukses',
+            'status_pembayaran'       => 'sukses',
             'midtrans_transaction_id' => $request->transaction_id,
-            'tanggal_bayar' => now()
+            'tanggal_bayar'           => now()
         ]);
     
         if ($pembayaran->jenis_pembayaran == 'dp') {
@@ -135,9 +138,32 @@ class PembayaranController extends Controller
         if ($pembayaran->jenis_pembayaran == 'pelunasan' && $pembayaran->servis) {
             $pembayaran->servis->update([
                 'status_pelunasan' => 'sudah lunas',
-                'status_servis' => 'bisa diambil'
+                'status_servis'    => 'bisa diambil'
             ]);
         }
+
+        // 🔔 A. Kirim Notif Lonceng ke Admin & Owner
+        $namaPelanggan = $pembayaran->booking->pelanggan->nama ?? 'Pelanggan';
+        $jenis         = strtoupper($pembayaran->jenis_pembayaran);
+        $adminsAndOwners = User::whereIn('role', ['admin', 'owner'])->get();
+
+        foreach ($adminsAndOwners as $user) {
+            $user->notify(new NotifInternal(
+                'Pembayaran Masuk (' . $jenis . ')',
+                'Pembayaran ' . $jenis . ' Rp ' . number_format($pembayaran->nominal, 0, ',', '.') . ' dari ' . $namaPelanggan . ' telah diterima.',
+                'fa-solid fa-money-bill-wave'
+            ));
+        }
+
+        // 🔔 B. Kirim Notif Lonceng ke Pelanggan
+        if ($pembayaran->booking && $pembayaran->booking->pelanggan) {
+            $pembayaran->booking->pelanggan->notify(new NotifPelanggan(
+                'Pembayaran Diterima',
+                'Pembayaran ' . $jenis . ' sebesar Rp ' . number_format($pembayaran->nominal, 0, ',', '.') . ' berhasil dikonfirmasi.',
+                'fa-solid fa-circle-check'
+            ));
+        }
+
         return response()->json(['success' => true]);
     }
 
@@ -173,7 +199,7 @@ class PembayaranController extends Controller
 
     public function updateAdmin(Request $request, $id)
     {
-        $pembayaran = Pembayaran::findOrFail($id);
+        $pembayaran = Pembayaran::with('booking.pelanggan', 'servis')->findOrFail($id);
         DB::beginTransaction();
         try {
             if ($request->metode_pembayaran == 'cash') {
@@ -184,14 +210,32 @@ class PembayaranController extends Controller
                     'midtrans_order_id' => null,
                     'tanggal_bayar'     => now(),
                 ]);
+
                 if ($pembayaran->jenis_pembayaran == 'dp') {
                     $pembayaran->booking->update(['status_dp' => 'sudah lunas']);
                 }
+
                 if ($pembayaran->jenis_pembayaran == 'pelunasan' && $pembayaran->servis) {
-                    $pembayaran->servis->update(['status_pelunasan' => 'sudah lunas', 'status_servis' => 'bisa diambil']);
+                    $pembayaran->servis->update([
+                        'status_pelunasan' => 'sudah lunas', 
+                        'status_servis'    => 'bisa diambil'
+                    ]);
                 }
-                } else {
-                $pembayaran->update(['metode_pembayaran' => 'transfer','status_pembayaran' => 'pending','tanggal_bayar' => null]);
+
+                // 🔔 Kirim Notif Lonceng ke Pelanggan
+                if ($pembayaran->booking && $pembayaran->booking->pelanggan) {
+                    $pembayaran->booking->pelanggan->notify(new NotifPelanggan(
+                        'Pembayaran Tunai Diterima',
+                        'Pembayaran tunai ' . strtoupper($pembayaran->jenis_pembayaran) . ' sebesar Rp ' . number_format($pembayaran->nominal, 0, ',', '.') . ' telah diterima Admin.',
+                        'fa-solid fa-receipt'
+                    ));
+                }
+            } else {
+                $pembayaran->update([
+                    'metode_pembayaran' => 'transfer',
+                    'status_pembayaran' => 'pending',
+                    'tanggal_bayar'     => null
+                ]);
             }
 
             DB::commit();
