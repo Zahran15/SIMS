@@ -154,13 +154,17 @@ class RequestSparepartController extends Controller
 
         // Melakukan looping berdasarkan array input sparepart yang dikirim oleh form
         foreach ($request->id_sparepart as $index => $sparepartId) {
-            RequestSparepart::create([
-                'id_penugasan'   => $request->id_penugasan,
-                'id_sparepart'   => $sparepartId,
-                'jumlah'         => $request->jumlah[$index],
-                'alasan'         => $request->alasan,
-                'status_request' => 'pending_admin'
-            ]);
+            $jumlah = $request->jumlah[$index];
+            for ($i = 0; $i < $jumlah; $i++) {
+                RequestSparepart::create([
+                    'id_penugasan'   => $request->id_penugasan,
+                    'id_sparepart'   => $sparepartId,
+                    'jumlah'         => 1,
+                    'alasan'         => $request->alasan,
+                    'status_request' => 'pending_admin'
+                ]);
+
+            }
         }
         
         return redirect()->route('teknisi.request_sparepart.index')->with('success', 'Semua request sparepart berhasil diajukan ke Admin.');
