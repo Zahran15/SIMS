@@ -51,8 +51,15 @@ class User extends Authenticatable
         );
     }
 
-        public function getAuthIdentifierName()
+    public function getAuthIdentifierName()
     {
         return 'id_user';
+    }
+
+    // Tambahkan method ini di dalam class User
+    public function notifications()
+    {
+        return $this->morphMany(\Illuminate\Notifications\DatabaseNotification::class, 'notifiable', null, 'notifiable_id', 'id_user')
+                    ->orderBy('created_at', 'desc');
     }
 }

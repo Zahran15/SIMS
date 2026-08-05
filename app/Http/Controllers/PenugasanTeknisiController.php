@@ -7,6 +7,7 @@ use App\Models\PenugasanTeknisi;
 use App\Models\Servis;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Notifications\NotifPenugasanTeknisi; // <-- 1. Import Class Notification
 
 class PenugasanTeknisiController extends Controller
 {
@@ -61,7 +62,7 @@ class PenugasanTeknisiController extends Controller
             'estimasi_selesai' => 'nullable',
         ]);
 
-        PenugasanTeknisi::create([
+        $penugasan = PenugasanTeknisi::create([
             'id_servis' => $request->id_servis,
             'id_user' => $request->id_user,
             'prioritas' => null,
@@ -71,6 +72,30 @@ class PenugasanTeknisiController extends Controller
         ]);
 
         Servis::where('id_servis', $request->id_servis)->update(['status_servis' => 'proses']);
+
+        // 🔹 NOTIFIKASI SAAT PENUGASAN DIBUAT
+        $servis = Servis::with('booking.pelanggan')->find($request->id_servis);
+        $teknisi = User::find($request->id_user);
+
+        // 1. Kirim Notifikasi ke Teknisi yang ditunjuk
+        if ($teknisi) {
+            $teknisi->notify(new NotifPenugasanTeknisi(
+                'Tugas Servis Baru',
+                'Kamu dapat tugas servis baru (Kode: ' . ($servis->kode_servis ?? 'Servis #' . $servis->id_servis) . ')',
+                'fa-solid fa-toolbox'
+            ));
+        }
+
+        // 2. Kirim Notifikasi ke Pelanggan (jika ada relasi ke pelanggan)
+        $pelanggan = $servis->booking->pelanggan ?? null;
+        if ($pelanggan) {
+            $pelanggan->notify(new NotifPenugasanTeknisi(
+                'Servis Sedang Diproses',
+                'Perangkat kamu telah diserahkan ke teknisi (' . ($teknisi->nama ?? 'Teknisi') . ') dan sedang dikerjakan.',
+                'fa-solid fa-laptop-medical'
+            ));
+        }
+
         return redirect()->route('admin.penugasan.index')->with('success', 'Teknisi berhasil ditugaskan');
     }
 
@@ -83,7 +108,8 @@ class PenugasanTeknisiController extends Controller
 
     public function update(Request $request, $id)
     {
-        $penugasan = PenugasanTeknisi::findOrFail($id);
+        $penugasan = PenugasanTeknisi::with('servis.booking.pelanggan', 'teknisi')->findOrFail($id);
+        
         $penugasan->update([
             'id_user' => $request->id_user,
             'prioritas' => $request->prioritas,
@@ -91,6 +117,17 @@ class PenugasanTeknisiController extends Controller
             'status_penugasan' => $request->status_penugasan,
             'catatan_teknisi' => $request->catatan_teknisi
         ]);
+
+        // 🔹 NOTIFIKASI SAAT STATUS PENUGASAN DIUPDATE
+        $pelanggan = $penugasan->servis->booking->pelanggan ?? null;
+        if ($pelanggan) {
+            $pelanggan->notify(new NotifPenugasanTeknisi(
+                'Update Status Servis',
+                'Status pengerjaan servis kamu diperbarui menjadi: ' . strtoupper($request->status_penugasan),
+                'fa-solid fa-info-circle'
+            ));
+        }
+
         return redirect()->route('admin.penugasan.index')->with('success', 'Penugasan berhasil diupdate');    
     }
 

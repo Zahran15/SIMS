@@ -23,6 +23,7 @@ use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\LaporanServisController;
 use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\PembayaranController;
+use Illuminate\Http\Request;
 
 // ================= AUTH =================
 Route::get('/', [AuthController::class, 'showWelcome']);
@@ -34,6 +35,24 @@ Route::get('/logout', [AuthController::class, 'logout']);
 Route::get('/reset', [AuthController::class, 'showResetForm'])->name('password.request');
 Route::post('/send-reset-code', [AuthController::class, 'sendResetCode'])->name('password.send_code');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+Route::post('/notifications/mark-all-read', function (Request $request) {
+    if (auth()->guard('web')->check()) {
+        auth()->guard('web')->user()->unreadNotifications->markAsRead();
+    } elseif (auth()->guard('pelanggan')->check()) {
+        auth()->guard('pelanggan')->user()->unreadNotifications->markAsRead();
+    }
+    
+    return back()->with('success', 'Semua notifikasi ditandai sudah dibaca.');
+})->name('notifications.markAllRead');
+// Route untuk melihat semua notifikasi
+Route::get('/notifications', function () {
+    $user = auth()->guard('web')->user() ?? auth()->guard('pelanggan')->user();
+    
+    // Ambil semua notifikasi dengan pagination
+    $notifications = $user ? $user->notifications()->paginate(10) : collect();
+
+    return view('notifications.index', compact('notifications'));
+})->middleware('auth:web,pelanggan')->name('notifications.index');
 
 // GROUP UTAMA ADMIN
 Route::middleware(['auth:web', 'cek_role:admin'])->prefix('admin')->group(function () {
