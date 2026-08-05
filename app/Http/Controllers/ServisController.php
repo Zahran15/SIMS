@@ -14,6 +14,7 @@ use App\Models\Pembayaran;
 use App\Models\HistoriAktivitas;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NotifServisSelesai;
+use App\Notifications\NotifPelanggan; // <-- Import NotifPelanggan
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -174,23 +175,23 @@ class ServisController extends Controller
     // UPDATE SERVIS PROSES
     public function update(Request $request, $id)
     {
-        $servis = Servis::findOrFail($id);
+        $servis = Servis::with('booking.pelanggan')->findOrFail($id);
         $statusLama = $servis->status_servis;
         $tanggalSelesaiFix = $request->perkiraan_selesai 
             ? \Carbon\Carbon::parse($request->perkiraan_selesai)->format('Y-m-d') 
             : $servis->perkiraan_selesai;
-        // UPDATE SERVIS
+
         $servis->update([
             'perkiraan_selesai' => $tanggalSelesaiFix, 
             'status_servis' => $request->status_servis,
             'status_pelunasan' => $request->status_pelunasan,
         ]);
-        // HAPUS DETAIL LAMA
+
         DetailServisJasa::where('id_servis', $servis->id_servis)->delete();
         DetailServisSparepart::where('id_servis', $servis->id_servis)->delete();
         $totalJasa = 0;
         $totalSparepart = 0;
-        // SIMPAN JASA
+
         if($request->jasa){
             foreach($request->jasa as $id_jasa){
                 if($id_jasa){
@@ -206,13 +207,12 @@ class ServisController extends Controller
             }
         }
 
-        // SIMPAN SPAREPART
         if($request->sparepart){
             foreach($request->sparepart as $key => $id_sparepart){
                 if($id_sparepart){
                     $sparepart = Sparepart::find($id_sparepart);
                     $qty = $request->qty[$key];
-                    $subtotal =$sparepart->harga_jual * $qty;
+                    $subtotal = $sparepart->harga_jual * $qty;
                     DetailServisSparepart::create([
                         'id_servis' => $servis->id_servis,
                         'id_sparepart' => $sparepart->id_sparepart,
@@ -225,24 +225,33 @@ class ServisController extends Controller
             }
         }
 
-        // UPDATE TOTAL
         $servis->update([
             'total_biaya' => $totalJasa + $totalSparepart
         ]);
+
         $namaAktivitas = 'Admin: Update Servis';
         if ($statusLama != $request->status_servis) {
-        $namaAktivitas = 'Status: ' . ucwords($request->status_servis);
-    }
+            $namaAktivitas = 'Status: ' . ucwords($request->status_servis);
+        }
 
-    HistoriAktivitas::create([
-        'id_user'    => Auth::id(),
-        'id_servis'  => $servis->id_servis,
-        'aktivitas'  => $namaAktivitas,
-        'keterangan' => 'Data servis diperbarui. Status saat ini: ' . ucwords($request->status_servis) . '. Total biaya diperkirakan Rp ' . number_format($servis->total_biaya, 0, ',', '.'),
-        'tanggal'    => Carbon::now()
-    ]);
-            return redirect()->route('admin.servis_proses.index')->with('success', 'Servis berhasil diupdate'
-        );
+        HistoriAktivitas::create([
+            'id_user'    => Auth::id(),
+            'id_servis'  => $servis->id_servis,
+            'aktivitas'  => $namaAktivitas,
+            'keterangan' => 'Data servis diperbarui. Status saat ini: ' . ucwords($request->status_servis) . '. Total biaya diperkirakan Rp ' . number_format($servis->total_biaya, 0, ',', '.'),
+            'tanggal'    => Carbon::now()
+        ]);
+
+        // 🔔 NOTIFIKASI LONCENG KEPADA PELANGGAN
+        if ($statusLama != $request->status_servis && $servis->booking && $servis->booking->pelanggan) {
+            $servis->booking->pelanggan->notify(new NotifPelanggan(
+                'Status Servis Diperbarui',
+                'Servis (' . $servis->kode_servis . ') statusnya kini: ' . strtoupper($request->status_servis),
+                'fa-solid fa-rotate'
+            ));
+        }
+
+        return redirect()->route('admin.servis_proses.index')->with('success', 'Servis berhasil diupdate');
     }
 
     public function editSelesai($id)
@@ -253,9 +262,21 @@ class ServisController extends Controller
 
     public function updateSelesai(Request $request, $id)
     {
-        $request->validate(['status_servis' => 'required|in:selesai,bisa diambil,sudah diambil',]);
-        $servis = Servis::where('id_servis', $id)->firstOrFail();
+        $request->validate(['status_servis' => 'required|in:selesai,bisa diambil,sudah diambil']);
+        $servis = Servis::with('booking.pelanggan')->where('id_servis', $id)->firstOrFail();
         $servis->update(['status_servis' => $request->status_servis]);
+
+        // 🔔 NOTIFIKASI LONCENG KEPADA PELANGGAN
+        if ($servis->booking && $servis->booking->pelanggan) {
+            $pesan = $request->status_servis == 'bisa diambil' 
+                ? 'Laptop/perangkat kamu sudah dapat diambil di toko.' 
+                : 'Status servis kamu diperbarui menjadi: ' . strtoupper($request->status_servis);
+            $servis->booking->pelanggan->notify(new NotifPelanggan(
+                'Update Pengambilan Servis',
+                $pesan,
+                'fa-solid fa-box-check'
+            ));
+        }
         return redirect()->route('admin.servis_selesai.index')->with('success', 'Status servis ' . $servis->kode_servis . ' berhasil diperbarui!');
     }
 
@@ -292,21 +313,17 @@ class ServisController extends Controller
     // 🔹 AKSI CEPAT SELESAI DARI INDEX (PERBAIKAN NOTIFIKASI EMAIL)
     public function quickSelesai($id)
     {
-        // Eager load relasi yang sama persis seperti halaman update
         $servis = Servis::with(['booking.pelanggan'])->findOrFail($id);
         $statusLama = $servis->status_servis;
 
-        // Proteksi: Pastikan hanya status 'proses' yang bisa menembus tombol ini
         if ($statusLama != 'proses') {
             return back()->with('error', 'Hanya servis berstatus proses yang dapat diselesaikan langsung.');
         }
 
-        // 1. Update status utama ke selesai
         $servis->update([
             'status_servis' => 'selesai'
         ]);
 
-        // 2. Buat Log Histori Aktivitas
         HistoriAktivitas::create([
             'id_user'    => Auth::id(),
             'id_servis'  => $servis->id_servis,
@@ -315,37 +332,38 @@ class ServisController extends Controller
             'tanggal'    => Carbon::now()
         ]);
 
-        // 3. PROSES KIRIM NOTIFIKASI EMAIL 
+        // 🔔 NOTIFIKASI LONCENG KEPADA PELANGGAN
+        if ($servis->booking && $servis->booking->pelanggan) {
+            $servis->booking->pelanggan->notify(new NotifPelanggan(
+                'Servis Telah Selesai!',
+                'Perangkat ' . ($servis->booking->merk_tipe ?? '') . ' sudah selesai diservis. Silakan cek tagihan pelunasan kamu.',
+                'fa-solid fa-circle-check'
+            ));
+        }
+
+        // Email Notification
         if ($servis->booking && $servis->booking->pelanggan) {
             $emailPelanggan = $servis->booking->pelanggan->email;
             $namaPelanggan  = $servis->booking->pelanggan->nama;
             $namaPerangkat  = $servis->booking->merk_tipe;            
-            Log::info('Mencoba kirim notif quickSelesai', [
-                'email' => $emailPelanggan,
-                'nama' => $namaPelanggan,
-                'perangkat' => $namaPerangkat,
-            ]);
-
+            
             try {
                 Notification::route('mail', $emailPelanggan)->notify(
                     new NotifServisSelesai($namaPelanggan, $namaPerangkat)
                 );
-                Log::info('Notif quickSelesai berhasil dikirim ke: ' . $emailPelanggan);
             } catch (\Throwable $e) {
-                Log::error('Gagal kirim notif servis selesai (quickSelesai): ' . $e->getMessage());
+                Log::error('Gagal kirim notif email servis selesai: ' . $e->getMessage());
             }
         }
 
-        // 4. GENERATE TAGIHAN PELUNASAN OTOMATIS
+        // Tagihan Pelunasan Otomatis
         $cekPelunasan = Pembayaran::where('id_servis', $servis->id_servis)->where('jenis_pembayaran', 'pelunasan')->first();
         if (!$cekPelunasan) {
-            // Hitung total DP sukses
             $totalDP = Pembayaran::where('id_booking', $servis->id_booking)
                 ->where('jenis_pembayaran', 'dp')
                 ->where('status_pembayaran', 'sukses')
                 ->sum('nominal');
 
-            // Sisa Pelunasan = Total Biaya - DP
             $nominalPelunasan = $servis->total_biaya - $totalDP;
             if ($nominalPelunasan < 0) {
                 $nominalPelunasan = 0;
@@ -361,7 +379,6 @@ class ServisController extends Controller
             ]);
         }
 
-        // Redirect ke halaman servis selesai membawa pesan sukses
         return redirect()->route('admin.servis_selesai.index')->with('success', 'Servis berhasil diselesaikan');
     }
 }

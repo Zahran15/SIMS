@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Servis;
 use App\Models\PenugasanTeknisi;
+use App\Models\User; // <-- Import Model User
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\HistoriAktivitas;
 use Carbon\Carbon;
+use App\Notifications\NotifInternal;  // <-- Import NotifInternal
+use App\Notifications\NotifPelanggan; // <-- Import NotifPelanggan
 
 class ServisKerjaController extends Controller
 {
@@ -69,15 +72,19 @@ class ServisKerjaController extends Controller
             'catatan_teknisi'  => 'required',
             'prioritas'        => 'required',
             'estimasi_selesai' => 'required'
-            ]);
-        $penugasan = PenugasanTeknisi::where('id_user', Auth::id())->where('id_penugasan', $id) ->firstOrFail();
+        ]);
+
+        $penugasan = PenugasanTeknisi::with('servis.booking.pelanggan')->where('id_user', Auth::id())->where('id_penugasan', $id)->firstOrFail();
         $estimasi = $request->estimasi_selesai ? Carbon::parse($request->estimasi_selesai)->format('Y-m-d') : $penugasan->estimasi_selesai;
+
         $penugasan->update([
             'catatan_teknisi'  => $request->catatan_teknisi, 
             'status_penugasan' => $request->status_penugasan,
             'prioritas'        => $request->prioritas, 
             'estimasi_selesai' => $estimasi
-            ]);
+        ]);
+
+        // Catat Histori
         HistoriAktivitas::create([
             'id_user'    => Auth::id(),
             'id_servis'  => $penugasan->id_servis,
@@ -85,6 +92,36 @@ class ServisKerjaController extends Controller
             'keterangan' => 'Teknisi mengubah status tugas menjadi ('.$request->status_penugasan.'). Catatan: ' . ($request->catatan_teknisi ?? '-'),
             'tanggal'    => Carbon::now()
         ]);
+
+        // -----------------------------------------------------------------
+        // 🔔 1. LONCENG KE PELANGGAN (Update Progress Servis)
+        // -----------------------------------------------------------------
+        if ($penugasan->servis && $penugasan->servis->booking && $penugasan->servis->booking->pelanggan) {
+            $pelanggan = $penugasan->servis->booking->pelanggan;
+            $pelanggan->notify(new NotifPelanggan(
+                'Progress Perbaikan Perangkat',
+                'Teknisi memperbarui pengerjaan laptop kamu: ' . strtoupper($request->status_penugasan) . '. Catatan: ' . $request->catatan_teknisi,
+                'fa-solid fa-wrench'
+            ));
+        }
+
+        // -----------------------------------------------------------------
+        // 🔔 2. LONCENG KE ADMIN & OWNER (Jika pengerjaan selesai)
+        // -----------------------------------------------------------------
+        if (in_array(strtolower($request->status_penugasan), ['selesai', 'done', 'finish'])) {
+            $namaTeknisi = Auth::user()->nama ?? 'Teknisi';
+            $kodeServis  = $penugasan->servis->kode_servis ?? 'Servis #' . $penugasan->id_servis;
+            
+            $adminsAndOwners = User::whereIn('role', ['admin', 'owner'])->get();
+            foreach ($adminsAndOwners as $user) {
+                $user->notify(new NotifInternal(
+                    'Pengerjaan Teknisi Selesai',
+                    'Teknisi ' . $namaTeknisi . ' telah menyelesaikan pengerjaan untuk ' . $kodeServis,
+                    'fa-solid fa-circle-check'
+                ));
+            }
+        }
+
         return redirect()->route('teknisi.servis_kerja.index')->with('success', 'Laporan pengerjaan berhasil diperbarui');
     }
 }
