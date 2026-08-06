@@ -14,7 +14,7 @@ use App\Models\Pembayaran;
 use App\Models\HistoriAktivitas;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NotifServisSelesai;
-use App\Notifications\NotifPelanggan; // <-- Import NotifPelanggan
+use App\Notifications\NotifPelanggan; 
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 

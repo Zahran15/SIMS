@@ -7,8 +7,8 @@ use App\Models\PenugasanTeknisi;
 use App\Models\Servis;
 use App\Models\User;
 use Carbon\Carbon;
-use App\Notifications\NotifInternal;  // <-- Menggunakan NotifInternal
-use App\Notifications\NotifPelanggan; // <-- Menggunakan NotifPelanggan
+use App\Notifications\NotifInternal;  
+use App\Notifications\NotifPelanggan; 
 
 class PenugasanTeknisiController extends Controller
 {
